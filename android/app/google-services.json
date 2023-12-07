@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "515324729838",
+    "project_id": "overlapd-13268",
+    "storage_bucket": "overlapd-13268.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:515324729838:android:44a24e2e0bba9bba8416ff",
+        "android_client_info": {
+          "package_name": "com.example.overlapd"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCY6HCfgR9wotNEnu4XiXoc60EymbTCiVg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
