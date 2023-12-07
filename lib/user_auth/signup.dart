@@ -22,13 +22,48 @@ class _SignUpState extends State<SignUp> {
   final InputBoxController _emailController = InputBoxController();
   final InputBoxController _passwordController = InputBoxController();
   final InputBoxController _rePasswordController = InputBoxController();
+
   bool _areFieldsValid() {
+    String email = _emailController.getText();
+    String password = _passwordController.getText();
+    bool isEmailValid = email.isNotEmpty && _isValidEmail(email);
+    bool isPasswordValid = _passwordController.getText().isNotEmpty && _isValidPassword(password);
     return _firstNameController.getText().isNotEmpty &&
         _lastNameController.getText().isNotEmpty &&
-        _emailController.getText().isNotEmpty &&
-        _passwordController.getText().isNotEmpty &&
+        isEmailValid && isPasswordValid &&
         _passwordController.getText() == _rePasswordController.getText();
   }
+
+  bool _isValidEmail(String email) {
+    // Use a regular expression to check the email format
+    RegExp emailRegExp = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
+    return emailRegExp.hasMatch(email);
+  }
+
+  bool _isValidPassword(String password) {
+    // Check if the password is at least 10 characters long
+    if (password.length < 10) {
+      return false;
+    }
+
+    // Check if the password contains at least 1 capital letter
+    if (!RegExp(r'[A-Z]').hasMatch(password)) {
+      return false;
+    }
+
+    // Check if the password contains at least 1 number
+    if (!RegExp(r'[0-9]').hasMatch(password)) {
+      return false;
+    }
+
+    // Check if the password contains at least 1 special character
+    if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(password)) {
+      return false;
+    }
+
+    return true;
+  }
+
   @override
   void dispose() {
     _firstNameController.dispose();

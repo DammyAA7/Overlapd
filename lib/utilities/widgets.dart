@@ -63,6 +63,21 @@ Widget emailInputBox(String hintText, bool autoCorrect, bool obscureText,
   );
 }
 
+Widget passwordInputBoxForLogin(String hintText, bool autoCorrect, bool obscureText,
+    InputBoxController inputBoxController) {
+  return widgetInputBox(
+    hintText: hintText,
+    autoCorrect: autoCorrect,
+    obscureText: obscureText,
+    textType: TextInputType.visiblePassword,
+    onChanged: (value) {
+      // You can perform any additional actions when the text changes here
+    },
+    inputBoxController: inputBoxController,
+  );
+}
+
+
 Widget passwordInputBox(String hintText, bool autoCorrect, bool obscureText,
     InputBoxController inputBoxController) {
   return widgetInputBox(
@@ -154,6 +169,8 @@ Widget widgetInputBox({
     }
   });
 
+  bool hasError = validator != null && validator(inputBoxController.controller.text) != null;
+
   return TextField(
     controller: inputBoxController.controller,
     onChanged: onChanged,
@@ -165,27 +182,40 @@ Widget widgetInputBox({
       contentPadding:
       const EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 10),
       filled: true,
-      fillColor: validator != null && validator(inputBoxController.controller.text) != null
+      fillColor: hasError
           ? Colors.red.withOpacity(0.1)
           : const Color(0xFF6EE8C5).withOpacity(0.1),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15.0),
         borderSide: BorderSide(
-          color: const Color(0xFF6EE8C5).withOpacity(0.6),
-          width: 1,
+          color: hasError
+              ? Colors.red.withOpacity(0.6)
+              : const Color(0xFF6EE8C5).withOpacity(0.6),
+          width: 2.5,
         ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(15.0),
         borderSide: BorderSide(
           style: BorderStyle.solid,
-          color: validator != null && validator(inputBoxController.controller.text) != null
+          color: hasError
               ? Colors.red.withOpacity(0.6)
               : const Color(0xFF6EE8C5).withOpacity(0.6),
-          width: 2.5,
+          width: 4.5,
         ),
       ),
-      errorText: validator != null ? validator(inputBoxController.controller.text) : null,
+      errorText: hasError ? validator!(inputBoxController.controller.text) : null,
+      errorStyle: const TextStyle(
+        fontSize: 14.0, // Adjust as needed
+        fontWeight: FontWeight.bold,
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15.0),
+        borderSide: BorderSide(
+          color: Colors.red.withOpacity(0.6),
+          width: 3.5,
+        ),
+      ),
       hintStyle: const TextStyle(
         color: Color(0xFF727E7B),
         fontFamily: 'Darker Grotesque',

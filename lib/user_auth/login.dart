@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:overlapd/utilities/toast.dart';
 import 'package:overlapd/utilities/widgets.dart';
-import 'package:overlapd/screens/home.dart';
 
 import 'firebase_auth_implementation/firebase_auth_services.dart';
 
@@ -18,10 +17,19 @@ class _LoginState extends State<Login> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   final InputBoxController _emailController = InputBoxController();
   final InputBoxController _passwordController = InputBoxController();
+
   bool _areFieldsValid() {
+    String email = _emailController.getText();
+    bool isEmailValid = email.isNotEmpty && _isValidEmail(email);
     return
-        _emailController.getText().isNotEmpty &&
+        isEmailValid &&
         _passwordController.getText().isNotEmpty;
+  }
+
+  bool _isValidEmail(String email) {
+    // Use a regular expression to check the email format
+    RegExp emailRegExp = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
+    return emailRegExp.hasMatch(email);
   }
 
   @override
@@ -49,7 +57,7 @@ class _LoginState extends State<Login> {
               emailInputBox('Enter your email address', false, false, _emailController),
               const SizedBox(height: 10),
               pageText(context, 'Password'),
-              passwordInputBox('Enter your password', false, true, _passwordController),
+              passwordInputBoxForLogin('Enter your password', false, true, _passwordController),
               textButton(
                   context, 'Forgotten password?', '/forgotten_password_page'),
               Center(
