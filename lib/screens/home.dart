@@ -37,5 +37,6 @@ class _HomeState extends State<Home> {
     await FirebaseAuth.instance.signOut();
     showToast(text: "User logged out successfully");
     Navigator.pushNamed(context, '/login_page');
+
   }
 }
