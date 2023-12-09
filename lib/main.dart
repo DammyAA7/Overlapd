@@ -1,5 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:overlapd/user_auth/firebase_auth_implementation/firebase_auth_services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'user_auth/login.dart';
 import 'user_auth/signup.dart';
 import 'screens/home.dart';
@@ -7,11 +9,19 @@ import 'screens/home.dart';
 Future main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  final FirebaseAuthService _auth = FirebaseAuthService();
+  bool isLoggedIn = await _auth.isLoggedIn();
+  runApp(MyApp(isLoggedIn: isLoggedIn));
+}
+
+Future<bool> isUserLoggedIn() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getBool('isLoggedIn') ?? false;
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+  const MyApp({super.key, required this.isLoggedIn});
 
   // This widget is the root of your application.
   @override
@@ -36,7 +46,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const Login(),
+      home: isLoggedIn ? const Home() : const Login(),
         routes: {
           '/login_page': (context) => const Login(),
           '/signup_page': (context) => const SignUp(),

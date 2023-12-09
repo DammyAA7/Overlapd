@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:overlapd/utilities/widgets.dart';
 import 'package:overlapd/utilities/toast.dart';
 
+import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
+
 
 class Home extends StatefulWidget {
   static const id = 'home_page';
@@ -14,6 +16,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final FirebaseAuthService _auth = FirebaseAuthService();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,9 +37,9 @@ class _HomeState extends State<Home> {
     );
   }
   void _signOut() async{
+    await _auth.setLoggedOut();
     await FirebaseAuth.instance.signOut();
     showToast(text: "User logged out successfully");
     Navigator.pushNamed(context, '/login_page');
-
   }
 }

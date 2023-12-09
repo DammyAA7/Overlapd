@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:overlapd/utilities/toast.dart';
 import 'package:overlapd/utilities/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'firebase_auth_implementation/firebase_auth_services.dart';
 
@@ -86,6 +87,7 @@ class _LoginState extends State<Login> {
     User? user = await _auth.signInWithEmailAndPassword(email, password);
 
     if (user != null){
+      await _auth.setLoggedIn();
       showToast(text: "User logged in successfully");
       Navigator.pushNamed(context, '/home_page');
     } else{
@@ -93,4 +95,5 @@ class _LoginState extends State<Login> {
     }
 
   }
+
 }
