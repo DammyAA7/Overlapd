@@ -263,3 +263,84 @@ Widget solidButton(
     ),
   );
 }
+
+Widget sideBarCard(
+    BuildContext context,
+    Icon icon,
+    String title,
+    String subtitle,
+    Widget pageRoute
+    ) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0),
+    child: ListTile(
+      onTap: () {
+    // Navigate to the home page with a fade transition
+    Navigator.pushReplacement(
+    context,
+    pageAnimationrl(pageRoute),
+  );
+},
+      leading: CircleAvatar(
+        backgroundColor: Colors.white,
+        child: icon,
+      ),
+      title: Text(title,
+          style: const TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 20
+          )
+      ),
+      subtitle: subtitle.isEmpty ? null : Text(subtitle,
+          style: const TextStyle(
+              color: Colors.black,
+              fontSize: 16,
+              fontWeight: FontWeight.bold
+          )
+      ),
+    ),
+  );
+}
+
+PageRouteBuilder<dynamic> pageAnimationlr(Widget pageRoute) {
+
+  return PageRouteBuilder(
+    pageBuilder: (_, __, ___) => pageRoute,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(-1.0, 0.0);
+      const end = Offset.zero;
+      const curve = Curves.easeInOutQuart;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      var offsetAnimation = animation.drive(tween);
+      return SlideTransition(
+        position: offsetAnimation,
+        child: child,
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 500),
+  );
+}
+
+PageRouteBuilder<dynamic> pageAnimationrl(Widget pageRoute) {
+
+  return PageRouteBuilder(
+    pageBuilder: (_, __, ___) => pageRoute,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(1.0, 0.0);
+      const end = Offset.zero;
+      const curve = Curves.easeInOutQuart;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      var offsetAnimation = animation.drive(tween);
+      return SlideTransition(
+        position: offsetAnimation,
+        child: child,
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 500),
+  );
+}

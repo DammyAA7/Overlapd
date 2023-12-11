@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:overlapd/utilities/widgets.dart';
+import 'package:overlapd/screens/side_bar.dart';
 import 'package:overlapd/utilities/toast.dart';
-
 import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 
 
@@ -15,24 +14,38 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
+
 class _HomeState extends State<Home> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const SideBar(),
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         backgroundColor: Colors.white,
         centerTitle: false,
         elevation: 0,
-        title: Text(
-          'Home',
-          style: Theme.of(context).textTheme.displayMedium,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Home',
+              style: Theme.of(context).textTheme.displayMedium,
+            ),
+            IconButton(
+              icon: const Icon(Icons.logout_outlined), // You can replace this with your preferred icon
+              onPressed: () {
+                _signOut();
+              },
+            ),
+
+          ],
         ),
       ),
       backgroundColor: Colors.white,
       body: Center(
-        child: solidButton(context, 'Log out', _signOut, true),
+          child:const Text('Loading')
       ),
     );
   }

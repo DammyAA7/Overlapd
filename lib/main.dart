@@ -1,10 +1,18 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_config/flutter_config.dart';
+import 'package:overlapd/screens/about.dart';
+import 'package:overlapd/screens/history.dart';
+import 'package:overlapd/screens/payment.dart';
+import 'package:overlapd/screens/support.dart';
 import 'package:overlapd/user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'user_auth/login.dart';
 import 'user_auth/signup.dart';
 import 'screens/home.dart';
+import 'screens/side_bar.dart';
+import 'screens/settings.dart';
 
 Future main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,7 +58,14 @@ class MyApp extends StatelessWidget {
         routes: {
           '/login_page': (context) => const Login(),
           '/signup_page': (context) => const SignUp(),
-          '/home_page': (context) => const Home()
+          '/home_page': (context) => const Home(),
+          '/sidebar' : (context) => const SideBar(),
+          '/settings_page' : (context) => const Setting(),
+          '/history_page' : (context) => const History(),
+          '/about_page' : (context) => const About(),
+          '/support_page' : (context) => const Support(),
+          '/payment_page' : (context) => const Payment(),
+
         },
     );
   }
