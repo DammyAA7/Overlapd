@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:overlapd/utilities/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -60,6 +61,11 @@ class FirebaseAuthService{
   Future<String?> getUsername() async {
     User? user = _auth.currentUser;
     return user?.email;
+  }
+
+
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getPersonalDetails(String uid) {
+    return FirebaseFirestore.instance.collection('users').doc(uid).snapshots();
   }
 
 

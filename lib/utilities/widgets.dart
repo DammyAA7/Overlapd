@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../screens/about.dart';
+import '../screens/payment.dart';
+import '../screens/settings.dart';
+import '../screens/support.dart';
+import 'package:overlapd/screens/history.dart';
+
 Widget pageText(BuildContext context, String text) {
   return Padding(
     padding: const EdgeInsets.only(top: 8.0, bottom: 4),
@@ -178,15 +184,20 @@ Widget widgetInputBox({
     autocorrect: autoCorrect,
     keyboardType: textType,
     inputFormatters: formatters,
+    style: const TextStyle(
+      color: Color(0xFF727E7B),
+      fontFamily: 'Darker Grotesque',
+      fontSize: 22.0,
+    ),
     decoration: InputDecoration(
       contentPadding:
-      const EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 10),
+      const EdgeInsets.only(left: 15, right: 15, top: 20, bottom: 20),
       filled: true,
       fillColor: hasError
           ? Colors.red.withOpacity(0.1)
           : const Color(0xFF6EE8C5).withOpacity(0.1),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(15.0),
+        borderRadius: BorderRadius.circular(20.0),
         borderSide: BorderSide(
           color: hasError
               ? Colors.red.withOpacity(0.6)
@@ -195,7 +206,7 @@ Widget widgetInputBox({
         ),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(15.0),
+        borderRadius: BorderRadius.circular(20.0),
         borderSide: BorderSide(
           style: BorderStyle.solid,
           color: hasError
@@ -206,7 +217,7 @@ Widget widgetInputBox({
       ),
       errorText: hasError ? validator!(inputBoxController.controller.text) : null,
       errorStyle: const TextStyle(
-        fontSize: 14.0, // Adjust as needed
+        fontSize: 18.0, // Adjust as needed
         fontWeight: FontWeight.bold,
       ),
       errorBorder: OutlineInputBorder(
@@ -219,6 +230,7 @@ Widget widgetInputBox({
       hintStyle: const TextStyle(
         color: Color(0xFF727E7B),
         fontFamily: 'Darker Grotesque',
+        fontSize: 22.0
       ),
       hintText: hintText,
     ),
@@ -244,11 +256,12 @@ Widget solidButton(
     ) {
   return SizedBox(
     width: MediaQuery.of(context).size.width,
+    height: 70,
     child: ElevatedButton(
       onPressed: isEnabled ? onPressed : null,
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(20),
         ),
         backgroundColor: isEnabled ? const Color(0xFF21D19F) : Colors.grey,
         elevation: 0,
@@ -258,6 +271,7 @@ Widget solidButton(
         style: TextStyle(
           color: isEnabled ? const Color(0xFFF6FEFC) : Colors.white70,
           fontWeight: FontWeight.w500,
+          fontSize: 22
         ),
       ),
     ),
@@ -344,3 +358,51 @@ PageRouteBuilder<dynamic> pageAnimationrl(Widget pageRoute) {
     transitionDuration: const Duration(milliseconds: 500),
   );
 }
+
+PageRouteBuilder<dynamic> pageAnimationFromBottomToTop(Widget pageRoute) {
+  return PageRouteBuilder(
+    pageBuilder: (_, __, ___) => pageRoute,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(0.0, 1.0);
+      const end = Offset.zero;
+      const curve = Curves.easeInOutQuart;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      var offsetAnimation = animation.drive(tween);
+      return SlideTransition(
+        position: offsetAnimation,
+        child: child,
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 500),
+  );
+}
+
+
+Drawer buildDrawer(BuildContext context, String userName) {
+  return Drawer(
+    backgroundColor: Colors.white,
+    child: SafeArea(
+        child: Container(
+          width: 288,
+          height: double.infinity,
+          color: Colors.white,
+          child: SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                sideBarCard(context, const Icon(Icons.person),userName, "Personal Information", const Setting()),
+                sideBarCard(context, const Icon(Icons.payment), "Payment", "", const Payment()),
+                sideBarCard(context, const Icon(Icons.access_time_outlined), "History", "", const History()),
+                sideBarCard(context, const Icon(Icons.support_agent_outlined), "Support", "", const Support()),
+                sideBarCard(context, const Icon(Icons.info_outline_rounded), "About", "", const About())
+              ],
+            ),
+          ),
+        )
+    ),
+  );
+}
+

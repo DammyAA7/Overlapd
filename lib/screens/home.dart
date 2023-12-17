@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:overlapd/deliveries/add_delivery_details.dart';
 import 'package:overlapd/deliveries/delivery_service.dart';
-import 'package:overlapd/screens/side_bar.dart';
 import 'package:overlapd/utilities/toast.dart';
 import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/widgets.dart';
@@ -16,14 +16,27 @@ class Home extends StatefulWidget {
 }
 
 
+
 class _HomeState extends State<Home> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   final DeliveryService _service = DeliveryService();
   late String _UID;
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _init();
+    _buildList();
+  }
+
+  Future<void> _init() async {
+    _UID = (await _auth.getUserId())!;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const SideBar(),
+      drawer:buildDrawer(context, 'Ade Bayo'),
       appBar: AppBar(
         automaticallyImplyLeading: true,
         backgroundColor: Colors.white,
@@ -48,12 +61,15 @@ class _HomeState extends State<Home> {
       ),
       backgroundColor: Colors.white,
       body: Center(
-          child:Column(
-            children: [
-              Expanded(child: _buildList()),
-              const Text('Loading'),
-              solidButton(context, 'Request Delivery', _requestDelivery, true),
-            ],
+          child:Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Expanded(child: _buildList()),
+                const Text('Loading'),
+                _requestDeliveryButton(),
+              ],
+            ),
           )
       ),
     );
@@ -62,7 +78,9 @@ class _HomeState extends State<Home> {
   void _requestDelivery() async{
     if(await _auth.isLoggedIn()){
       await _service.openDelivery();
-      print('logged in');
+      Navigator.of(context).pushReplacement(
+        pageAnimationFromBottomToTop(const DeliveryDetails()),
+      );
     } else{
       print('not');
     }
@@ -96,9 +114,11 @@ class _HomeState extends State<Home> {
             // If there is no data or the data is empty, display a message
             return const Text('No deliveries available');
           } else {
-            // If data is available, build the ListView
             return ListView(
-              children: snapshot.data!.docs.map((document) => _buildItem(document)).toList(),
+              children: snapshot.data!.docs
+                  .map((document) {
+                return _buildItem(document);
+              }).toList(),
             );
           }
         });
@@ -106,10 +126,6 @@ class _HomeState extends State<Home> {
 
   Widget _buildItem(DocumentSnapshot document){
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-
-    print('Data User ID: ${data['Placed by']}');
-    print('Current User ID: $_UID');
-
     return data['Placed by'] != _UID ? Container(
       alignment: Alignment.center,
       child: Column(
@@ -120,15 +136,54 @@ class _HomeState extends State<Home> {
     ) : const SizedBox.shrink();
   }
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _init();
-    _buildList();
+
+
+  Widget _requestDeliveryButton(){
+    return StreamBuilder(
+      stream: _service.getRequestedDeliveries(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // If the data is still loading, return a loading indicator
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          // If there's an error, display an error message
+          return Text('Error: ${snapshot.error}');
+        } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.docs.isEmpty) {
+          // If there is no data or the data is empty, display a message
+          return solidButton(context, 'Request Delivery', _requestDelivery, true);
+        } else {
+          // If data is available, build the button based on the current document
+          bool hasPendingDelivery = snapshot.data!.docs.any((document) {
+            Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+            return data['Placed by'] == _UID && data['complete'] == 'no' &&
+                data['cancelled'] == 'no';
+          });
+
+          return hasPendingDelivery
+              ? solidButton(
+              context, 'Cancel Delivery Request', _cancelDelivery, true)
+              : solidButton(
+              context, 'Request Delivery', _requestDelivery, true);
+        }
+      },
+    );
   }
 
-  Future<void> _init() async {
-    _UID = (await _auth.getUserId())!;
+
+void _cancelDelivery() async{
+  final latestPlacedDelivery = await _service.getLatestPlacedDelivery(_UID);
+
+  if (latestPlacedDelivery != null) {
+    final deliveryId = latestPlacedDelivery;
+    // Update the 'cancelled' field to 'yes'
+    await FirebaseFirestore.instance
+        .collection('All Deliveries')
+        .doc('Open Deliveries')
+        .collection('Order Info')
+        .doc(deliveryId).delete();
+  } else {
+    print('No placed deliveries found for user $_UID');
   }
+}
+
 }

@@ -11,7 +11,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'user_auth/login.dart';
 import 'user_auth/signup.dart';
 import 'screens/home.dart';
-import 'screens/side_bar.dart';
 import 'screens/settings.dart';
 
 Future main() async{
@@ -59,7 +58,6 @@ class MyApp extends StatelessWidget {
           '/login_page': (context) => const Login(),
           '/signup_page': (context) => const SignUp(),
           '/home_page': (context) => const Home(),
-          '/sidebar' : (context) => const SideBar(),
           '/settings_page' : (context) => const Setting(),
           '/history_page' : (context) => const History(),
           '/about_page' : (context) => const About(),
