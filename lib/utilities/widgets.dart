@@ -22,6 +22,10 @@ class InputBoxController {
   String getText() {
     return controller.text;
   }
+
+  void clear() {
+    controller.clear();
+  }
 }
 
 Widget letterInputBox(String hintText, bool autoCorrect, bool obscureText,
@@ -35,11 +39,38 @@ Widget letterInputBox(String hintText, bool autoCorrect, bool obscureText,
       // You can perform any additional actions when the text changes here
     },
     inputBoxController: inputBoxController,
-    inputFormatter: FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z]')),
+    inputFormatter: FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z'-]")),
     validator: (String? value) {
       if (value != null && value.isNotEmpty) {
-        if (RegExp(r'[0-9]').hasMatch(value)) {
+        if (!RegExp(r"^[a-zA-Z'-]+$").hasMatch(value)) {
           return 'Invalid character: Numbers are not allowed.';
+        }
+      }
+      return null; // No error
+    },
+  );
+}
+
+Widget alphanumericInputBox(
+    String hintText,
+    bool autoCorrect,
+    bool obscureText,
+    InputBoxController inputBoxController,
+    ) {
+  return widgetInputBox(
+    hintText: hintText,
+    autoCorrect: autoCorrect,
+    obscureText: obscureText,
+    textType: TextInputType.text,
+    onChanged: (value) {
+      // You can perform any additional actions when the text changes here
+    },
+    inputBoxController: inputBoxController,
+    inputFormatter: FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z0-9'\s-]")),
+    validator: (String? value) {
+      if (value != null && value.isNotEmpty) {
+        if (!RegExp(r"^[a-zA-Z0-9'\s-]+$").hasMatch(value)) {
+          return 'Invalid characters: Only letters, numbers, spaces, hyphen, and apostrophe are allowed.';
         }
       }
       return null; // No error
@@ -268,10 +299,13 @@ Widget solidButton(
       ),
       child: Text(
         buttonName,
+        maxLines: 1,
+        overflow: TextOverflow.clip,
         style: TextStyle(
           color: isEnabled ? const Color(0xFFF6FEFC) : Colors.white70,
           fontWeight: FontWeight.w500,
-          fontSize: 22
+          fontSize: 22,
+
         ),
       ),
     ),
@@ -402,6 +436,42 @@ Drawer buildDrawer(BuildContext context, String userName) {
             ),
           ),
         )
+    ),
+  );
+}
+
+Widget itemTile(String itemName, int itemQTY, void Function()? add, void Function()? subtract){
+  String capitalizedItemName = itemName
+      .split(' ')
+      .map((word) => word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '')
+      .join(' ');
+  return Padding(
+    padding: const EdgeInsets.only(top: 25),
+    child: Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: const Color(0xFF21D19F).withOpacity(0.5),
+        borderRadius: BorderRadius.circular(20)
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Text(
+            capitalizedItemName,
+            overflow: TextOverflow.visible,
+            maxLines: 1,
+          ),
+          const SizedBox(width: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+            IconButton(onPressed: subtract, icon: const Icon(Icons.remove)),
+            Text('$itemQTY'),
+            IconButton(onPressed: add, icon: const Icon(Icons.add)),
+          ],)
+
+        ],
+      ),
     ),
   );
 }

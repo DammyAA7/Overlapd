@@ -66,7 +66,7 @@ class _HomeState extends State<Home> {
             child: Column(
               children: [
                 Expanded(child: _buildList()),
-                const Text('Loading'),
+                const Text('Eniola'),
                 _requestDeliveryButton(),
               ],
             ),
