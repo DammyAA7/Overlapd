@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 
@@ -7,16 +8,24 @@ class DeliveryService extends ChangeNotifier {
   final FirebaseAuthService _auth = FirebaseAuthService();
 
 
-  Future<void> openDelivery() async {
+  Future<void> openDelivery(Position currentLocation, String storeName, List itemList, String total) async {
     final userId = await _auth.getUserId();
-    var orderNo;
+    String orderNo;
+
+
+    final geoPoint = GeoPoint(currentLocation.latitude, currentLocation.longitude);
+
     final public = {
-      'Delivery Location': 'Dublin',
+      'Delivery Destination': geoPoint,
+      'Grocery Store': storeName,
       'Placed by': userId,
-      'Item Delivered': 'Phone',
-      'Time Stamp': '13/12/2023',
+      'Items for Delivery': itemList,
+      'Item Total' : total,
+      'Time Stamp': DateTime.now(),
+      'accepted by' : 'N/A',
       'complete': 'no',
-      'cancelled': 'no'
+      'cancelled': 'no',
+      'declined By': ''
     };
     final orderInfoDocRef = await FirebaseFirestore.instance
         .collection('All Deliveries')
@@ -24,18 +33,18 @@ class DeliveryService extends ChangeNotifier {
         .collection('Order Info')
         .add(public);
     orderNo = orderInfoDocRef.id;
-    print(orderNo);
     final private = {
-      'Delivery Location': 'Dublin',
+      'Grocery Store': storeName,
+      'accepted by' : 'N/A',
       'Order number': orderNo,
-      'Item Delivered': 'Phone',
-      'Time Stamp': '13/12/2023',
+      'Item Delivered': itemList,
+      'Time Stamp': DateTime.now(),
       'complete': 'no',
       'cancelled': 'no'
     };
 
     FirebaseFirestore.instance.collection('users').doc(userId).collection(
-        'Placed Delivery').doc(DateTime.now().toString()).set(private);
+        'Placed Delivery').doc(orderNo).set(private);
   }
 
   Stream<QuerySnapshot> getRequestedDeliveries() {

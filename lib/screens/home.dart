@@ -21,6 +21,7 @@ class _HomeState extends State<Home> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   final DeliveryService _service = DeliveryService();
   late String _UID;
+  late bool isDeclineRequest = false;
   @override
   void initState() {
     // TODO: implement initState
@@ -36,6 +37,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       drawer:buildDrawer(context, 'Ade Bayo'),
       appBar: AppBar(
         automaticallyImplyLeading: true,
@@ -66,7 +68,6 @@ class _HomeState extends State<Home> {
             child: Column(
               children: [
                 Expanded(child: _buildList()),
-                const Text('Eniola'),
                 _requestDeliveryButton(),
               ],
             ),
@@ -75,16 +76,9 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void _requestDelivery() async{
-    if(await _auth.isLoggedIn()){
-      await _service.openDelivery();
-      Navigator.of(context).pushReplacement(
-        pageAnimationFromBottomToTop(const DeliveryDetails()),
-      );
-    } else{
-      print('not');
-    }
-
+  void _requestDelivery() {
+    Navigator.of(context).pushReplacement(
+        pageAnimationFromBottomToTop(const DeliveryDetails()));
   }
 
   void _signOut() async {
@@ -98,6 +92,56 @@ class _HomeState extends State<Home> {
       showToast(text: "An error occurred during sign-out");
       // Handle the exception or show an appropriate message to the user
     }
+  }
+
+  void acceptDelivery(String orderID) async{
+    try {
+      // Retrieve the value of 'Placed by' from 'All Deliveries' collection
+      DocumentSnapshot deliverySnapshot = await FirebaseFirestore.instance
+          .collection('All Deliveries')
+          .doc('Open Deliveries')
+          .collection('Order Info')
+          .doc(orderID)
+          .get();
+      if (deliverySnapshot.exists) {
+        String placedByUserID = deliverySnapshot['Placed by'];
+
+        // Update 'accepted by' field in the user's 'Placed Delivery' collection
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(placedByUserID)
+            .collection('Placed Delivery')
+            .doc(orderID)
+            .update({'accepted by': _UID});
+
+        // Update 'accepted by' field in 'All Deliveries' collection
+        await FirebaseFirestore.instance
+            .collection('All Deliveries')
+            .doc('Open Deliveries')
+            .collection('Order Info')
+            .doc(orderID)
+            .update({'accepted by': _UID});
+
+        showToast(text: 'Delivery accepted successfully');
+      } else {
+        showToast(text: 'Delivery not found');
+      }
+    } catch (e) {
+      print('Error accepting delivery: $e');
+      showToast(text: 'Error accepting delivery');
+    }
+  }
+
+  void declineDelivery(String orderID) async{
+    await FirebaseFirestore.instance
+        .collection('All Deliveries')
+        .doc('Open Deliveries')
+        .collection('Order Info')
+        .doc(orderID)
+        .update({
+      'declined By': FieldValue.arrayUnion([_UID]),
+    });
+
   }
   
   Widget _buildList(){
@@ -126,12 +170,36 @@ class _HomeState extends State<Home> {
 
   Widget _buildItem(DocumentSnapshot document){
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-    return data['Placed by'] != _UID ? Container(
+    String orderNo = document.id;
+    if(isDeclineRequest){
+      print('object');
+    }
+    return data['Placed by'] != _UID && data['accepted by'] == 'N/A' && !data['declined By']?.contains(_UID) ? Container(
       alignment: Alignment.center,
-      child: Column(
-        children: [
-           Text(data['Delivery Location'])
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          padding: const EdgeInsets.all(8.0),
+          height: 140,
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+            color: const Color(0xFF21D19F).withOpacity(0.5),
+            borderRadius: BorderRadius.circular(20)
+          ),
+          child: Column(
+            children: [
+               Text(data['Grocery Store']),
+              Text(data['Item Total']),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children:
+              [
+                ElevatedButton(onPressed: () => declineDelivery(orderNo), child: const Text('Decline')),
+                ElevatedButton(onPressed: () => acceptDelivery(orderNo), child: const Text('Accept'))
+              ],)
+            ],
+          ),
+        ),
       ),
     ) : const SizedBox.shrink();
   }
@@ -174,16 +242,21 @@ void _cancelDelivery() async{
   final latestPlacedDelivery = await _service.getLatestPlacedDelivery(_UID);
 
   if (latestPlacedDelivery != null) {
-    final deliveryId = latestPlacedDelivery;
     // Update the 'cancelled' field to 'yes'
     await FirebaseFirestore.instance
         .collection('All Deliveries')
         .doc('Open Deliveries')
         .collection('Order Info')
-        .doc(deliveryId).delete();
+        .doc(latestPlacedDelivery).delete();
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_UID)
+        .collection('Placed Delivery')
+        .doc(latestPlacedDelivery).update({'cancelled' : 'yes'});
   } else {
     print('No placed deliveries found for user $_UID');
   }
 }
+
 
 }

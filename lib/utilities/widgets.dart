@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../screens/about.dart';
 import '../screens/payment.dart';
@@ -300,7 +301,6 @@ Widget solidButton(
       child: Text(
         buttonName,
         maxLines: 1,
-        overflow: TextOverflow.clip,
         style: TextStyle(
           color: isEnabled ? const Color(0xFFF6FEFC) : Colors.white70,
           fontWeight: FontWeight.w500,
@@ -413,6 +413,27 @@ PageRouteBuilder<dynamic> pageAnimationFromBottomToTop(Widget pageRoute) {
   );
 }
 
+PageRouteBuilder<dynamic> pageAnimationFromTopToBottom(Widget pageRoute) {
+  return PageRouteBuilder(
+    pageBuilder: (_, __, ___) => pageRoute,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(0.0, -1.0); // Top-to-bottom transition
+      const end = Offset.zero;
+      const curve = Curves.easeInOutQuart;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      var offsetAnimation = animation.drive(tween);
+      return SlideTransition(
+        position: offsetAnimation,
+        child: child,
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 500),
+  );
+}
+
+
 
 Drawer buildDrawer(BuildContext context, String userName) {
   return Drawer(
@@ -456,10 +477,11 @@ Widget itemTile(String itemName, int itemQTY, void Function()? add, void Functio
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          Text(
-            capitalizedItemName,
-            overflow: TextOverflow.visible,
-            maxLines: 1,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              capitalizedItemName,
+            ),
           ),
           const SizedBox(width: 15),
           Row(
@@ -474,5 +496,42 @@ Widget itemTile(String itemName, int itemQTY, void Function()? add, void Functio
       ),
     ),
   );
+}
+
+Future<Position> determinePosition() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  // Test if location services are enabled.
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    // Location services are not enabled don't continue
+    // accessing the position and request users of the
+    // App to enable the location services.
+    return Future.error('Location services are disabled.');
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // Permissions are denied, next time you could try
+      // requesting permissions again (this is also where
+      // Android's shouldShowRequestPermissionRationale
+      // returned true. According to Android guidelines
+      // your App should show an explanatory UI now.
+      return Future.error('Location permissions are denied');
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    // Permissions are denied forever, handle appropriately.
+    return Future.error(
+        'Location permissions are permanently denied, we cannot request permissions.');
+  }
+
+  // When we reach here, permissions are granted and we can
+  // continue accessing the position of the device.
+  return await Geolocator.getCurrentPosition();
 }
 
