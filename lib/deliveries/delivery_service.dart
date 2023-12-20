@@ -52,6 +52,11 @@ class DeliveryService extends ChangeNotifier {
         'Open Deliveries').collection('Order Info').snapshots();
   }
 
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getUserFistName(String placedUserID){
+    return FirebaseFirestore.instance.collection('users').doc(
+        placedUserID).snapshots();
+  }
+
   Future<String?> getLatestPlacedDelivery(String userId) async {
     try {
       final querySnapshot = await FirebaseFirestore.instance

@@ -6,6 +6,7 @@ import 'package:overlapd/deliveries/delivery_service.dart';
 import 'package:overlapd/utilities/toast.dart';
 import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/widgets.dart';
+import 'package:overlapd/utilities/homeUtilities.dart';
 
 class Home extends StatefulWidget {
   static const id = 'home_page';
@@ -21,7 +22,6 @@ class _HomeState extends State<Home> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   final DeliveryService _service = DeliveryService();
   late String _UID;
-  late bool isDeclineRequest = false;
   @override
   void initState() {
     // TODO: implement initState
@@ -67,8 +67,21 @@ class _HomeState extends State<Home> {
             padding: const EdgeInsets.all(8.0),
             child: Column(
               children: [
-                Expanded(child: _buildList()),
-                _requestDeliveryButton(),
+                Expanded(flex:5, child: _buildList()),
+                Expanded(flex:5, child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                          color: const Color(0xFF21D19F).withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(20)
+                      ),
+                    child: const Center(
+                      child: Text('Recent Activity'),
+                    )
+                    ),
+                )
+                ),
+                Expanded(flex:1, child: _requestDeliveryButton())
               ],
             ),
           )
@@ -158,12 +171,31 @@ class _HomeState extends State<Home> {
             // If there is no data or the data is empty, display a message
             return const Text('No deliveries available');
           } else {
-            return ListView(
-              children: snapshot.data!.docs
-                  .map((document) {
-                return _buildItem(document);
-              }).toList(),
-            );
+            bool hasAcceptedDelivery = snapshot.data!.docs.any((document) {
+              Map<String, dynamic> data = document.data() as Map<String,
+                  dynamic>;
+              return data['accepted by'] == _UID;
+            });
+
+            if (hasAcceptedDelivery) {
+              DocumentSnapshot activeOrderDocument = snapshot.data!.docs.firstWhere(
+                      (document) {
+                        Map<String, dynamic> data = document.data() as Map<
+                            String,
+                            dynamic>;
+                        return data['accepted by'] == _UID;
+                      },
+              );
+              String orderID = activeOrderDocument.id;
+              String placedByUser = activeOrderDocument['Placed by'];
+              return activeDeliveryCard(placedByUser, orderID);
+            } else {
+              return ListView(
+                children: snapshot.data!.docs.map((document) {
+                  return _buildItem(document);
+                }).toList(),
+              );
+            }
           }
         });
   }
@@ -171,9 +203,6 @@ class _HomeState extends State<Home> {
   Widget _buildItem(DocumentSnapshot document){
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
     String orderNo = document.id;
-    if(isDeclineRequest){
-      print('object');
-    }
     return data['Placed by'] != _UID && data['accepted by'] == 'N/A' && !data['declined By']?.contains(_UID) ? Container(
       alignment: Alignment.center,
       child: Padding(
@@ -227,13 +256,23 @@ class _HomeState extends State<Home> {
                 data['cancelled'] == 'no';
           });
 
-          return hasPendingDelivery
-              ? solidButton(
-              context, 'Cancel Delivery Request', _cancelDelivery, true)
-              : solidButton(
-              context, 'Request Delivery', _requestDelivery, true);
+          bool hasAcceptedDelivery = snapshot.data!.docs.any((document) {
+            Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+            return data['accepted by'] == _UID;
+          });
+
+          if (hasAcceptedDelivery) {
+            return const SizedBox.shrink();
+          }
+          else if(hasPendingDelivery) {
+            return solidButton(
+                context, 'Cancel Delivery Request', _cancelDelivery, true);
+          }else{
+        return solidButton(
+        context, 'Request Delivery', _requestDelivery, true);
+          }
         }
-      },
+      }
     );
   }
 
@@ -259,4 +298,9 @@ void _cancelDelivery() async{
 }
 
 
+
+
+
 }
+
+
