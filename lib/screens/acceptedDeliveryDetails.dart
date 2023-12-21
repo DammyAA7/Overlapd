@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../utilities/widgets.dart';
+import 'chat/chat.dart';
 import 'home.dart';
 class AcceptedDeliveryDetails extends StatefulWidget {
+  final String placedByUserId;
+  final String acceptedByUserName;
   static const id = 'accepteddeliverydetails_page';
-  const AcceptedDeliveryDetails({super.key});
+  const AcceptedDeliveryDetails({super.key, required this.placedByUserId, required this.acceptedByUserName});
 
   @override
   State<AcceptedDeliveryDetails> createState() => _AcceptedDeliveryDetailsState();
@@ -42,13 +45,20 @@ class _AcceptedDeliveryDetailsState extends State<AcceptedDeliveryDetails> {
               ),
             ],),
 
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-              Icon((Icons.chat)),
-              SizedBox(width: 15),
-              Icon((Icons.call)),
+                GestureDetector(
+                    onTap: (){
+                      Navigator.pushReplacement(
+                        context,
+                        pageAnimationFromBottomToTop(Chat(whatUser: false, receiverUserName: widget.acceptedByUserName, receiverUserId: widget.placedByUserId,)),
+                      );
+                    },
+                    child: const Icon((Icons.chat))),
+              const SizedBox(width: 15),
+              const Icon((Icons.call)),
             ],)
           ],
         ),

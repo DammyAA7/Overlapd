@@ -53,9 +53,9 @@ class FirebaseAuthService{
     await prefs.setBool('isLoggedIn', false);
   }
 
-  Future<String?> getUserId() async {
+  String getUserId()  {
     User? user = _auth.currentUser;
-    return user?.uid;
+    return (user?.uid)!;
   }
 
   Future<String?> getUsername() async {

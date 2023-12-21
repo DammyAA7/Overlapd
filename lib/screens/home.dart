@@ -21,18 +21,15 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   final DeliveryService _service = DeliveryService();
-  late String _UID;
+  late final String _UID = _auth.getUserId();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _init();
     _buildList();
   }
 
-  Future<void> _init() async {
-    _UID = (await _auth.getUserId())!;
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -171,12 +168,23 @@ class _HomeState extends State<Home> {
             // If there is no data or the data is empty, display a message
             return const Text('No deliveries available');
           } else {
+
             bool hasAcceptedDelivery = snapshot.data!.docs.any((document) {
               Map<String, dynamic> data = document.data() as Map<String,
                   dynamic>;
               return data['accepted by'] == _UID;
             });
 
+            bool hasPendingDelivery = snapshot.data!.docs.any((document) {
+              Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+              return data['Placed by'] == _UID && data['complete'] == 'no' &&
+                  data['cancelled'] == 'no';
+            });
+
+            bool hasAcceptedPendingDelivery = snapshot.data!.docs.any((document) {
+              Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+              return data['accepted by'] != _UID && data['accepted by'] != 'N/A';
+            });
             if (hasAcceptedDelivery) {
               DocumentSnapshot activeOrderDocument = snapshot.data!.docs.firstWhere(
                       (document) {
@@ -188,7 +196,30 @@ class _HomeState extends State<Home> {
               );
               String orderID = activeOrderDocument.id;
               String placedByUser = activeOrderDocument['Placed by'];
-              return activeDeliveryCard(placedByUser, orderID);
+              String acceptedByUser = activeOrderDocument['accepted by'];
+              return activeDeliveryCard(placedByUser, orderID, acceptedByUser);
+            }else if(hasPendingDelivery){
+              if(hasAcceptedPendingDelivery){
+                DocumentSnapshot activeOrderDocument = snapshot.data!.docs.firstWhere(
+                      (document) {
+                    Map<String, dynamic> data = document.data() as Map<
+                        String,
+                        dynamic>;
+                    return data['Placed by'] == _UID;
+                  },
+                );
+                String orderID = activeOrderDocument.id;
+                String acceptedByUser = activeOrderDocument['accepted by'];
+                String placedByUser = activeOrderDocument['Placed by'];
+                return activeDeliveryStatusCard(acceptedByUser, orderID, placedByUser);
+              } else{
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    child: const Text('Order Requested\n We will notify you when the order has been accepted'),
+                  ),
+                );
+              }
             } else {
               return ListView(
                 children: snapshot.data!.docs.map((document) {
