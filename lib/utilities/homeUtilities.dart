@@ -24,7 +24,7 @@ Widget activeDeliveryCard(String placedByUser, String orderID, String acceptedBy
             );
           },
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(5.0),
             child: Column(
               children: [
                 Expanded(
@@ -99,7 +99,7 @@ Widget activeDeliveryStatusCard(String acceptedByUser, String orderID, String pl
             child: Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(3.0),
+                  padding: const EdgeInsets.all(5.0),
                   height: 140,
                   width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
@@ -110,16 +110,18 @@ Widget activeDeliveryStatusCard(String acceptedByUser, String orderID, String pl
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Order No: $orderID', style: const TextStyle(fontSize: 20)),
-                          Text('$firstName will shop and deliver your items',
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                              style: const TextStyle(fontSize: 20)),
-                        ],
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Order No: $orderID', style: const TextStyle(fontSize: 20)),
+                            Text('$firstName will shop and deliver your items',
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                                style: const TextStyle(fontSize: 20)),
+                          ],
+                        ),
                       ),
                       const Icon(Icons.arrow_forward_ios_outlined)
                     ],

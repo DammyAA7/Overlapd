@@ -43,6 +43,6 @@ Future<void> sendMessage(String receiverId, String message, String senderName) a
   return _fireStore.collection("chat")
       .doc(chatRoomId)
       .collection('messages')
-      .orderBy('timestamp', descending: false).snapshots();
+      .orderBy('timestamp', descending: true).snapshots();
   }
 }

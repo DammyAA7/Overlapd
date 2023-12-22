@@ -64,48 +64,55 @@ class _ChatState extends State<Chat> {
           ],
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-              child: _buildMessageList()
-          ),
-          _buildMessageInput()
-        ],
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Expanded(
+                child: _buildMessageList()
+            ),
+            _buildMessageInput()
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildMessageInput(){
-    return Row(
-      children: [
-        Expanded(
-            child: TextField(
-              controller: _messageController,
-              decoration: const InputDecoration(
-                hintText: 'Enter Message'
-              ),
-            )
-        ),
-        IconButton(onPressed: sendMessage, icon: const Icon(Icons.send_rounded))
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Row(
+        children: [
+          Expanded(
+              child: TextField(
+                controller: _messageController,
+                decoration: const InputDecoration(
+                  hintText: 'Enter Message'
+                ),
+              )
+          ),
+          IconButton(onPressed: sendMessage, icon: const Icon(Icons.send_rounded))
+        ],
+      ),
     );
   }
 
 
   Widget _buildMessageItem(DocumentSnapshot document){
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-    var alignment = data['senderId'] == _UID ? Alignment.centerRight : Alignment.centerLeft;
     bool sameSender = _lastSenderId == data['senderId'];
-
+    bool isSender = data['senderId'] == _UID;
     _lastSenderId = data['senderId'];
+    var alignment = isSender ? Alignment.centerRight : Alignment.centerLeft;
     return Container(
       alignment: alignment,
       child: Column(
-        crossAxisAlignment: data['senderId'] == _UID ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        mainAxisAlignment: data['senderId'] == _UID ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        mainAxisAlignment: isSender ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
+          chatBubble(data['message'], isSender),
           if (!sameSender) Text(data['senderName']),
-          chatBubble(data['message']),
+
         ],
       ),
     );
@@ -127,6 +134,7 @@ class _ChatState extends State<Chat> {
     return const Text('No messages');
     } else {
       return ListView(
+        reverse: true,
         children: snapshot.data!.docs.map((document) => _buildMessageItem(document)).toList(),
       );
     }
@@ -134,24 +142,41 @@ class _ChatState extends State<Chat> {
     );
   }
 
-  Widget chatBubble(String message){
+  Widget chatBubble(String message, bool isSender){
     return Padding(
       padding: const EdgeInsets.all(1.0),
       child: Container(
-        alignment: Alignment.centerRight,
-        width: MediaQuery.of(context).size.width/2,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: const Color(0xFF21D19F)
-        ),
-        child: Text(
-          message,
-          maxLines: 10,
-          overflow: TextOverflow.visible,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.white
+        alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
+        child: FittedBox(
+          fit: BoxFit.none,
+
+          child: Container(
+            padding: isSender ? const EdgeInsets.only(top: 8, right: 8, left: 20, bottom: 8) : const EdgeInsets.only(top: 8, left: 8, right: 20, bottom: 8),
+            decoration: BoxDecoration(
+                borderRadius: isSender ? const BorderRadius.only(
+                    topRight: Radius.circular(0),
+                    topLeft: Radius.circular(12),
+                    bottomLeft: Radius.circular(12),
+                    bottomRight: Radius.circular(12))
+                    : const BorderRadius.only(
+                    topRight: Radius.circular(12),
+                    topLeft: Radius.circular(0),
+                    bottomLeft: Radius.circular(12),
+                    bottomRight: Radius.circular(12)),
+                color: isSender ? const Color(0xFF21D19F) : const Color(0xFF21D19F).withOpacity(0.7)
+            ),
+            constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width / 2
+            ),
+            child: Text(
+              message,
+              maxLines: 10,
+              overflow: TextOverflow.visible,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.white
+              ),
+            ),
           ),
         ),
       ),
