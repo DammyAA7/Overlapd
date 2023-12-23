@@ -100,34 +100,35 @@ Widget activeDeliveryStatusCard(String acceptedByUser, String orderID, String pl
               children: [
                 Container(
                   padding: const EdgeInsets.all(5.0),
-                  height: 140,
+                  height: 200,
                   width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
                     color: const Color(0xFF21D19F).withOpacity(0.5),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Order No: $orderID', style: const TextStyle(fontSize: 20)),
-                            Text('$firstName will shop and deliver your items',
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 2,
-                                style: const TextStyle(fontSize: 20)),
-                          ],
+                  child: Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Order No: $orderID', style: const TextStyle(fontSize: 20)),
+                              Text('$firstName will shop and deliver your items',
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                  style: const TextStyle(fontSize: 20)),
+                            ],
+                          ),
                         ),
-                      ),
-                      const Icon(Icons.arrow_forward_ios_outlined)
-                    ],
+                        const Icon(Icons.arrow_forward_ios_outlined)
+                      ],
+                    ),
                   ),
                 ),
-                SizedBox.shrink()
               ],
             ),
           ),

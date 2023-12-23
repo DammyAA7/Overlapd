@@ -8,15 +8,14 @@ class DeliveryService extends ChangeNotifier {
   final FirebaseAuthService _auth = FirebaseAuthService();
 
 
-  Future<void> openDelivery(Position currentLocation, String storeName, List itemList, String total) async {
+  Future<void> openDelivery(String currentLocation, String storeName, List itemList, String total) async {
     final userId = await _auth.getUserId();
     String orderNo;
 
 
-    final geoPoint = GeoPoint(currentLocation.latitude, currentLocation.longitude);
 
     final public = {
-      'Delivery Destination': geoPoint,
+      'Delivery Destination': currentLocation,
       'Grocery Store': storeName,
       'Placed by': userId,
       'Items for Delivery': itemList,
