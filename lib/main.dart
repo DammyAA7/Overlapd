@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_config/flutter_config.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:overlapd/screens/about.dart';
 import 'package:overlapd/screens/history.dart';
 import 'package:overlapd/screens/payment.dart';
@@ -18,6 +19,7 @@ Future main() async{
   await Firebase.initializeApp();
   final FirebaseAuthService _auth = FirebaseAuthService();
   bool isLoggedIn = await _auth.isLoggedIn();
+  await Hive.initFlutter();
   runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 

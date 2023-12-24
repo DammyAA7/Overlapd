@@ -5,7 +5,7 @@ import 'package:overlapd/utilities/widgets.dart';
 import '../screens/requestedDeliveryStatus.dart';
 
 //when the user accepts a delivery, the currents unaccepted delivery requested are replaced with the card below. It gives the user a brief description of the order.
-Widget activeDeliveryCard(String placedByUser, String orderID, String acceptedByUser){
+Widget activeDeliveryCard(String placedByUser, String orderID, String acceptedByUser, String deliveryAddress, List itemList){
   return FutureBuilder(
     future: Future.wait([getFirstName(placedByUser), getFirstName(acceptedByUser)]),
     builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
@@ -18,9 +18,9 @@ Widget activeDeliveryCard(String placedByUser, String orderID, String acceptedBy
         String acceptedUserFirstName = snapshot.data?[1];
         return GestureDetector(
           onTap: (){
-            Navigator.pushReplacement(
+            Navigator.push(
               context,
-              pageAnimationrl(AcceptedDeliveryDetails(placedByUserId: placedByUser, acceptedByUserName: acceptedUserFirstName)),
+              pageAnimationrl(AcceptedDeliveryDetails(placedByUserId: placedByUser, acceptedByUserName: acceptedUserFirstName, orderID: orderID, deliveryAddress: deliveryAddress, itemList: itemList)),
             );
           },
           child: Padding(
@@ -41,14 +41,16 @@ Widget activeDeliveryCard(String placedByUser, String orderID, String acceptedBy
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Order No: $orderID', style: const TextStyle(fontSize: 20)),
-                            Text('You\'ll be grocery shopping for $firstName', style: const TextStyle(fontSize: 20)),
-                            const Text('You will earn €6.99 from this delivery', style: TextStyle(fontSize: 20))
-                          ],
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Order No: $orderID', style: const TextStyle(fontSize: 20)),
+                              Text('You\'ll be grocery shopping for $firstName', style: const TextStyle(fontSize: 20)),
+                              const Text('You will earn €6.99 from this delivery', style: TextStyle(fontSize: 20))
+                            ],
+                          ),
                         ),
                         const Icon(Icons.arrow_forward_ios_outlined)
                       ],
@@ -85,11 +87,9 @@ Widget activeDeliveryStatusCard(String acceptedByUser, String orderID, String pl
       } else {
         String firstName = snapshot.data?[0];
         String placedByFirstName = snapshot.data?[1];
-        print(firstName);
-        print(placedByFirstName);
         return GestureDetector(
           onTap: (){
-            Navigator.pushReplacement(
+            Navigator.push(
               context,
               pageAnimationrl(RequestedDeliveryStatus(acceptedByUserId: acceptedByUser, placedByUserName: placedByFirstName)),
             );

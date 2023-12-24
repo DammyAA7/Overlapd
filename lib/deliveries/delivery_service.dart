@@ -1,21 +1,34 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:geolocator/geolocator.dart';
 
 import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 
 class DeliveryService extends ChangeNotifier {
   final FirebaseAuthService _auth = FirebaseAuthService();
 
+  Future<void> acceptDelivery(String deliveryAddress, String userId, String placedBy, String orderId) async{
+    final details = {
+      'Delivery Address': deliveryAddress,
+      'Placed by': placedBy,
+      'Time Stamp': DateTime.now(),
+      'complete': 'no',
+      'cancelled': 'no',
+    };
 
-  Future<void> openDelivery(String currentLocation, String storeName, List itemList, String total) async {
-    final userId = await _auth.getUserId();
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('Accepted Deliveries')
+        .doc(orderId)
+        .set(details);
+
+  }
+  Future<void> openDelivery(String address, String storeName, List itemList, String total) async {
+    final userId = _auth.getUserId();
     String orderNo;
 
-
-
     final public = {
-      'Delivery Destination': currentLocation,
+      'Delivery Address': address,
       'Grocery Store': storeName,
       'Placed by': userId,
       'Items for Delivery': itemList,
@@ -24,7 +37,8 @@ class DeliveryService extends ChangeNotifier {
       'accepted by' : 'N/A',
       'complete': 'no',
       'cancelled': 'no',
-      'declined By': ''
+      'declined By': '',
+      'receipt':'N/A'
     };
     final orderInfoDocRef = await FirebaseFirestore.instance
         .collection('All Deliveries')

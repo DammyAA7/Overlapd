@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'networkUtilities.dart';
+import 'package:http/http.dart' as http;
 
 Widget locationListTile(String location, VoidCallback press){
   return Column(
@@ -84,3 +85,40 @@ Future<Position> determinePosition() async {
   // continue accessing the position of the device.
   return await Geolocator.getCurrentPosition();
 }
+
+class Coordinates {
+  final double latitude;
+  final double longitude;
+
+  Coordinates(this.latitude, this.longitude);
+
+}
+
+Future<Coordinates?> getCoordinates(String address) async {
+  Uri uri = Uri.https(
+    "maps.googleapis.com",
+    'maps/api/geocode/json',
+    {
+      "address": address,
+      "key": "AIzaSyDFcJ0SWLhnTZVktTPn8jB5nJ2hpuSfwNk", // Replace with your Google Maps API key
+    },
+  );
+
+  try {
+    http.Response response = await http.get(uri);
+    if (response.statusCode == 200) {
+      Map<String, dynamic> data = json.decode(response.body);
+      if (data['status'] == 'OK') {
+        var location = data['results'][0]['geometry']['location'];
+        double latitude = location['lat'];
+        double longitude = location['lng'];
+        return Coordinates(latitude, longitude);
+      }
+    }
+  } catch (error) {
+    print("Error fetching coordinates: $error");
+  }
+
+  return null;
+}
+

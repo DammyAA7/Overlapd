@@ -10,8 +10,11 @@ import '../../utilities/widgets.dart';
 class Chat extends StatefulWidget {
   final String receiverUserId;
   final String receiverUserName;
+  final String? orderID;
+  final String? deliveryAddress;
+  final List? itemList;
   final bool whatUser;
-  const Chat({super.key, required this.whatUser, required this.receiverUserId, required this.receiverUserName});
+  const Chat({super.key, required this.whatUser, required this.receiverUserId, required this.receiverUserName, this.orderID, this.deliveryAddress, this.itemList});
 
   @override
   State<Chat> createState() => _ChatState();
@@ -22,9 +25,6 @@ class _ChatState extends State<Chat> {
   final ChatService _chatService = ChatService();
   final FirebaseAuthService _auth = FirebaseAuthService();
   late final String _UID = _auth.getUserId();
-  String? _lastSenderId;
-
-
 
   void sendMessage() async{
     if(_messageController.text.isNotEmpty){
@@ -45,11 +45,17 @@ class _ChatState extends State<Chat> {
             IconButton(
               onPressed: () {
                 // Navigate to the home page with a fade transition
-                Navigator.pushReplacement(
+                Navigator.pop(
                   context,
                   pageAnimationlr(widget.whatUser
                       ? RequestedDeliveryStatus(placedByUserName: widget.receiverUserName, acceptedByUserId: widget.receiverUserId,)
-                      : AcceptedDeliveryDetails(acceptedByUserName: widget.receiverUserName, placedByUserId: widget.receiverUserId) ),
+                      : AcceptedDeliveryDetails(acceptedByUserName: widget.receiverUserName,
+                    placedByUserId: widget.receiverUserId,
+                    orderID: widget.orderID,
+                    deliveryAddress: widget.deliveryAddress,
+                    itemList: widget.itemList,
+                    )
+                  ),
                 );
               },
               icon: const Icon(Icons.arrow_back_ios_new_rounded),
@@ -100,9 +106,7 @@ class _ChatState extends State<Chat> {
 
   Widget _buildMessageItem(DocumentSnapshot document){
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-    bool sameSender = _lastSenderId == data['senderId'];
     bool isSender = data['senderId'] == _UID;
-    _lastSenderId = data['senderId'];
     var alignment = isSender ? Alignment.centerRight : Alignment.centerLeft;
     return Container(
       alignment: alignment,
@@ -111,7 +115,6 @@ class _ChatState extends State<Chat> {
         mainAxisAlignment: isSender ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           chatBubble(data['message'], isSender),
-          if (!sameSender) Text(data['senderName']),
 
         ],
       ),

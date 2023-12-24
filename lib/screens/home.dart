@@ -1,3 +1,5 @@
+
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +24,7 @@ class _HomeState extends State<Home> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   final DeliveryService _service = DeliveryService();
   late final String _UID = _auth.getUserId();
+  String? firstName;
   @override
   void initState() {
     // TODO: implement initState
@@ -115,6 +118,7 @@ class _HomeState extends State<Home> {
           .get();
       if (deliverySnapshot.exists) {
         String placedByUserID = deliverySnapshot['Placed by'];
+        String address = deliverySnapshot['Delivery Address'];
 
         // Update 'accepted by' field in the user's 'Placed Delivery' collection
         await FirebaseFirestore.instance
@@ -131,6 +135,8 @@ class _HomeState extends State<Home> {
             .collection('Order Info')
             .doc(orderID)
             .update({'accepted by': _UID});
+
+        _service.acceptDelivery(address, _UID, placedByUserID, orderID);
 
         showToast(text: 'Delivery accepted successfully');
       } else {
@@ -197,7 +203,9 @@ class _HomeState extends State<Home> {
               String orderID = activeOrderDocument.id;
               String placedByUser = activeOrderDocument['Placed by'];
               String acceptedByUser = activeOrderDocument['accepted by'];
-              return activeDeliveryCard(placedByUser, orderID, acceptedByUser);
+              String deliveryAddress = activeOrderDocument['Delivery Address'];
+              List itemList = activeOrderDocument['Items for Delivery'];
+              return activeDeliveryCard(placedByUser, orderID, acceptedByUser, deliveryAddress, itemList);
             }else if(hasPendingDelivery){
               if(hasAcceptedPendingDelivery){
                 DocumentSnapshot activeOrderDocument = snapshot.data!.docs.firstWhere(

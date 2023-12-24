@@ -23,8 +23,8 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
   List Stores = ['Tesco', 'Lidl', 'SuperValu', 'Spar'];
   String? chosenStore;
   String? setAddress;
+  Position? currentLocation;
   final DeliveryService _service = DeliveryService();
-  final TextEditingController _searchController = TextEditingController();
   bool canConfirmDelivery() {
     return items.isNotEmpty;
   }
@@ -58,7 +58,6 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
       }
     }
   }
-
 
   String calculateTotalAmount() {
     num totalQuantity = 0;
@@ -139,8 +138,8 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
                                         padding: const EdgeInsets.all(8.0),
                                         child: ElevatedButton.icon(
                                             onPressed: ()  async{
-                                              Position currentLocation = await determinePosition();
-                                              String? formattedAddress = await getAddressFromCoordinates(currentLocation.latitude, currentLocation.longitude);
+                                              currentLocation = await determinePosition();
+                                              String? formattedAddress = await getAddressFromCoordinates(currentLocation!.latitude, currentLocation!.longitude);
                                               setState(() {
                                                 setAddress = formattedAddress;
                                                 Navigator.of(context).pop();
@@ -163,6 +162,7 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
                                             itemBuilder: (context,index) => locationListTile(placePredictions[index].description!, () {
                                               setState(() {
                                                 setAddress = placePredictions[index].description;
+                                                getCoordinates(setAddress!);
                                                 Navigator.of(context).pop();
                                               });
                                             })
