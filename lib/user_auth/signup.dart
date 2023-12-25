@@ -57,7 +57,7 @@ class _SignUpState extends State<SignUp> {
     }
 
     // Check if the password contains at least 1 special character
-    if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(password)) {
+    if (!RegExp(r'[!@#\\$%^&*(),.?":{}|<>]').hasMatch(password)) {
       return false;
     }
 
@@ -135,6 +135,7 @@ class _SignUpState extends State<SignUp> {
     User? user = await _auth.signUpWithEmailAndPassword(email, password);
 
     if (user != null){
+      await _auth.setLoggedIn();
       createUserCredentials(user: user);
       showToast(text: "User created successfully");
       Navigator.pushNamed(context, '/home_page');

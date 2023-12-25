@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:overlapd/utilities/toast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FirebaseAuthService{
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -32,5 +34,39 @@ class FirebaseAuthService{
     }
     return null;
   }
+
+  // Set the login status to true when the user logs in
+  Future<void> setLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', true);
+  }
+
+  // Check if the user is logged in
+  Future<bool> isLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('isLoggedIn') ?? false;
+  }
+
+  // Clear the login status when the user logs out
+  Future<void> setLoggedOut() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
+  }
+
+  String getUserId()  {
+    User? user = _auth.currentUser;
+    return (user?.uid)!;
+  }
+
+  Future<String?> getUsername() async {
+    User? user = _auth.currentUser;
+    return user?.email;
+  }
+
+
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getPersonalDetails(String uid) {
+    return FirebaseFirestore.instance.collection('users').doc(uid).snapshots();
+  }
+
 
 }

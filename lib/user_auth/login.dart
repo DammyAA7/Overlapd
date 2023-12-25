@@ -86,6 +86,7 @@ class _LoginState extends State<Login> {
     User? user = await _auth.signInWithEmailAndPassword(email, password);
 
     if (user != null){
+      await _auth.setLoggedIn();
       showToast(text: "User logged in successfully");
       Navigator.pushNamed(context, '/home_page');
     } else{
@@ -93,4 +94,5 @@ class _LoginState extends State<Login> {
     }
 
   }
+
 }

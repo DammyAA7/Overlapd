@@ -40,12 +40,26 @@ dependencies:
   firebase_core: ^2.24.1
   cloud_firestore: ^4.13.4
   firebase_auth: ^4.15.1
-  firebase_storage: ^11.5.4
+  firebase_storage: ^11.5.6
   fluttertoast: ^8.2.4
+  shared_preferences: ^2.2.2
+  google_maps_flutter: ^2.5.0
+  flutter_config: ^2.0.2
+  flutter_polyline_points: ^2.0.0
+  location: ^5.0.3
+  geolocator: ^10.1.0
+  dropdown_button2: ^2.3.9
+  timeline_tile: ^2.0.0
+  provider: ^6.1.1
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  image_picker: ^1.0.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  hive_generator: ^2.0.1
+  build_runner: ^2.1.11
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
