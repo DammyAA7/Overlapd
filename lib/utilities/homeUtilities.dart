@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:overlapd/screens/acceptedDeliveryDetails.dart';
 import 'package:overlapd/utilities/widgets.dart';
 import '../screens/requestedDeliveryStatus.dart';
@@ -136,6 +137,24 @@ Widget activeDeliveryStatusCard(String acceptedByUser, String orderID, String pl
       }
     },
   );
+}
+
+Future<Position> getCurrentLocation() async{
+  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if(!serviceEnabled){
+    return Future.error('Location Services are disabled');
+  }
+  LocationPermission permission = await Geolocator.checkPermission();
+  if(permission == LocationPermission.denied){
+    permission = await Geolocator.requestPermission();
+    if(permission == LocationPermission.denied){
+      return Future.error('Location permissions are denied, enable location to request or accept delivery');
+    }
+  }
+  if(permission == LocationPermission.deniedForever){
+    return Future.error('Location permissions are permanently denied, enable location to request or accept delivery');
+  }
+  return await Geolocator.getCurrentPosition();
 }
 
 

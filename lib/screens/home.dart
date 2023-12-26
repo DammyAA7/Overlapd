@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:overlapd/deliveries/add_delivery_details.dart';
 import 'package:overlapd/deliveries/delivery_service.dart';
 import 'package:overlapd/utilities/toast.dart';
@@ -25,6 +26,7 @@ class _HomeState extends State<Home> {
   final DeliveryService _service = DeliveryService();
   late final String _UID = _auth.getUserId();
   String? firstName;
+  Position? currentPosition;
   @override
   void initState() {
     // TODO: implement initState
@@ -89,9 +91,17 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void _requestDelivery() {
-    Navigator.of(context).pushReplacement(
-        pageAnimationFromBottomToTop(const DeliveryDetails()));
+  void _requestDelivery() async{
+    try {
+      await getCurrentLocation();
+      // Proceed with delivery request logic as location services are enabled
+      Navigator.of(context).pushReplacement(
+        pageAnimationFromBottomToTop(const DeliveryDetails()),
+      );
+    } catch (e) {
+      // Display a message to the user about the location issue
+      showToast(text: e.toString());
+    }
   }
 
   void _signOut() async {
@@ -109,6 +119,8 @@ class _HomeState extends State<Home> {
 
   void acceptDelivery(String orderID) async{
     try {
+      //check if location services are enabled
+      currentPosition = await getCurrentLocation();
       // Retrieve the value of 'Placed by' from 'All Deliveries' collection
       DocumentSnapshot deliverySnapshot = await FirebaseFirestore.instance
           .collection('All Deliveries')
@@ -335,9 +347,6 @@ void _cancelDelivery() async{
     print('No placed deliveries found for user $_UID');
   }
 }
-
-
-
 
 
 }

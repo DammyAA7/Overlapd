@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:overlapd/utilities/toast.dart';
@@ -27,11 +28,13 @@ class AcceptedDeliveryDetails extends StatefulWidget {
 class _AcceptedDeliveryDetailsState extends State<AcceptedDeliveryDetails>{
   late List<bool?> isCheckedList;
   late Box<bool?> checkboxStateBox;
+  Position? liveLocation;
   @override
   void initState() {
     super.initState();
     isCheckedList = List.generate(widget.itemList?.length ?? 0, (index) => false);
     initHive();
+    _liveLocation();
   }
 
   Future<void> initHive() async {
@@ -93,12 +96,12 @@ class _AcceptedDeliveryDetailsState extends State<AcceptedDeliveryDetails>{
         children: [
           Text('Order No: ${widget.orderID}'),
           Text((widget.deliveryAddress)!),
+          Text('lat: ${liveLocation?.latitude} lng: ${liveLocation?.longitude}'),
+          MaterialButton(onPressed: (){
+            _liveLocation();
+          },
+          child: const Text('get live location'),),
           const Text('Item List'),
-
-          ElevatedButton(onPressed: (){
-            print(widget.itemList);
-          }, child: const Text('Order ID')),
-
           Expanded(
             child: ListView.builder(
               itemCount: widget.itemList?.length ?? 0,
@@ -129,6 +132,18 @@ class _AcceptedDeliveryDetailsState extends State<AcceptedDeliveryDetails>{
         ],
       ),
     );
+  }
+
+  void _liveLocation(){
+    LocationSettings locationSettings = const LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 50,
+    );
+    Geolocator.getPositionStream(locationSettings: locationSettings).listen((Position position) {
+      setState(() {
+        liveLocation = position;
+      });
+    });
   }
   void _captureReceipt() async{
     ImagePicker imagePicker = ImagePicker();
