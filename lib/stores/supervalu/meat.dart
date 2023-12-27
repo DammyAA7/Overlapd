@@ -61,23 +61,29 @@ class _MeatState extends State<Meat> {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: SizedBox(
-        height: 150,
-        width: MediaQuery.of(context).size.width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Image.network(data['imageUrl']),
-            Expanded(child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        children: [
+          SizedBox(
+            height: 150,
+            width: MediaQuery.of(context).size.width,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Text(data['productTitle'], overflow: TextOverflow.visible, maxLines: 2,),
-                Text(data['productPrice']),
-                Text(data['pricePerWeight'])
+                Image.network(data['imageUrl']),
+                Expanded(child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(data['productTitle'], overflow: TextOverflow.visible, maxLines: 2,),
+                    Text(data['productPrice']),
+                    Text(data['pricePerWeight'])
+                  ],
+                )
+                ),
               ],
-            )),
-          ],
-        ),
+            ),
+          ),
+          const Divider(thickness: 1)
+        ],
       ),
     );
   }
