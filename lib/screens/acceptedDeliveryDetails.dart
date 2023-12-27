@@ -137,11 +137,17 @@ class _AcceptedDeliveryDetailsState extends State<AcceptedDeliveryDetails>{
   void _liveLocation(){
     LocationSettings locationSettings = const LocationSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 50,
+      distanceFilter: 30,
     );
     Geolocator.getPositionStream(locationSettings: locationSettings).listen((Position position) {
-      setState(() {
-        liveLocation = position;
+      setState(() async {
+        GeoPoint point = GeoPoint(position.latitude, position.longitude);
+        await FirebaseFirestore.instance
+            .collection('All Deliveries')
+            .doc('Open Deliveries')
+            .collection('Order Info')
+            .doc(widget.orderID)
+            .update({'live location': point});
       });
     });
   }

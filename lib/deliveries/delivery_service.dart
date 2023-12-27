@@ -38,6 +38,7 @@ class DeliveryService extends ChangeNotifier {
       'complete': 'no',
       'cancelled': 'no',
       'declined By': '',
+      'live location': [0,0],
       'receipt':'N/A'
     };
     final orderInfoDocRef = await FirebaseFirestore.instance

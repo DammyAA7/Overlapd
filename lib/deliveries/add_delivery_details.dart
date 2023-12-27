@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:overlapd/stores/supervalu/meat.dart';
 import 'package:overlapd/utilities/networkUtilities.dart';
 import 'package:overlapd/utilities/toast.dart';
 import '../screens/home.dart';
@@ -236,6 +237,12 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
               onChanged: (newValue){
                 setState(() {
                   chosenStore = newValue.toString();
+                  if (chosenStore == 'SuperValu'){
+                    Navigator.pushReplacement(
+                      context,
+                      pageAnimationFromTopToBottom(const Meat()),
+                    );
+                  }
                 });
               },
               onSaved: (value) {
