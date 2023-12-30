@@ -1,4 +1,5 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:overlapd/stores/supervalu/meat.dart';
@@ -26,6 +27,7 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
   String? setAddress;
   Position? currentLocation;
   final DeliveryService _service = DeliveryService();
+  final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
   bool canConfirmDelivery() {
     return items.isNotEmpty;
   }
@@ -240,7 +242,12 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
                   if (chosenStore == 'SuperValu'){
                     Navigator.pushReplacement(
                       context,
-                      pageAnimationFromTopToBottom(const Meat()),
+                      pageAnimationFromTopToBottom( Meat(snapshot: _fireStore.collection("SuperValu").snapshots())),
+                    );
+                  } else if(chosenStore == 'Tesco'){
+                    Navigator.pushReplacement(
+                      context,
+                      pageAnimationFromTopToBottom( Meat(snapshot: _fireStore.collection("Tesco").doc('Drinks').collection('Water').snapshots())),
                     );
                   }
                 });

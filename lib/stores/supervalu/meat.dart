@@ -7,14 +7,14 @@ import '../../utilities/widgets.dart';
 
 class Meat extends StatefulWidget {
   static const id = 'meat_page';
-  const Meat({super.key});
+  final Stream<QuerySnapshot> snapshot;
+  const Meat({super.key, required this.snapshot});
 
   @override
   State<Meat> createState() => _MeatState();
 }
 
 class _MeatState extends State<Meat> {
-  final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +37,7 @@ class _MeatState extends State<Meat> {
             Align(
               alignment: Alignment.center,
               child: Text(
-                'Super Valu',
+                'Tesco',
                 style: Theme.of(context).textTheme.displayMedium,
               ),
             ),
@@ -69,13 +69,13 @@ class _MeatState extends State<Meat> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Image.network(data['imageUrl']),
+                Image.network(data['imageUrl'].toString()),
                 Expanded(child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(data['productTitle'], overflow: TextOverflow.visible, maxLines: 2,),
-                    Text(data['productPrice']),
-                    Text(data['pricePerWeight'])
+                    Text(data['title'].toString(), overflow: TextOverflow.visible, maxLines: 2,),
+                    Text(data['price'].toString()),
+                    Text(data['pricePer'].toString())
                   ],
                 )
                 ),
@@ -90,7 +90,7 @@ class _MeatState extends State<Meat> {
 
   Widget _buildProductList(){
     return StreamBuilder(
-        stream: getProducts(),
+        stream: widget.snapshot,
         builder: (context, snapshot){
           if (snapshot.connectionState == ConnectionState.waiting) {
             // If the data is still loading, return a loading indicator
@@ -110,7 +110,4 @@ class _MeatState extends State<Meat> {
     );
   }
 
-  Stream<QuerySnapshot> getProducts(){
-    return _fireStore.collection("SuperValu").snapshots();
-  }
 }
