@@ -2,6 +2,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:overlapd/stores/Tesco/tescoRange.dart';
+import 'package:overlapd/stores/range.dart';
 import 'package:overlapd/stores/supervalu/meat.dart';
 import 'package:overlapd/utilities/networkUtilities.dart';
 import 'package:overlapd/utilities/toast.dart';
@@ -28,6 +30,7 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
   Position? currentLocation;
   final DeliveryService _service = DeliveryService();
   final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
+  MapRange range = MapRange();
   bool canConfirmDelivery() {
     return items.isNotEmpty;
   }
@@ -247,7 +250,7 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
                   } else if(chosenStore == 'Tesco'){
                     Navigator.pushReplacement(
                       context,
-                      pageAnimationFromTopToBottom( Meat(snapshot: _fireStore.collection("Tesco").doc('Drinks').collection('Water').snapshots())),
+                      pageAnimationrl(Range(groceryRange: range.groceryRange)),
                     );
                   }
                 });
@@ -335,5 +338,7 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
       ),
     );
   }
+
+
 
 }

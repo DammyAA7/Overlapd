@@ -27,10 +27,7 @@ class _MeatState extends State<Meat> {
             IconButton(
               onPressed: () {
                 // Navigate to the home page with a fade transition
-                Navigator.pushReplacement(
-                  context,
-                  pageAnimationlr(const DeliveryDetails()),
-                );
+                Navigator.pop(context);
               },
               icon: const Icon(Icons.arrow_back_ios_new_rounded),
             ),
