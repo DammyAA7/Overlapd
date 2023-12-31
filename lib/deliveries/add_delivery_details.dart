@@ -2,9 +2,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:overlapd/stores/Tesco/tescoRange.dart';
+import 'package:overlapd/stores/groceryRange.dart';
 import 'package:overlapd/stores/range.dart';
-import 'package:overlapd/stores/supervalu/meat.dart';
+import 'package:overlapd/stores/productListPage.dart';
 import 'package:overlapd/utilities/networkUtilities.dart';
 import 'package:overlapd/utilities/toast.dart';
 import '../screens/home.dart';
@@ -250,7 +250,7 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
                   } else if(chosenStore == 'Tesco'){
                     Navigator.pushReplacement(
                       context,
-                      pageAnimationrl(Range(groceryRange: range.groceryRange)),
+                      pageAnimationrl(Range(groceryRange: range.tescoGroceryRange)),
                     );
                   }
                 });
@@ -283,7 +283,7 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
               Expanded(flex: 8,child: alphanumericInputBox('Enter Item', true, false, _itemController),),
               const SizedBox(width: 10.0),
               Expanded(flex: 2,child: solidButton(
-                  context, 'add',
+                  context, '+',
                       () {
                     // Check if item controller is not empty
                     if (_itemController.getText().isNotEmpty) {

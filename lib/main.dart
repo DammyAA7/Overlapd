@@ -1,7 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:overlapd/stores/groceryRange.dart';
+import 'package:provider/provider.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:overlapd/screens/about.dart';
 import 'package:overlapd/screens/history.dart';
@@ -20,7 +22,10 @@ Future main() async{
   final FirebaseAuthService _auth = FirebaseAuthService();
   bool isLoggedIn = await _auth.isLoggedIn();
   await Hive.initFlutter();
-  runApp(MyApp(isLoggedIn: isLoggedIn));
+  runApp(ChangeNotifierProvider(
+      create: (context) => Cart(),
+      child: MyApp(isLoggedIn: isLoggedIn)
+  ));
 }
 
 Future<bool> isUserLoggedIn() async {

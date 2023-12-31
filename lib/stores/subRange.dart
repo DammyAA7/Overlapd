@@ -1,11 +1,9 @@
-
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:overlapd/stores/supervalu/meat.dart';
+import 'package:overlapd/stores/productListPage.dart';
 import 'package:overlapd/stores/range.dart';
 import '../utilities/widgets.dart';
-import 'Tesco/tescoRange.dart';
+import 'groceryRange.dart';
 
 class SubRange extends StatefulWidget {
   final Map<String, Stream<QuerySnapshot>> subRange;
@@ -30,7 +28,7 @@ class _SubRangeState extends State<SubRange> {
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  pageAnimationlr(Range(groceryRange: range.groceryRange)),
+                  pageAnimationlr(Range(groceryRange: range.tescoGroceryRange)),
                 );
               },
               icon: const Icon(Icons.arrow_back_ios_new_rounded),
