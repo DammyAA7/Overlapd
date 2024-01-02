@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:overlapd/stores/groceryRange.dart';
 import 'package:overlapd/stores/shoppingCart.dart';
@@ -20,6 +21,10 @@ class Meat extends StatefulWidget {
 
 class _MeatState extends State<Meat> {
   int quantity = 1;
+  String filterProduct = "";
+  bool scroll = true;
+  TextEditingController searchText = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,14 +51,51 @@ class _MeatState extends State<Meat> {
           ],
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Expanded(
-                child: _buildProductList()
-            ),
-          ],
+      body: NotificationListener<UserScrollNotification>(
+        onNotification: (notification){
+          if(notification.direction == ScrollDirection.forward){
+            if(!scroll) setState(() => scroll = true);
+          } else if(notification.direction == ScrollDirection.reverse){
+            if(scroll) setState(() => scroll = false);
+          }
+          return true;
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Visibility(
+                visible: scroll,
+                maintainState: true,
+                child: TextField(
+                  controller: searchText, // Use the stored value
+                  onChanged: (value){
+                    setState(() {
+                      filterProduct = value;
+                    });
+                  },
+                  decoration: InputDecoration(
+                      filled: true,
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide.none,
+                      ),
+                    hintText: 'Search',
+                    prefixIcon: const Icon(Icons.search_outlined),
+                    suffixIcon: IconButton(onPressed: (){
+                      setState((){
+                        filterProduct = "";
+                        searchText.clear();
+                      });
+                    }, icon: const Icon(Icons.clear))
+                  ),
+                ),
+              ),
+              Expanded(
+                  child: _buildProductList()
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: Stack(
@@ -75,96 +117,109 @@ class _MeatState extends State<Meat> {
 
   Widget _buildProductItem(DocumentSnapshot document){
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+    if(filterProduct.isEmpty){
+      return productListTile(data);
+    }
+    if(data['title'].toString().toLowerCase().contains(filterProduct.toLowerCase())){
+      return productListTile(data);
+    }
+    else{
+      return const SizedBox.shrink();
+    }
+
+  }
+
+  Padding productListTile(Map<String, dynamic> data) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          Slidable(
-            endActionPane: ActionPane(
-              motion: const ScrollMotion(),
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(15)),
-                        color: Colors.blue
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [
-                          IconButton(
-                              onPressed: (){
-                                setState(() {
-                                  quantity += 1;
-                                });
-                                },
-                              icon: const Icon(Icons.add)),
-                          Text('$quantity'),
-                          IconButton(
-                              onPressed: (){
-                                setState(() {
-                                  if(quantity > 1){
-                                    quantity -= 1;
-                                  }
-                                });
-                                },
-                              icon: const Icon(Icons.remove)),
-                        ],
-                      ),
+    padding: const EdgeInsets.all(8.0),
+    child: Column(
+      children: [
+        Slidable(
+          endActionPane: ActionPane(
+            motion: const ScrollMotion(),
+            children: [
+              Expanded(
+                flex: 1,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                      color: Colors.blue
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        IconButton(
+                            onPressed: (){
+                              setState(() {
+                                quantity += 1;
+                              });
+                              },
+                            icon: const Icon(Icons.add)),
+                        Text('$quantity'),
+                        IconButton(
+                            onPressed: (){
+                              setState(() {
+                                if(quantity > 1){
+                                  quantity -= 1;
+                                }
+                              });
+                              },
+                            icon: const Icon(Icons.remove)),
+                      ],
                     ),
                   ),
                 ),
-                const SizedBox(width: 3),
-                SlidableAction(onPressed: ((context){
-                  //add to cart
-                  Product product = Product(
-                      title: data['title'].toString(),
-                      price: double.parse(data['price'].toString().replaceAll(RegExp(r'[^0-9.]'), '')),
-                      pricePer: data['pricePer'].toString(),
-                      imageUrl: data['imageUrl'].toString()
-                  );
-                  final cart = context.read<Cart>();
-                  cart.addToCart(product, quantity);
-                  setState(() {
-                    quantity = 1;
-                  });
+              ),
+              const SizedBox(width: 3),
+              SlidableAction(onPressed: ((context){
+                //add to cart
+                Product product = Product(
+                    title: data['title'].toString(),
+                    price: double.parse(data['price'].toString().replaceAll(RegExp(r'[^0-9.]'), '')),
+                    pricePer: data['pricePer'].toString(),
+                    imageUrl: data['imageUrl'].toString()
+                );
+                final cart = context.read<Cart>();
+                cart.addToCart(product, quantity);
+                setState(() {
+                  quantity = 1;
+                });
 
-                  showToast(text: 'Successfully Added to cart');
-                }),
-                  padding: const EdgeInsets.all(2.0),
-                  flex: 1,
-                  borderRadius: const BorderRadius.all(Radius.circular(15)),
-                  backgroundColor: Colors.red,
-                  icon: Icons.add_shopping_cart_rounded
+                showToast(text: 'Successfully Added to cart');
+              }),
+                padding: const EdgeInsets.all(2.0),
+                flex: 1,
+                borderRadius: const BorderRadius.all(Radius.circular(15)),
+                backgroundColor: Colors.red,
+                icon: Icons.add_shopping_cart_rounded
+              ),
+            ],
+          ),
+          child: SizedBox(
+            height: 150,
+            width: MediaQuery.of(context).size.width,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Image.network(data['imageUrl'].toString()),
+                Expanded(child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(data['title'].toString(), overflow: TextOverflow.visible, maxLines: 2,),
+                    Text(data['price'].toString()),
+                    Text(data['pricePer'].toString())
+                  ],
+                )
                 ),
               ],
             ),
-            child: SizedBox(
-              height: 150,
-              width: MediaQuery.of(context).size.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Image.network(data['imageUrl'].toString()),
-                  Expanded(child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(data['title'].toString(), overflow: TextOverflow.visible, maxLines: 2,),
-                      Text(data['price'].toString()),
-                      Text(data['pricePer'].toString())
-                    ],
-                  )
-                  ),
-                ],
-              ),
-            ),
           ),
-          const Divider(thickness: 1)
-        ],
-      ),
-    );
+        ),
+        const Divider(thickness: 1)
+      ],
+    ),
+  );
   }
 
   Widget _buildProductList(){
@@ -191,6 +246,5 @@ class _MeatState extends State<Meat> {
         }
     );
   }
-
 
 }
