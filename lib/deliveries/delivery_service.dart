@@ -24,7 +24,7 @@ class DeliveryService extends ChangeNotifier {
         .set(details);
 
   }
-  Future<void> openDelivery(String address, String storeName, Map<Product, int> productList, String total) async {
+  Future<void> openDelivery(String address, String storeName, List productList, String total) async {
     final userId = _auth.getUserId();
     String orderNo;
 

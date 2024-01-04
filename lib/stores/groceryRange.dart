@@ -65,6 +65,15 @@ class Product {
     required this.imageUrl
   });
 
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'price': price,
+      'pricePer': pricePer,
+      'imageUrl': imageUrl,
+    };
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -83,6 +92,15 @@ class Product {
 class Cart extends ChangeNotifier{
   Map<Product, int> cart = {};
 
+  List<Map<String, dynamic>> toMapList() {
+    return cart.entries
+        .map((entry) => {
+      'product': entry.key.toMap(),
+      'quantity': entry.value,
+    })
+        .toList();
+  }
+
   void addToCart(Product product, int quantity){
     if (cart.containsKey(product)) {
       // If the product exists, update the quantity
@@ -95,6 +113,10 @@ class Cart extends ChangeNotifier{
 
   void removeFromCart(Product product){
     cart.remove(product);
+  }
+
+  void clearCart() {
+    cart.clear();
   }
 
   void updateQuantity(Product product, int quantity){

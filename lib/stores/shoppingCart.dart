@@ -166,7 +166,9 @@ class _ShoppingCartState extends State<ShoppingCart> {
   }
 
   void _checkout(String setAddress, String chosenStore, Map<Product, int> products, String amount) async{
-    await _service.openDelivery(setAddress, chosenStore, products, amount);
+    List<Map<String, dynamic>> productListMap = context.read<Cart>().toMapList();
+    await _service.openDelivery(setAddress, chosenStore, productListMap, amount);
+    context.read<Cart>().clearCart();
     Navigator.of(context).pushReplacement(
         pageAnimationFromTopToBottom(const Home()));
     showToast(text: 'Delivery Confirmed');
