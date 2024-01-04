@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 
+import '../stores/groceryRange.dart';
 import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 
 class DeliveryService extends ChangeNotifier {
@@ -23,7 +24,7 @@ class DeliveryService extends ChangeNotifier {
         .set(details);
 
   }
-  Future<void> openDelivery(String address, String storeName, List itemList, String total) async {
+  Future<void> openDelivery(String address, String storeName, Map<Product, int> productList, String total) async {
     final userId = _auth.getUserId();
     String orderNo;
 
@@ -31,7 +32,7 @@ class DeliveryService extends ChangeNotifier {
       'Delivery Address': address,
       'Grocery Store': storeName,
       'Placed by': userId,
-      'Items for Delivery': itemList,
+      'Items for Delivery': productList,
       'Item Total' : total,
       'Time Stamp': DateTime.now(),
       'accepted by' : 'N/A',
@@ -51,7 +52,7 @@ class DeliveryService extends ChangeNotifier {
       'Grocery Store': storeName,
       'accepted by' : 'N/A',
       'Order number': orderNo,
-      'Item Delivered': itemList,
+      'Item Delivered': productList,
       'Time Stamp': DateTime.now(),
       'complete': 'no',
       'cancelled': 'no'

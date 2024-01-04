@@ -143,7 +143,7 @@ class _MeatState extends State<Meat> {
                 child: Container(
                   decoration: const BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(15)),
-                      color: Colors.blue
+                      color: Colors.white
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -191,7 +191,7 @@ class _MeatState extends State<Meat> {
                 padding: const EdgeInsets.all(2.0),
                 flex: 1,
                 borderRadius: const BorderRadius.all(Radius.circular(15)),
-                backgroundColor: Colors.red,
+                backgroundColor: Colors.green,
                 icon: Icons.add_shopping_cart_rounded
               ),
             ],

@@ -45,14 +45,32 @@ class _SubRangeState extends State<SubRange> {
       ),
       body: ListView(
         children: widget.subRange.keys.map((key) {
-          return ElevatedButton(
-            onPressed: () {
+          return GestureDetector(
+            onTap: (){
               Navigator.push(
-                context,
-                pageAnimationrl(Meat(snapshot: widget.subRange[key]!)),
-              );
+                  context,
+                  pageAnimationrl(Meat(snapshot: widget.subRange[key]!)));
             },
-            child: Text(key),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 50,
+                  width: MediaQuery.of(context).size.width,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 20, right: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(key),
+                        const Icon(Icons.arrow_forward_ios_outlined)
+                      ],
+                    ),
+                  ),
+                ),
+                const Divider(thickness: 1)
+              ],
+            ),
           );
         }).toList(),
       ),

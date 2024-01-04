@@ -35,12 +35,6 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
     return items.isNotEmpty;
   }
 
-  void _confirmDelivery() async{
-    await _service.openDelivery(setAddress!, chosenStore!, items, calculateTotalAmount());
-    Navigator.of(context).pushReplacement(
-        pageAnimationFromTopToBottom(const Home()));
-    showToast(text: 'Delivery Confirmed');
-  }
   List<AutocompletePrediction> placePredictions = [];
 
   void placeAutoComplete(String query) async{
@@ -332,7 +326,7 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
                 ],
               ),
             ),
-            solidButton(context, 'Confirm Delivery', _confirmDelivery, canConfirmDelivery())
+            solidButton(context, 'Confirm Delivery', (){}, canConfirmDelivery())
           ],
         ),
       ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
+import '../deliveries/delivery_service.dart';
+import '../screens/home.dart';
 import '../utilities/toast.dart';
 import '../utilities/widgets.dart';
 import 'groceryRange.dart';
@@ -13,6 +15,7 @@ class ShoppingCart extends StatefulWidget {
 }
 
 class _ShoppingCartState extends State<ShoppingCart> {
+  final DeliveryService _service = DeliveryService();
   @override
   Widget build(BuildContext context) {
     return Consumer<Cart>(
@@ -152,12 +155,21 @@ class _ShoppingCartState extends State<ShoppingCart> {
                   ],
                 ),
               ),
-              solidButton(context, 'Checkout', (){}, false)
+              solidButton(context, 'Checkout', (){
+                _checkout('12 Dalriada Court', 'Tesco', value.cart, value.calculateTotalAmount());
+              }, value.cart.isNotEmpty)
             ],
           ),
         ),
       ),
     );
+  }
+
+  void _checkout(String setAddress, String chosenStore, Map<Product, int> products, String amount) async{
+    await _service.openDelivery(setAddress, chosenStore, products, amount);
+    Navigator.of(context).pushReplacement(
+        pageAnimationFromTopToBottom(const Home()));
+    showToast(text: 'Delivery Confirmed');
   }
 
 }

@@ -1,5 +1,4 @@
 
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -7,9 +6,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:overlapd/deliveries/add_delivery_details.dart';
 import 'package:overlapd/deliveries/delivery_service.dart';
 import 'package:overlapd/utilities/toast.dart';
+import '../stores/groceryRange.dart';
 import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/widgets.dart';
 import 'package:overlapd/utilities/homeUtilities.dart';
+import 'package:overlapd/stores/range.dart';
 
 class Home extends StatefulWidget {
   static const id = 'home_page';
@@ -27,6 +28,7 @@ class _HomeState extends State<Home> {
   late final String _UID = _auth.getUserId();
   String? firstName;
   Position? currentPosition;
+  MapRange range = MapRange();
   @override
   void initState() {
     // TODO: implement initState
@@ -38,55 +40,135 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      drawer:buildDrawer(context, 'Ade Bayo'),
-      appBar: AppBar(
-        automaticallyImplyLeading: true,
-        backgroundColor: Colors.white,
-        centerTitle: false,
-        elevation: 0,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Home',
-              style: Theme.of(context).textTheme.displayMedium,
-            ),
-            IconButton(
-              icon: const Icon(Icons.logout_outlined), // You can replace this with your preferred icon
-              onPressed: () {
-                _signOut();
-              },
-            ),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        drawer:buildDrawer(context, 'Ade Bayo'),
+        appBar: AppBar(
+          automaticallyImplyLeading: true,
+          backgroundColor: Colors.white,
+          centerTitle: false,
+          elevation: 0,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Home',
+                style: Theme.of(context).textTheme.displayMedium,
+              ),
+              IconButton(
+                icon: const Icon(Icons.logout_outlined), // You can replace this with your preferred icon
+                onPressed: () {
+                  _signOut();
+                },
+              ),
 
-          ],
+            ],
+          ),
+        ),
+        backgroundColor: Colors.white,
+        body: Center(
+            child:Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: Column(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            height: 70,
+                            decoration: BoxDecoration(
+                              borderRadius:  BorderRadius.circular(20),
+                            ),
+                            child: TabBar(
+                              dividerColor: Colors.transparent,
+                              indicatorSize: TabBarIndicatorSize.tab,
+                              indicatorWeight: 4.0,
+                              indicator: BoxDecoration(
+                                color: Colors.black54,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+
+                                labelColor: Colors.white,
+                                tabs: const [
+                                  Tab(child: Text('Order', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold))),
+                                  Tab(child: Text('Deliver', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold))),
+                                ]
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 5,
+                          child: TabBarView(
+                            children: [
+                              Column(
+                                children: [
+                                  selectStoreTile(context, 'supervalu.png', range.supervaluGroceryRange),
+                                  selectStoreTile(context, 'tesco.png', range.tescoGroceryRange),
+                                ],
+                              ),
+                              _buildList()
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  Expanded(flex:5, child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20)
+                        ),
+                      child: const Text('Recent Activity')
+                      ),
+                  )
+                  ),
+                  Expanded(flex:1, child: _requestDeliveryButton())
+                ],
+              ),
+            )
         ),
       ),
-      backgroundColor: Colors.white,
-      body: Center(
-          child:Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                Expanded(flex:5, child: _buildList()),
-                Expanded(flex:5, child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                          color: const Color(0xFF21D19F).withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(20)
-                      ),
-                    child: const Center(
-                      child: Text('Recent Activity'),
-                    )
-                    ),
-                )
-                ),
-                Expanded(flex:1, child: _requestDeliveryButton())
-              ],
+    );
+  }
+
+  GestureDetector selectStoreTile(
+      BuildContext context,
+      String imageName,
+      Map<String, Map<String, Stream<QuerySnapshot>>> range
+      ) {
+    return GestureDetector(
+      onTap: (){
+        Navigator.pushReplacement(
+          context,
+          pageAnimationrl(Range(groceryRange: range)),
+        );
+        },
+      child: Column(
+        children: [
+          SizedBox(
+            height: 70,
+            width: MediaQuery.of(context).size.width,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image(image: AssetImage('assets/storeLogos/$imageName')),
+                  const Icon(Icons.arrow_forward_ios_outlined)
+                ],
+              ),
             ),
-          )
+          ),
+          const Divider(thickness: 1)
+        ],
       ),
     );
   }

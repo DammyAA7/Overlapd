@@ -25,6 +25,24 @@ class MapRange{
 
       }
     };
+
+    supervaluGroceryRange = {
+      'Fruits & Vegetables' : {
+        'Fruit': streamTesco('Pets', 'Cats&Kitten'),
+        'Vegetables': streamTesco('Pets', 'Cats&Kitten'),
+        'Potatoes': streamTesco('Pets', 'Cats&Kitten'),
+        'Salads': streamTesco('Pets', 'Cats&Kitten'),
+        'Herbs': streamTesco('Pets', 'Cats&Kitten'),
+        'Fresh Flowers': streamTesco('Pets', 'Cats&Kitten')
+      },
+      'Bakery': {
+        'Bread': streamTesco('Pets', 'Cats&Kitten'),
+        'Fresh In Store Bakery':streamTesco('Pets', 'Cats&Kitten'),
+        'Packaged Cakes & Treats': streamTesco('Pets', 'Cats&Kitten')
+      }
+
+    };
+
   }
 
   Stream<QuerySnapshot> streamTesco(String document, String subCollection) {
