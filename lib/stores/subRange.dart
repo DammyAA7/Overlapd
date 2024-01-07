@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:overlapd/stores/productListPage.dart';
 import 'package:overlapd/stores/range.dart';
+import 'package:overlapd/stores/shoppingCart.dart';
 import '../utilities/widgets.dart';
 import 'groceryRange.dart';
 
@@ -40,6 +41,15 @@ class _SubRangeState extends State<SubRange> {
                 style: Theme.of(context).textTheme.displayMedium,
               ),
             ),
+            const Spacer(),
+            IconButton(
+                onPressed: (){
+                  Navigator.push(
+                      context,
+                      pageAnimationFromBottomToTop(const ShoppingCart())
+                  );
+                },
+                icon: const Icon(Icons.shopping_cart_rounded)),
           ],
         ),
       ),

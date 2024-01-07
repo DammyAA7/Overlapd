@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF21D19F)),
-        fontFamily: 'Darker Grotesque',
+        fontFamily: 'Cabin',
         textTheme: const TextTheme(
           labelLarge: TextStyle(fontSize: 18),
           displayMedium: TextStyle(fontSize: 35.0),

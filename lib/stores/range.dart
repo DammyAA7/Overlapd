@@ -44,15 +44,14 @@ class _RangeState extends State<Range> {
               ),
             ),
             const Spacer(),
-            MaterialButton(
+            IconButton(
               onPressed: (){
                 Navigator.push(
                     context,
                     pageAnimationFromBottomToTop(const ShoppingCart())
                 );
               },
-              child: const Icon(Icons.shopping_cart_rounded),
-            ),
+                icon: const Icon(Icons.shopping_cart_rounded)),
           ],
         ),
       ),

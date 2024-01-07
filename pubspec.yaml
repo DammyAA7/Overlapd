@@ -55,6 +55,7 @@ dependencies:
   hive_flutter: ^1.1.0
   image_picker: ^1.0.5
   flutter_slidable: ^3.0.1
+  flutter_stripe: ^10.0.0
 
 dev_dependencies:
   flutter_test:
@@ -99,7 +100,7 @@ flutter:
   fonts:
      - family: Darker Grotesque
        fonts:
-       - asset: assets/fonts/Darker_Grotesque/DarkerGrotesque-Medium.ttf
+       - asset: assets/fonts/Cabin/Cabin_Condensed-Medium.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

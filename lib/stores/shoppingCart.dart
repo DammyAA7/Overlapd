@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:overlapd/stores/checkout.dart';
 import 'package:provider/provider.dart';
 import '../deliveries/delivery_service.dart';
 import '../screens/home.dart';
@@ -22,29 +23,26 @@ class _ShoppingCartState extends State<ShoppingCart> {
       builder: (context, value, child) => Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title:  Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              IconButton(
-                onPressed: () {
-                  // Navigate to the home page with a fade transition
-                  Navigator.pop(
-                      context);
-                },
-                icon: const Icon(Icons.arrow_back_ios_new_rounded),
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: Text(
-                  'Shopping Cart',
-                  style: Theme.of(context).textTheme.displayMedium,
-                ),
-              ),
-            ],
+          leading: IconButton(
+            onPressed: () {
+              // Navigate to the home page with a fade transition
+              Navigator.pop(
+                  context);
+            },
+            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          ),
+          centerTitle: true,
+          title:  Text(
+            'Cart',
+            style: Theme.of(context).textTheme.displayMedium,
           ),
         ),
-        body: Padding(
+        body: value.cart.isEmpty ? const Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Align(
+            alignment: Alignment.center,
+              child: Text('Shopping cart is empty')),
+        ) : Padding(
           padding: const EdgeInsets.all(10.0),
           child: Column(
             children: [
@@ -136,7 +134,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                               ),
                             ),
                             const Divider(
-                              thickness: 2,
+                              thickness: 1,
                             )
                           ],
                         );
@@ -144,7 +142,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                   ),
                 ),
               ),
-              const Divider(height: 1),
+              const Divider(thickness: 1),
               SizedBox(
                 height: 50,
                 width: MediaQuery.of(context).size.width,
@@ -155,8 +153,12 @@ class _ShoppingCartState extends State<ShoppingCart> {
                   ],
                 ),
               ),
-              solidButton(context, 'Checkout', (){
-                _checkout('12 Dalriada Court', 'Tesco', value.cart, value.calculateTotalAmount());
+              solidButton(context, 'Continue to Checkout', (){
+                //_checkout('12 Dalriada Court', 'Tesco', value.cart, value.calculateTotalAmount());
+                Navigator.push(
+                    context,
+                    pageAnimationFromBottomToTop(const Checkout())
+                );
               }, value.cart.isNotEmpty)
             ],
           ),
