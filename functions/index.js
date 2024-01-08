@@ -1,20 +1,26 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+const functions = require("firebase-functions");
 
-const {onRequest} = require("firebase-functions/v2/https");
-const logger = require("firebase-functions/logger");
-const
+const stripe = require('stripe')('pk_test_51LGj6tFS2FZdmPkQgjFVjTFGhSMxHdPkWHHT4SKRXODBZ5YUovBqZsrNLh4LlF4NAgSYTd5viwuqgOOXBLtEewym00Z2Xl2VbQ');
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: 2000,
+      currency: 'eur',
+      capture_method: 'manual',
+      automatic_payment_methods: {
+        enabled: true,
+      },
+    }, function (error, paymentIntent){
+        if(error !=null){
+            res.json({"error":error});
+        }else{
+            res.json({
+                paymentIntent: paymentIntent.client_secret,
+                paymentIntentData: paymentIntent,
+                amount: 2000,
+                currency: 'eur'
+            });
+        }
+    });
+});
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
