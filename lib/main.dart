@@ -1,6 +1,7 @@
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:hive/hive.dart';
 import 'package:overlapd/stores/groceryRange.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,8 @@ Future main() async{
   final FirebaseAuthService _auth = FirebaseAuthService();
   bool isLoggedIn = await _auth.isLoggedIn();
   await Hive.initFlutter();
+  Stripe.publishableKey = "pk_test_51LGj6tFS2FZdmPkQgjFVjTFGhSMxHdPkWHHT4SKRXODBZ5YUovBqZsrNLh4LlF4NAgSYTd5viwuqgOOXBLtEewym00Z2Xl2VbQ";
+  Stripe.instance.applySettings();
   runApp(ChangeNotifierProvider(
       create: (context) => Cart(),
       child: MyApp(isLoggedIn: isLoggedIn)

@@ -132,6 +132,16 @@ class Cart extends ChangeNotifier{
     return formattedTotalAmount;
   }
 
+  String stripEuroSign(String amountWithEuroSign) {
+    // Check if the string contains the Euro sign
+    if (amountWithEuroSign.startsWith('€')) {
+      // Strip the Euro sign and return the rest of the string
+      return amountWithEuroSign.substring(1);
+    }
+    // If the Euro sign is not found, return the original string
+    return amountWithEuroSign;
+  }
+
 }
 
 

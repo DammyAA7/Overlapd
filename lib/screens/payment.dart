@@ -1,6 +1,9 @@
+
+
 import 'package:flutter/material.dart';
 import '../utilities/widgets.dart';
 import 'home.dart';
+
 
 class Payment extends StatefulWidget {
   static const id = 'payment_page';
@@ -34,8 +37,10 @@ class _PaymentState extends State<Payment> {
       ),
       bottomSheet: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: solidButton(context, 'Add Payment Card', (){}, true),
+        child: solidButton(context, 'Add Payment Card', () async{
+        }, true),
       ),
     );
   }
+
 }

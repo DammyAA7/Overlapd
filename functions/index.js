@@ -1,10 +1,10 @@
 const functions = require("firebase-functions");
 
-const stripe = require('stripe')('pk_test_51LGj6tFS2FZdmPkQgjFVjTFGhSMxHdPkWHHT4SKRXODBZ5YUovBqZsrNLh4LlF4NAgSYTd5viwuqgOOXBLtEewym00Z2Xl2VbQ');
+const stripe = require('stripe')('sk_test_51LGj6tFS2FZdmPkQC27Hciu45hp1UdzyvPJZ9KNJBmeAOfxuuZh7YEmbyf1lmtzUbw8DuNHt2myibSVkcsgFuHUJ00K9VcbjnB');
 
 exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: 2000,
+      amount: parseInt(req.body.amount),
       currency: 'eur',
       capture_method: 'manual',
       automatic_payment_methods: {
@@ -17,7 +17,7 @@ exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
             res.json({
                 paymentIntent: paymentIntent.client_secret,
                 paymentIntentData: paymentIntent,
-                amount: 2000,
+                amount: req.body.amount,
                 currency: 'eur'
             });
         }
