@@ -177,8 +177,10 @@ class _CheckoutState extends State<Checkout> {
       await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
             paymentIntentClientSecret: jsonResponse['paymentIntent'],
+            customerId:  jsonResponse['customer'],
+            customerEphemeralKeySecret: jsonResponse['ephemeralKey'],
             merchantDisplayName: 'Overlap Delivery',
-            billingDetailsCollectionConfiguration: const BillingDetailsCollectionConfiguration(attachDefaultsToPaymentMethod: true, address: AddressCollectionMode.full)
+            billingDetailsCollectionConfiguration: const BillingDetailsCollectionConfiguration(attachDefaultsToPaymentMethod: true, address: AddressCollectionMode.automatic)
           )
       );
       await Stripe.instance.presentPaymentSheet();
