@@ -7,6 +7,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/deliveryDetailsUtilities.dart';
 import '../utilities/networkUtilities.dart';
 import '../utilities/toast.dart';
@@ -21,6 +22,7 @@ class Checkout extends StatefulWidget {
 }
 
 class _CheckoutState extends State<Checkout> {
+  final FirebaseAuthService _auth = FirebaseAuthService();
   String? setAddress;
   Position? currentLocation;
   @override
@@ -157,22 +159,23 @@ class _CheckoutState extends State<Checkout> {
           bottomSheet: Padding(
             padding: const EdgeInsets.all(8.0),
             child: solidButton(context, 'Checkout', () async{
-              await initPayment((double.parse(value.stripEuroSign(value.calculateTotalAmount())) * 100).toInt().toString());
+              await initPayment((double.parse(value.stripEuroSign(value.calculateTotalAmount())) * 100).toInt().toString(), _auth.getUsername(), context);
             }, true),
           ),
       ),
     );
   }
 
-  Future<void> initPayment(String amount) async{
-    print(amount);
+  Future<void> initPayment(String amount, String email, BuildContext context) async{
     try{
       final response = await http.post(Uri.parse(
           'https://us-central1-overlapd-13268.cloudfunctions.net/StripePaymentIntent'),
         body: {
-          'amount': amount
+          'amount': amount,
+          'email': email
         });
 
+      print(response.body);
       final jsonResponse = jsonDecode(response.body);
       await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
@@ -180,13 +183,12 @@ class _CheckoutState extends State<Checkout> {
             customerId:  jsonResponse['customer'],
             customerEphemeralKeySecret: jsonResponse['ephemeralKey'],
             merchantDisplayName: 'Overlap Delivery',
-            billingDetailsCollectionConfiguration: const BillingDetailsCollectionConfiguration(attachDefaultsToPaymentMethod: true, address: AddressCollectionMode.automatic)
+            billingDetailsCollectionConfiguration: const BillingDetailsCollectionConfiguration(attachDefaultsToPaymentMethod: true, address: AddressCollectionMode.full, name: CollectionMode.always)
           )
       );
       await Stripe.instance.presentPaymentSheet();
     } catch(e){
       print(e);
-      showToast(text: '{$e}');
     }
   }
 

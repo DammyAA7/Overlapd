@@ -58,9 +58,9 @@ class FirebaseAuthService{
     return (user?.uid)!;
   }
 
-  Future<String?> getUsername() async {
+  String getUsername() {
     User? user = _auth.currentUser;
-    return user?.email;
+    return (user?.email)!;
   }
 
 
