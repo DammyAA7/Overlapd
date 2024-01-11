@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +13,8 @@ import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/widgets.dart';
 import 'package:overlapd/utilities/homeUtilities.dart';
 import 'package:overlapd/stores/range.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
 
 class Home extends StatefulWidget {
   static const id = 'home_page';
@@ -111,7 +115,19 @@ class _HomeState extends State<Home> {
                                   selectStoreTile(context, 'tesco.png', range.tescoGroceryRange),
                                 ],
                               ),
-                              _buildList()
+                              true ? solidButton(context, 'Verify Identity', () async{
+                                try{
+                                  final response = await http.post(Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeIdentity'));
+                                  final jsonResponse = jsonDecode(response.body);
+                                  await FirebaseFirestore.instance
+                                      .collection('users')
+                                      .doc(_UID)
+                                      .set({'Stripe Identity Id': jsonResponse['id']}, SetOptions(merge: true));
+                                  launchUrl(Uri.parse(jsonResponse['url']), mode: LaunchMode.inAppBrowserView);
+                                } catch(e) {
+                                  print(e);
+                                }
+                              }, true) : _buildList()
                             ],
                           ),
                         )

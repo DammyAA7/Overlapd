@@ -57,6 +57,7 @@ dependencies:
   flutter_slidable: ^3.0.1
   flutter_stripe: ^10.0.0
   http: ^1.1.2
+  url_launcher: ^6.2.3
 
 dev_dependencies:
   flutter_test:

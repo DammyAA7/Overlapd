@@ -175,7 +175,6 @@ class _CheckoutState extends State<Checkout> {
           'email': email
         });
 
-      print(response.body);
       final jsonResponse = jsonDecode(response.body);
       await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(

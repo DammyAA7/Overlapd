@@ -47,3 +47,31 @@ exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
     });
 });
 
+
+exports.StripeIdentity = functions.https.onRequest(async (req, res) => {
+    try {
+        const verificationSession = await stripe.identity.verificationSessions.create({
+            type: 'document',
+            options: {
+                document: {
+                    allowed_types: ['passport','driving_license'],
+                    require_live_capture: true,
+                    require_matching_selfie: true,
+                }
+            }
+        });
+
+        res.json({
+            id: verificationSession.id,
+            url: verificationSession.url
+        });
+    } catch (error) {
+        console.error("Error creating verification session:", error);
+        res.status(500).json({
+            error: "Error creating verification session",
+        });
+    }
+});
+
+
+
