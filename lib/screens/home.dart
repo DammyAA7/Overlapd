@@ -1,6 +1,4 @@
-
 import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -115,19 +113,52 @@ class _HomeState extends State<Home> {
                                   selectStoreTile(context, 'tesco.png', range.tescoGroceryRange),
                                 ],
                               ),
-                              true ? solidButton(context, 'Verify Identity', () async{
-                                try{
-                                  final response = await http.post(Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeIdentity'));
-                                  final jsonResponse = jsonDecode(response.body);
-                                  await FirebaseFirestore.instance
-                                      .collection('users')
-                                      .doc(_UID)
-                                      .set({'Stripe Identity Id': jsonResponse['id']}, SetOptions(merge: true));
-                                  launchUrl(Uri.parse(jsonResponse['url']), mode: LaunchMode.inAppBrowserView);
-                                } catch(e) {
-                                  print(e);
-                                }
-                              }, true) : _buildList()
+                              true ? Column(
+                                children: [
+                                  solidButton(context, 'Verify Identity', () async{
+                                    try{
+                                      final response = await http.post(Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeIdentity'));
+                                      final jsonResponse = jsonDecode(response.body);
+                                      await FirebaseFirestore.instance
+                                          .collection('users')
+                                          .doc(_UID)
+                                          .set({'Stripe Identity Id': jsonResponse['id']}, SetOptions(merge: true));
+                                      launchUrl(Uri.parse(jsonResponse['url']), mode: LaunchMode.inAppBrowserView);
+                                    } catch(e) {
+                                      print(e);
+                                    }
+                                  }, true),
+                                  const SizedBox(height: 10),
+                                  solidButton(context, 'Create Stripe Express Account', () async{
+                                    try{
+                                      final accountResponse = await http.post(
+                                          Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateConnectAccount'),
+                                          body: {
+                                            'uid': _UID,
+                                            'email': _auth.getUsername()
+                                          }
+                                      );
+                                      final jsonAccountResponse = jsonDecode(accountResponse.body);
+                                      print(jsonAccountResponse);
+                                      await FirebaseFirestore.instance
+                                          .collection('users')
+                                          .doc(_UID)
+                                          .set({'Stripe Account Id': jsonAccountResponse['id']}, SetOptions(merge: true));
+                                      final accountLinkResponse = await http.post(
+                                          Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateAccountLink'),
+                                          body: {
+                                            'account': jsonAccountResponse['id'],
+                                          }
+                                      );
+                                      final jsonAccountLinkResponse = jsonDecode(accountLinkResponse.body);
+                                      print(jsonAccountLinkResponse);
+                                      launchUrl(Uri.parse(jsonAccountLinkResponse['url']), mode: LaunchMode.inAppBrowserView);
+                                    } catch(e) {
+                                      print(e);
+                                    }
+                                  }, true)
+                                ],
+                              ) : _buildList()
                             ],
                           ),
                         )

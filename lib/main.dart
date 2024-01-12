@@ -23,7 +23,7 @@ Future main() async{
   final FirebaseAuthService _auth = FirebaseAuthService();
   bool isLoggedIn = await _auth.isLoggedIn();
   await Hive.initFlutter();
-  Stripe.publishableKey = "pk_test_51LGj6tFS2FZdmPkQgjFVjTFGhSMxHdPkWHHT4SKRXODBZ5YUovBqZsrNLh4LlF4NAgSYTd5viwuqgOOXBLtEewym00Z2Xl2VbQ";
+  Stripe.publishableKey = "pk_test_51OWmrwIaruu0MDtu9f0fOLYUdaDsxU6FHsV2TtXLw6CstWMCKPwZhhldZEWSmsStYYTYpfeRfzGVAZ9tfLKODOYt00gDUZP4EI";
   Stripe.instance.applySettings();
   runApp(ChangeNotifierProvider(
       create: (context) => Cart(),
