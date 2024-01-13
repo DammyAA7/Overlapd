@@ -94,6 +94,10 @@ exports.StripeCreateConnectAccount = functions.https.onRequest(async (req, res) 
                 },
             },
             default_currency: 'eur',
+            business_profile:{
+                mcc: '4215',
+                product_description: 'Deliver items to client on deliverers existing route'
+            },
             metadata: {
                 email : req.body.email,
                 uid: req.body.uid,

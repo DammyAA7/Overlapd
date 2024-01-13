@@ -27,7 +27,7 @@ class _SubRangeState extends State<SubRange> {
           children: [
             IconButton(
               onPressed: () {
-                Navigator.pushReplacement(
+                Navigator.pop(
                   context,
                   pageAnimationlr(Range(groceryRange: range.tescoGroceryRange)),
                 );

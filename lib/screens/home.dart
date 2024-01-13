@@ -109,8 +109,8 @@ class _HomeState extends State<Home> {
                             children: [
                               Column(
                                 children: [
-                                  selectStoreTile(context, 'supervalu.png', range.supervaluGroceryRange),
-                                  selectStoreTile(context, 'tesco.png', range.tescoGroceryRange),
+                                  selectStoreTile(context, 'supervalu.png', range.supervaluGroceryRange, 'SuperValu'),
+                                  selectStoreTile(context, 'tesco.png', range.tescoGroceryRange, 'Tesco'),
                                 ],
                               ),
                               true ? Column(
@@ -188,13 +188,14 @@ class _HomeState extends State<Home> {
   GestureDetector selectStoreTile(
       BuildContext context,
       String imageName,
-      Map<String, Map<String, Stream<QuerySnapshot>>> range
+      Map<String, Map<String, Stream<QuerySnapshot>>> range,
+      String storeName
       ) {
     return GestureDetector(
       onTap: (){
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
-          pageAnimationrl(Range(groceryRange: range)),
+          pageAnimationrl(Range(groceryRange: range, storeName: storeName)),
         );
         },
       child: Column(

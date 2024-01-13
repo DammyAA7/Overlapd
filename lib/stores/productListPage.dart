@@ -202,14 +202,20 @@ class _MeatState extends State<Meat> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Image.network(data['imageUrl'].toString()),
-                Expanded(child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(data['title'].toString(), overflow: TextOverflow.visible, maxLines: 2,),
-                    Text(data['price'].toString()),
-                    Text(data['pricePer'].toString())
-                  ],
+                Expanded(
+                    flex: 1,
+                    child: Image.network(data['imageUrl'].toString())),
+                Expanded(
+                    flex: 2,
+                    child:
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Text(data['title'].toString(), overflow: TextOverflow.visible, maxLines: 2, style: Theme.of(context).textTheme.labelLarge,),
+                        Text(data['price'].toString(), style: Theme.of(context).textTheme.labelLarge,),
+                        Text(data['pricePer'].toString(), style: Theme.of(context).textTheme.labelMedium)
+                      ],
                 )
                 ),
               ],

@@ -9,7 +9,8 @@ import '../utilities/widgets.dart';
 
 class Range extends StatefulWidget {
   final Map<String, Map<String, Stream<QuerySnapshot>>> groceryRange;
-  const Range({super.key, required this.groceryRange});
+  final String? storeName;
+  const Range({super.key, required this.groceryRange, this.storeName});
 
   @override
   State<Range> createState() => _RangeState();
@@ -39,7 +40,7 @@ class _RangeState extends State<Range> {
             Align(
               alignment: Alignment.center,
               child: Text(
-                'Tesco',
+                widget.storeName!,
                 style: Theme.of(context).textTheme.displayMedium,
               ),
             ),
