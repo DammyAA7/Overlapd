@@ -30,9 +30,9 @@ exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
       automatic_payment_methods: {
         enabled: true,
       },
-      application_fee_amount: 599,
       transfer_data:{
-        destination: 'acct_1OXtFrI6RzzbHE2P'
+        amount: 599,
+        destination: 'acct_1OYD9AIejXw0Dd0j'
       }
     }, function (error, paymentIntent){
         if(error !=null){
