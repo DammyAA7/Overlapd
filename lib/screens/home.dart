@@ -28,13 +28,14 @@ class _HomeState extends State<Home> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   final DeliveryService _service = DeliveryService();
   late final String _UID = _auth.getUserId();
-  String? firstName;
+  String? name;
   Position? currentPosition;
   MapRange range = MapRange();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    _loadUserData();
     _buildList();
   }
 
@@ -46,7 +47,7 @@ class _HomeState extends State<Home> {
       length: 2,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        drawer:buildDrawer(context, 'Ade Bayo'),
+        drawer:buildDrawer(context, name ?? 'Name'),
         appBar: AppBar(
           automaticallyImplyLeading: true,
           backgroundColor: Colors.white,
@@ -477,6 +478,26 @@ void _cancelDelivery() async{
     print('No placed deliveries found for user $_UID');
   }
 }
+
+  Future<void> _loadUserData() async {
+    try {
+      // Fetch user document from Firestore
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_UID)
+          .get();
+
+      if (userSnapshot.exists) {
+        // If user document exists, update the firstName state
+        setState(() {
+          name = userSnapshot['First Name'] + ' ' + userSnapshot['Last Name'];
+
+        });
+      }
+    } catch (e) {
+      print('Error loading user data: $e');
+    }
+  }
 
 
 }

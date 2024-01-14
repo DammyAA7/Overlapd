@@ -23,38 +23,31 @@ class _RangeState extends State<Range> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title:  Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            IconButton(
-              onPressed: () {
-                // Navigate to the home page with a fade transition
-                Navigator.pushReplacement(
-                  context,
-                  pageAnimationlr(const Home()),
-                );
-              },
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: Text(
-                widget.storeName!,
-                style: Theme.of(context).textTheme.displayMedium,
-              ),
-            ),
-            const Spacer(),
-            IconButton(
+        centerTitle: true,
+        leading: IconButton(
+          onPressed: () {
+            // Navigate to the home page with a fade transition
+            Navigator.pushReplacement(
+              context,
+              pageAnimationlr(const Home()),
+            );
+          },
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        ),
+        title:  Text(
+          widget.storeName!,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        actions: [
+          IconButton(
               onPressed: (){
                 Navigator.push(
                     context,
                     pageAnimationFromBottomToTop(const ShoppingCart())
                 );
               },
-                icon: const Icon(Icons.shopping_cart_rounded)),
-          ],
-        ),
+              icon: const Icon(Icons.shopping_cart_rounded)),
+        ],
       ),
       body: ListView(
         children: widget.groceryRange.keys.map((key) {
@@ -62,7 +55,7 @@ class _RangeState extends State<Range> {
             onTap: (){
               Navigator.push(
                 context,
-                pageAnimationrl(SubRange(subRange: widget.groceryRange[key]!)));
+                pageAnimationrl(SubRange(subRange: widget.groceryRange[key]!, categoryName: key,)));
             },
             child: Column(
               children: [

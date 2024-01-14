@@ -197,7 +197,7 @@ class _MeatState extends State<Meat> {
             ],
           ),
           child: SizedBox(
-            height: 150,
+            height: 100,
             width: MediaQuery.of(context).size.width,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -213,8 +213,15 @@ class _MeatState extends State<Meat> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Text(data['title'].toString(), overflow: TextOverflow.visible, maxLines: 2, style: Theme.of(context).textTheme.labelLarge,),
-                        Text(data['price'].toString(), style: Theme.of(context).textTheme.labelLarge,),
-                        Text(data['pricePer'].toString(), style: Theme.of(context).textTheme.labelMedium)
+                        Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children:[
+                              Text(data['price'].toString(), style: Theme.of(context).textTheme.labelLarge,),
+                              const SizedBox(width: 5),
+                              Text(data['pricePer'].toString(), style: Theme.of(context).textTheme.labelMedium)
+                          ]
+                        ),
+
                       ],
                 )
                 ),

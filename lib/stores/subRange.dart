@@ -8,7 +8,8 @@ import 'groceryRange.dart';
 
 class SubRange extends StatefulWidget {
   final Map<String, Stream<QuerySnapshot>> subRange;
-  const SubRange({super.key, required this.subRange});
+  final String categoryName;
+  const SubRange({super.key, required this.subRange, required this.categoryName});
 
   @override
   State<SubRange> createState() => _SubRangeState();
@@ -21,37 +22,30 @@ class _SubRangeState extends State<SubRange> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title:  Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            IconButton(
-              onPressed: () {
-                Navigator.pop(
-                  context,
-                  pageAnimationlr(Range(groceryRange: range.tescoGroceryRange)),
+        centerTitle: true,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(
+              context,
+              pageAnimationlr(Range(groceryRange: range.tescoGroceryRange)),
+            );
+          },
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        ),
+        title:  Text(
+          widget.categoryName,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        actions: [
+          IconButton(
+              onPressed: (){
+                Navigator.push(
+                    context,
+                    pageAnimationFromBottomToTop(const ShoppingCart())
                 );
               },
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: Text(
-                'Sub Range',
-                style: Theme.of(context).textTheme.displayMedium,
-              ),
-            ),
-            const Spacer(),
-            IconButton(
-                onPressed: (){
-                  Navigator.push(
-                      context,
-                      pageAnimationFromBottomToTop(const ShoppingCart())
-                  );
-                },
-                icon: const Icon(Icons.shopping_cart_rounded)),
-          ],
-        ),
+              icon: const Icon(Icons.shopping_cart_rounded)),
+        ],
       ),
       body: ListView(
         children: widget.subRange.keys.map((key) {
