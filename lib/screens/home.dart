@@ -118,12 +118,21 @@ class _HomeState extends State<Home> {
                                 children: [
                                   solidButton(context, 'Verify Identity', () async{
                                     try{
-                                      final response = await http.post(Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeIdentity'));
+                                      final response = await http.post(
+                                          Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeIdentity'),
+                                          body: {
+                                            'uid': _UID
+                                          }
+                                      );
                                       final jsonResponse = jsonDecode(response.body);
                                       await FirebaseFirestore.instance
                                           .collection('users')
                                           .doc(_UID)
                                           .set({'Stripe Identity Id': jsonResponse['id']}, SetOptions(merge: true));
+                                      await FirebaseFirestore.instance
+                                          .collection('users')
+                                          .doc(_UID)
+                                          .set({'Stripe Identity Status': jsonResponse['status']}, SetOptions(merge: true));
                                       launchUrl(Uri.parse(jsonResponse['url']), mode: LaunchMode.inAppBrowserView);
                                     } catch(e) {
                                       print(e);
