@@ -1,5 +1,6 @@
 const functions = require("firebase-functions");
 const stripe = require('stripe')('sk_test_51OWmrwIaruu0MDtuTh7GPThpzMdCA8h1Fldtd5HVnS5nPyjUdmUYuMV5kf7gQGNV1FwWMo1DCdFHo3lt45c1UjYv00vqvpo7zr');
+const admin = require('firebase-admin');
 admin.initializeApp();
 
 exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
@@ -154,22 +155,23 @@ exports.stripeWebhook = functions.https.onRequest(async (request, response) => {
               error);
           return response.sendStatus(400);
         }
+        const uid = request.body.data.object.metadata;
         switch (event.type) {
             case 'identity.verification_session.created':
-              const {uid} = request.body.data.object.metadata;
-              await _updateStatus(uid);
+
+              await _updateStatus(uid,"created");
               break;
             case 'identity.verification_session.processing':
-              const identityVerificationSessionProcessing = event.data.object;
-              // Then define and call a function to handle the event identity.verification_session.processing
+
+              await _updateStatus(uid, "processing");
               break;
             case 'identity.verification_session.requires_input':
-              const identityVerificationSessionRequiresInput = event.data.object;
-              // Then define and call a function to handle the event identity.verification_session.requires_input
+
+              await _updateStatus(uid, "requires_input");
               break;
             case 'identity.verification_session.verified':
-              const identityVerificationSessionVerified = event.data.object;
-              // Then define and call a function to handle the event identity.verification_session.verified
+
+              await _updateStatus(uid, "verified");
               break;
             // ... handle other event types
             default:
@@ -187,14 +189,11 @@ exports.stripeWebhook = functions.https.onRequest(async (request, response) => {
     });
 
 
-async function _savePurchase(customerId, productId) {
+async function _savePurchase(uid, status) {
   const product = await _getProduct(productId);
   await admin
       .firestore()
-      .collection("purchases").add({
-        customerId,
-        product,
-        datePurchased: admin.firestore.FieldValue.serverTimestamp(),
-      });
+      .collection("users")
+      .document(uid)
+      .set({'Stripe Identity Status': status}, {merge: true});
 }
-

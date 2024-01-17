@@ -129,10 +129,6 @@ class _HomeState extends State<Home> {
                                           .collection('users')
                                           .doc(_UID)
                                           .set({'Stripe Identity Id': jsonResponse['id']}, SetOptions(merge: true));
-                                      await FirebaseFirestore.instance
-                                          .collection('users')
-                                          .doc(_UID)
-                                          .set({'Stripe Identity Status': jsonResponse['status']}, SetOptions(merge: true));
                                       launchUrl(Uri.parse(jsonResponse['url']), mode: LaunchMode.inAppBrowserView);
                                     } catch(e) {
                                       print(e);
