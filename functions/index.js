@@ -1,5 +1,6 @@
 const functions = require("firebase-functions");
 const stripe = require('stripe')('sk_test_51OWmrwIaruu0MDtuTh7GPThpzMdCA8h1Fldtd5HVnS5nPyjUdmUYuMV5kf7gQGNV1FwWMo1DCdFHo3lt45c1UjYv00vqvpo7zr');
+const endpointSecret = 'whsec_acOhx1XWucP3CYTq91fq3ceo85XIMNLo';
 const admin = require('firebase-admin');
 admin.initializeApp();
 
@@ -141,59 +142,27 @@ exports.StripeCreateAccountLink = functions.https.onRequest(async (req, res) => 
     }
 });
 
-exports.stripeWebhook = functions.https.onRequest(async (request, response) => {
+exports.StripeWebhook = functions.https.onRequest(async (req, res) => {
+      const sig = req.headers['stripe-signature'];
+      const payloadData = req.rawBody;
       try {
         let event;
         try {
-          event = stripe.webhooks.constructEvent(
-              request.rawBody,
-              request.headers["stripe-signature"],
-              "whsec_6f2773184596d291d5405f597ba7bcb3453a9ffbe335e8a9be1d45b209b28ec1",
-          );
-        } catch (error) {
-          functions.logger.info("stripe webhook verification error",
-              error);
-          return response.sendStatus(400);
-        }
-        const uid = request.body.data.object.metadata;
-        switch (event.type) {
-            case 'identity.verification_session.created':
+            event = stripe.webhooks.constructEvent(payloadData, sig, endpointSecret);
+          } catch (err) {
+            return response.status(400).send(`Webhook Error: ${err.message}`);
 
-              await _updateStatus(uid,"created");
-              break;
-            case 'identity.verification_session.processing':
-
-              await _updateStatus(uid, "processing");
-              break;
-            case 'identity.verification_session.requires_input':
-
-              await _updateStatus(uid, "requires_input");
-              break;
-            case 'identity.verification_session.verified':
-
-              await _updateStatus(uid, "verified");
-              break;
-            // ... handle other event types
-            default:
-              console.log(`Unhandled event type ${event.type}`);
           }
-        if (event.type === "payment_intent.succeeded") {
-          const {customerId, productId} = request.body.data.object.metadata;
-          await _savePurchase(customerId, productId);
-        }
-        return response.sendStatus(200);
+        const uid = event.data.object.metadata.uid;
+        await admin.firestore().collection("users").document(uid).set({'Stripe Identity Status': 'works'});
+
+        return res.sendStatus(200);
       } catch (error) {
-        functions.logger.error("stripe webhook error", error);
-        return response.sendStatus(400);
+        return res.sendStatus(400).send(`Webhook Error: ${error.message}`);
       }
     });
 
 
-async function _savePurchase(uid, status) {
-  const product = await _getProduct(productId);
-  await admin
-      .firestore()
-      .collection("users")
-      .document(uid)
-      .set({'Stripe Identity Status': status}, {merge: true});
+async function _updateStatus(uid, status) {
+  await admin.firestore().collection("users").document(uid).set({'Stripe Identity Status': status}, {merge: true});
 }
