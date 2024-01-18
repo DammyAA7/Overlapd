@@ -149,7 +149,8 @@ class _SignUpState extends State<SignUp> {
     final json = {
       'First Name': _firstNameController.getText(),
       'Last Name': _lastNameController.getText(),
-      'Email Address': _emailController.getText()
+      'Email Address': _emailController.getText(),
+      'Stripe Identity Status': ''
     };
     await docUser.set(json);
   }

@@ -154,8 +154,31 @@ exports.StripeWebhook = functions.https.onRequest(async (req, res) => {
 
           }
         const uid = event.data.object.metadata.uid;
-        await admin.firestore().collection("users").document(uid).set({'Stripe Identity Status': 'works'});
-
+        switch (event.type) {
+            case 'identity.verification_session.canceled':
+              const identityVerificationSessionCanceled = event.data.object;
+              _updateStatus(uid, "canceled");
+              break;
+            case 'identity.verification_session.created':
+              const identityVerificationSessionCreated = event.data.object;
+              _updateStatus(uid, "created");
+              break;
+            case 'identity.verification_session.processing':
+              const identityVerificationSessionProcessing = event.data.object;
+              _updateStatus(uid, "processing");
+              break;
+            case 'identity.verification_session.requires_input':
+              const identityVerificationSessionRequiresInput = event.data.object;
+              _updateStatus(uid, "requires_input");
+              break;
+            case 'identity.verification_session.verified':
+              const identityVerificationSessionVerified = event.data.object;
+               _updateStatus(uid, "verified");
+              break;
+            // ... handle other event types
+            default:
+              console.log(`Unhandled event type ${event.type}`);
+          }
         return res.sendStatus(200);
       } catch (error) {
         return res.sendStatus(400).send(`Webhook Error: ${error.message}`);
@@ -164,5 +187,5 @@ exports.StripeWebhook = functions.https.onRequest(async (req, res) => {
 
 
 async function _updateStatus(uid, status) {
-  await admin.firestore().collection("users").document(uid).set({'Stripe Identity Status': status}, {merge: true});
+  await admin.firestore().collection("users").doc(uid).set({'Stripe Identity Status': status}, {merge: true});
 }

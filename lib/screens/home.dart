@@ -116,24 +116,7 @@ class _HomeState extends State<Home> {
                               ),
                               true ? Column(
                                 children: [
-                                  solidButton(context, 'Verify Identity', () async{
-                                    try{
-                                      final response = await http.post(
-                                          Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeIdentity'),
-                                          body: {
-                                            'uid': _UID
-                                          }
-                                      );
-                                      final jsonResponse = jsonDecode(response.body);
-                                      await FirebaseFirestore.instance
-                                          .collection('users')
-                                          .doc(_UID)
-                                          .set({'Stripe Identity Id': jsonResponse['id']}, SetOptions(merge: true));
-                                      launchUrl(Uri.parse(jsonResponse['url']), mode: LaunchMode.inAppBrowserView);
-                                    } catch(e) {
-                                      print(e);
-                                    }
-                                  }, true),
+                                  _identityStatus(),
                                   const SizedBox(height: 10),
                                   solidButton(context, 'Create Stripe Express Account', () async{
                                     try{
@@ -306,6 +289,60 @@ class _HomeState extends State<Home> {
       'declined By': FieldValue.arrayUnion([_UID]),
     });
 
+  }
+
+
+
+  Widget _identityStatus(){
+    return StreamBuilder(
+        stream: _auth.getIdentityStatus(_UID),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // If the data is still loading, return a loading indicator
+            return const CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            // If there's an error, display an error message
+            return Text('Error: ${snapshot.error}');
+          } else if (!snapshot.hasData || snapshot.data == null ) {
+            // If there is no data or the data is empty, display a message
+            return const Text('No deliveries available');
+          }else {
+            // Access the status value from the snapshot
+            String status = snapshot.data!['Stripe Identity Status'];
+
+            // Determine the button text and enable status based on the 'Stripe Identity Status'
+            String buttonText = '';
+            bool isButtonEnabled = false;
+
+            if (status == 'processing' || status == 'verified') {
+              buttonText = status;
+              isButtonEnabled = false;
+            } else {
+              buttonText = 'Verify Identity';
+              isButtonEnabled = true; // Set this to false if you want to disable the button
+            }
+
+            return solidButton(context, buttonText, () async{
+              try{
+                final response = await http.post(
+                    Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeIdentity'),
+                    body: {
+                      'uid': _UID
+                    }
+                );
+                final jsonResponse = jsonDecode(response.body);
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(_UID)
+                    .set({'Stripe Identity Id': jsonResponse['id']}, SetOptions(merge: true));
+                launchUrl(Uri.parse(jsonResponse['url']), mode: LaunchMode.inAppBrowserView);
+              } catch(e) {
+                print(e);
+              }
+            }, isButtonEnabled);
+          }
+        },
+    );
   }
   
   Widget _buildList(){
