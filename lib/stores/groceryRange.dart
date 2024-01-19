@@ -132,6 +132,31 @@ class Cart extends ChangeNotifier{
     return formattedTotalAmount;
   }
 
+  String totalAmountPlusFees() {
+    double totalAmount = 0;
+    double deliveryFees = 5.99;
+    cart.forEach((product, quantity) {
+      totalAmount += product.price * quantity;
+    });
+    totalAmount += calculateServiceFees() + deliveryFees;
+    String formattedTotalAmount = '€${totalAmount.toStringAsFixed(2)}';
+    return formattedTotalAmount;
+  }
+
+  double calculateServiceFees(){
+    double serviceFees = 0;
+    double totalAmount = 0;
+    cart.forEach((product, quantity) {
+      totalAmount += product.price * quantity;
+    });
+    serviceFees = totalAmount * 0.11;
+    if(serviceFees > 3.29){
+      serviceFees = 3.29;
+      return serviceFees;
+    }
+    return serviceFees;
+  }
+
   String stripEuroSign(String amountWithEuroSign) {
     // Check if the string contains the Euro sign
     if (amountWithEuroSign.startsWith('€')) {

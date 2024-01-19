@@ -11,6 +11,7 @@ exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
         email: req.body.email,
         limit: 1,
     });
+    const serviceCharge = Math.min(parseInt(req.body.amount) * 0.11, 329);
 
     if (customerList.data.length !== 0){
         customerId = customerList.data[0].id;
@@ -26,14 +27,14 @@ exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
     );
     const paymentIntent = await stripe.paymentIntents.create({
       customer: customerId,
-      amount: parseInt(req.body.amount) + 599,
+      amount: parseInt(req.body.amount) + 599 + serviceCharge,
       currency: 'eur',
       capture_method: 'manual',
       automatic_payment_methods: {
         enabled: true,
       },
       transfer_data:{
-        amount: 599,
+        amount: 549,
         destination: 'acct_1OYD9AIejXw0Dd0j'
       }
     }, function (error, paymentIntent){
@@ -189,3 +190,20 @@ exports.StripeWebhook = functions.https.onRequest(async (req, res) => {
 async function _updateStatus(uid, status) {
   await admin.firestore().collection("users").doc(uid).set({'Stripe Identity Status': status}, {merge: true});
 }
+
+exports.StripeAccountBalance = functions.https.onRequest(async (req, res) => {
+    try {
+        const balance = await stripe.balance.retrieve({
+          stripeAccount: 'acct_1OYD9AIejXw0Dd0j',
+        });
+        res.json({
+            balance: balance,
+        });
+    } catch (error) {
+        console.error("Error getting account balance:", error);
+        res.status(500).json({
+            error: "Error getting account balance",
+        });
+    }
+});
+

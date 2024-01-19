@@ -153,14 +153,48 @@ class _CheckoutState extends State<Checkout> {
                   'Shopping preferences',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
+                const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Subtotal:'),
+                          Text(value.calculateTotalAmount())
+                        ],
+                      ),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Delivery fees:'),
+                          Text('€5.99')
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Service fees:'),
+                          Text('€${value.calculateServiceFees().toStringAsFixed(2)}')
+                        ],
+                      ),
+                      const Divider(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Total:'),
+                          Text(value.totalAmountPlusFees())
+                        ],
+                      ),
+                      solidButton(context, 'Checkout', () async{
+                        await initPayment((double.parse(value.stripEuroSign(value.calculateTotalAmount())) * 100).toInt().toString(), _auth.getUsername(), context);
+                      }, true),
+                    ],
+                  ),
+                ),
               ],
             ),
-          ),
-          bottomSheet: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: solidButton(context, 'Checkout', () async{
-              await initPayment((double.parse(value.stripEuroSign(value.calculateTotalAmount())) * 100).toInt().toString(), _auth.getUsername(), context);
-            }, true),
           ),
       ),
     );

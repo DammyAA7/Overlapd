@@ -149,7 +149,8 @@ class _ShoppingCartState extends State<ShoppingCart> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Total: ${value.calculateTotalAmount()}', style: const TextStyle(fontSize: 30)),
+                    const Text('Total:'),
+                    Text(value.calculateTotalAmount())
                   ],
                 ),
               ),
