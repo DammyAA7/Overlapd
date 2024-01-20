@@ -31,15 +31,16 @@ class _HomeState extends State<Home> {
   String? name;
   Position? currentPosition;
   MapRange range = MapRange();
+  bool isVerified = true;
+  bool hasAccount = true;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _loadUserData();
     _buildList();
+    isIdentityVerifiedAndHasAccount();
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -114,38 +115,11 @@ class _HomeState extends State<Home> {
                                   selectStoreTile(context, 'tesco.png', range.tescoGroceryRange, 'Tesco'),
                                 ],
                               ),
-                              true ? Column(
+                              isVerified && hasAccount ? Column(
                                 children: [
                                   _identityStatus(),
                                   const SizedBox(height: 10),
-                                  solidButton(context, 'Create Stripe Express Account', () async{
-                                    try{
-                                      final accountResponse = await http.post(
-                                          Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateConnectAccount'),
-                                          body: {
-                                            'uid': _UID,
-                                            'email': _auth.getUsername()
-                                          }
-                                      );
-                                      final jsonAccountResponse = jsonDecode(accountResponse.body);
-                                      print(jsonAccountResponse);
-                                      await FirebaseFirestore.instance
-                                          .collection('users')
-                                          .doc(_UID)
-                                          .set({'Stripe Account Id': jsonAccountResponse['id']}, SetOptions(merge: true));
-                                      final accountLinkResponse = await http.post(
-                                          Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateAccountLink'),
-                                          body: {
-                                            'account': jsonAccountResponse['id'],
-                                          }
-                                      );
-                                      final jsonAccountLinkResponse = jsonDecode(accountLinkResponse.body);
-                                      print(jsonAccountLinkResponse);
-                                      launchUrl(Uri.parse(jsonAccountLinkResponse['url']), mode: LaunchMode.inAppBrowserView);
-                                    } catch(e) {
-                                      print(e);
-                                    }
-                                  }, true)
+                                  _expressAccount()
                                 ],
                               ) : _buildList()
                             ],
@@ -295,7 +269,7 @@ class _HomeState extends State<Home> {
 
   Widget _identityStatus(){
     return StreamBuilder(
-        stream: _auth.getIdentityStatus(_UID),
+        stream: _auth.getAccountInfo(_UID),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             // If the data is still loading, return a loading indicator
@@ -308,8 +282,35 @@ class _HomeState extends State<Home> {
             return const Text('No deliveries available');
           }else {
             // Access the status value from the snapshot
-            String status = snapshot.data!['Stripe Identity Status'];
-
+            bool fieldExist = true;
+            try{
+              snapshot.data?.get('Stripe Identity Status');
+            } catch(e){
+              fieldExist = false;
+            }
+            String status;
+            if(fieldExist){
+              status = snapshot.data!['Stripe Identity Status'];
+            } else{
+              return solidButton(context, 'Verify Identity', () async{
+                try{
+                  final response = await http.post(
+                      Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeIdentity'),
+                      body: {
+                        'uid': _UID
+                      }
+                  );
+                  final jsonResponse = jsonDecode(response.body);
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(_UID)
+                      .set({'Stripe Identity Id': jsonResponse['id']}, SetOptions(merge: true));
+                  launchUrl(Uri.parse(jsonResponse['url']), mode: LaunchMode.inAppBrowserView);
+                } catch(e) {
+                  print(e);
+                }
+              }, true);
+            }
             // Determine the button text and enable status based on the 'Stripe Identity Status'
             String buttonText = '';
             bool isButtonEnabled = false;
@@ -317,6 +318,9 @@ class _HomeState extends State<Home> {
             if (status == 'processing' || status == 'verified') {
               buttonText = status;
               isButtonEnabled = false;
+              if(status == 'verified'){
+                isVerified = false;
+              }
             } else {
               buttonText = 'Verify Identity';
               isButtonEnabled = true; // Set this to false if you want to disable the button
@@ -342,6 +346,94 @@ class _HomeState extends State<Home> {
             }, isButtonEnabled);
           }
         },
+    );
+  }
+
+  Widget _expressAccount(){
+    return StreamBuilder(
+      stream: _auth.getAccountInfo(_UID),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // If the data is still loading, return a loading indicator
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          // If there's an error, display an error message
+          return Text('Error: ${snapshot.error}');
+        } else if (!snapshot.hasData || snapshot.data == null ) {
+          // If there is no data or the data is empty, display a message
+          return const Text('No data available');
+        }else {
+          // Access the status value from the snapshot
+          bool fieldExist = true;
+          String id = '';
+          try{
+            snapshot.data?.get('Stripe Account Id');
+            id = snapshot.data!['Stripe Account Id'];
+          } catch(e){
+            fieldExist = false;
+            print(e);
+          }
+          if(id.isNotEmpty && fieldExist){
+            hasAccount = false;
+            return solidButton(context, 'Account Created', () async{
+              try{
+                final accountResponse = await http.post(
+                    Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateConnectAccount'),
+                    body: {
+                      'uid': _UID,
+                      'email': _auth.getUsername()
+                    }
+                );
+                final jsonAccountResponse = jsonDecode(accountResponse.body);
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(_UID)
+                    .set({'Stripe Account Id': jsonAccountResponse['id']}, SetOptions(merge: true));
+                final accountLinkResponse = await http.post(
+                    Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateAccountLink'),
+                    body: {
+                      'account': jsonAccountResponse['id'],
+                    }
+                );
+                final jsonAccountLinkResponse = jsonDecode(accountLinkResponse.body);
+                launchUrl(Uri.parse(jsonAccountLinkResponse['url']), mode: LaunchMode.inAppBrowserView);
+              } catch(e) {
+                print(e);
+              }
+            }, false);
+          }
+           else{
+            return solidButton(context, 'Create Stripe Account', () async{
+              try{
+                final accountResponse = await http.post(
+                    Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateConnectAccount'),
+                    body: {
+                      'uid': _UID,
+                      'email': _auth.getUsername()
+                    }
+                );
+                final jsonAccountResponse = jsonDecode(accountResponse.body);
+                print(jsonAccountResponse);
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(_UID)
+                    .set({'Stripe Account Id': jsonAccountResponse['id']}, SetOptions(merge: true));
+                final accountLinkResponse = await http.post(
+                    Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateAccountLink'),
+                    body: {
+                      'account': jsonAccountResponse['id'],
+                    }
+                );
+                final jsonAccountLinkResponse = jsonDecode(accountLinkResponse.body);
+                print(jsonAccountLinkResponse);
+                launchUrl(Uri.parse(jsonAccountLinkResponse['url']), mode: LaunchMode.inAppBrowserView);
+              } catch(e) {
+                print(e);
+              }
+            }, true);
+          }
+        }
+      },
     );
   }
   
@@ -406,11 +498,9 @@ class _HomeState extends State<Home> {
                 String placedByUser = activeOrderDocument['Placed by'];
                 return activeDeliveryStatusCard(acceptedByUser, orderID, placedByUser);
               } else{
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    child: const Text('Order Requested\n We will notify you when the order has been accepted'),
-                  ),
+                return const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('Order Requested\n We will notify you when the order has been accepted'),
                 );
               }
             } else {
@@ -539,6 +629,43 @@ void _cancelDelivery() async{
     } catch (e) {
       print('Error loading user data: $e');
     }
+  }
+
+  Future<bool> isIdentityVerifiedAndHasAccount() async {
+    try {
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_UID)
+          .get();
+
+      if (userSnapshot.exists) {
+        // Check if identity status is verified and if the user has an account ID
+        bool isIdentityVerified = false;
+        bool hasAccount = false;
+
+        String identityStatus = userSnapshot['Stripe Identity Status'];
+        String accountId = userSnapshot['Stripe Account Id'];
+
+        if (identityStatus == 'verified') {
+          isIdentityVerified = true;
+        }
+
+        if (accountId.isNotEmpty) {
+          hasAccount = true;
+        }
+
+        // Update the state variables
+        setState(() {
+          isVerified = isIdentityVerified;
+          hasAccount = hasAccount;
+        });
+
+        return isIdentityVerified && hasAccount;
+      }
+    } catch (e) {
+      print('Error checking identity status and account: $e');
+    }
+    return false;
   }
 
 

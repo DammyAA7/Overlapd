@@ -68,7 +68,7 @@ class FirebaseAuthService{
     return FirebaseFirestore.instance.collection('users').doc(uid).snapshots();
   }
 
-  Stream<DocumentSnapshot> getIdentityStatus(String uid) {
+  Stream<DocumentSnapshot> getAccountInfo(String uid) {
     return FirebaseFirestore.instance.collection('users').doc(
         uid).snapshots();
   }
