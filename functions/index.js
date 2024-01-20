@@ -11,7 +11,7 @@ exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
         email: req.body.email,
         limit: 1,
     });
-    const serviceCharge = Math.min(parseInt(req.body.amount) * 0.11, 329);
+    const serviceCharge = Math.min(Math.floor(parseInt(req.body.amount) * 0.11), 329);
 
     if (customerList.data.length !== 0){
         customerId = customerList.data[0].id;
@@ -197,7 +197,8 @@ exports.StripeAccountBalance = functions.https.onRequest(async (req, res) => {
           stripeAccount: 'acct_1OYD9AIejXw0Dd0j',
         });
         res.json({
-            balance: balance,
+            available: balance.available,
+            pending: balance.pending
         });
     } catch (error) {
         console.error("Error getting account balance:", error);

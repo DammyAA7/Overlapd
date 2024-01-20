@@ -18,7 +18,8 @@ class Payment extends StatefulWidget {
 
 
 class _PaymentState extends State<Payment> {
-
+  int available = 0;
+  int pending = 0;
   @override
   void initState() {
     // TODO: implement initState
@@ -54,16 +55,16 @@ class _PaymentState extends State<Payment> {
             color: const Color(0xFF21D19F).withOpacity(0.2),
             borderRadius: BorderRadius.circular(20)
           ),
-          child: const Padding(
+          child: Padding(
             padding: EdgeInsets.all(8.0),
             child: Column(
               children: [
                 Text('Balance'),
                 Row(
                   children: [
-                    Text('Available: €0.00'),
+                    Text('Available: €${(available / 100).toStringAsFixed(2)}'),
                     Spacer(),
-                    Text('Pending: €0.00'),
+                    Text('Pending: €${(pending / 100).toStringAsFixed(2)}'),
                   ],
                 ),
               ],
@@ -85,7 +86,10 @@ class _PaymentState extends State<Payment> {
           Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeAccountBalance'),
       );
       final jsonResponse = jsonDecode(response.body);
-      print(jsonResponse);
+      setState(() {
+        available = jsonResponse['available'][0]['amount'];
+        pending = jsonResponse['pending'][0]['amount'];
+      });
     } catch(e) {
       print(e);
     }
