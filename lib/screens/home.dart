@@ -39,7 +39,6 @@ class _HomeState extends State<Home> {
     super.initState();
     _loadUserData();
     _buildList();
-    isIdentityVerifiedAndHasAccount();
   }
 
   @override
@@ -115,13 +114,7 @@ class _HomeState extends State<Home> {
                                   selectStoreTile(context, 'tesco.png', range.tescoGroceryRange, 'Tesco'),
                                 ],
                               ),
-                              isVerified && hasAccount ? Column(
-                                children: [
-                                  _identityStatus(),
-                                  const SizedBox(height: 10),
-                                  _expressAccount()
-                                ],
-                              ) : _buildList()
+                              _isVerifiedHasAccount()
                             ],
                           ),
                         )
@@ -436,7 +429,49 @@ class _HomeState extends State<Home> {
       },
     );
   }
-  
+  Widget _isVerifiedHasAccount(){
+    return StreamBuilder(
+        stream: _auth.getAccountInfo(_UID),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // If the data is still loading, return a loading indicator
+            return const CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            // If there's an error, display an error message
+            return Text('Error: ${snapshot.error}');
+          } else if (!snapshot.hasData || snapshot.data == null) {
+            // If there is no data or the data is empty, display a message
+            return const Text('No deliveries available');
+          } else {
+            try{
+              String identityStatus = snapshot.data!['Stripe Identity Status'];
+              String accountId = snapshot.data!['Stripe Account Id'];
+
+              if (identityStatus == 'verified' && accountId.isNotEmpty) {
+                return _buildList();
+              } else {
+                return Column(
+                  children: [
+                    _identityStatus(),
+                    const SizedBox(height: 10),
+                    _expressAccount()
+                  ],
+                );
+              }
+            } catch(e){
+              return Column(
+                children: [
+                  _identityStatus(),
+                  const SizedBox(height: 10),
+                  _expressAccount()
+                ],
+              );
+            }
+          }
+        }
+    );
+  }
+
   Widget _buildList(){
     return StreamBuilder(
         stream: _service.getRequestedDeliveries(),
@@ -629,43 +664,6 @@ void _cancelDelivery() async{
     } catch (e) {
       print('Error loading user data: $e');
     }
-  }
-
-  Future<bool> isIdentityVerifiedAndHasAccount() async {
-    try {
-      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(_UID)
-          .get();
-
-      if (userSnapshot.exists) {
-        // Check if identity status is verified and if the user has an account ID
-        bool isIdentityVerified = false;
-        bool hasAccount = false;
-
-        String identityStatus = userSnapshot['Stripe Identity Status'];
-        String accountId = userSnapshot['Stripe Account Id'];
-
-        if (identityStatus == 'verified') {
-          isIdentityVerified = true;
-        }
-
-        if (accountId.isNotEmpty) {
-          hasAccount = true;
-        }
-
-        // Update the state variables
-        setState(() {
-          isVerified = isIdentityVerified;
-          hasAccount = hasAccount;
-        });
-
-        return isIdentityVerified && hasAccount;
-      }
-    } catch (e) {
-      print('Error checking identity status and account: $e');
-    }
-    return false;
   }
 
 
