@@ -24,88 +24,85 @@ class _MeatState extends State<Meat> {
   String filterProduct = "";
   bool scroll = true;
   TextEditingController searchText = TextEditingController();
-
+  bool flag = true;
+  Map<Product, int> productQuantities = {};
+  Map<Product, bool> productFlags = {};
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title:  Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            IconButton(
-              onPressed: () {
-                // Navigate to the home page with a fade transition
-                Navigator.pop(context);
-              },
-              icon: const Icon(Icons.arrow_back_ios_new_rounded),
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: Text(
-                'Tesco',
-                style: Theme.of(context).textTheme.displayMedium,
-              ),
-            ),
-          ],
+        centerTitle: true,
+        leading: IconButton(
+          onPressed: () {
+            // Navigate to the home page with a fade transition
+            Navigator.pop(context);
+          },
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        ),
+        title:  Text(
+          'Tesco',
+          style: Theme.of(context).textTheme.displayMedium,
         ),
       ),
-      body: NotificationListener<UserScrollNotification>(
-        onNotification: (notification){
-          if(notification.direction == ScrollDirection.forward){
-            if(!scroll) setState(() => scroll = true);
-          } else if(notification.direction == ScrollDirection.reverse){
-            if(scroll) setState(() => scroll = false);
-          }
-          return true;
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Visibility(
-                visible: scroll,
-                maintainState: true,
-                child: TextField(
-                  controller: searchText, // Use the stored value
-                  onChanged: (value){
-                    setState(() {
-                      filterProduct = value;
-                    });
-                  },
-                  decoration: InputDecoration(
-                      filled: true,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide.none,
-                      ),
-                    hintText: 'Search',
-                    prefixIcon: const Icon(Icons.search_outlined),
-                    suffixIcon: IconButton(onPressed: (){
-                      setState((){
-                        filterProduct = "";
-                        searchText.clear();
+      body: Consumer<Cart>(
+        builder: (context, cart, child) => NotificationListener<UserScrollNotification>(
+          onNotification: (notification){
+            if(notification.direction == ScrollDirection.forward){
+              if(!scroll) setState(() => scroll = true);
+            } else if(notification.direction == ScrollDirection.reverse){
+              if(scroll) setState(() => scroll = false);
+            }
+            return true;
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Visibility(
+                  visible: scroll,
+                  maintainState: true,
+                  child: TextField(
+                    controller: searchText, // Use the stored value
+                    onChanged: (value){
+                      setState(() {
+                        filterProduct = value;
                       });
-                    }, icon: const Icon(Icons.clear))
+                    },
+                    decoration: InputDecoration(
+                        filled: true,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide.none,
+                        ),
+                      hintText: 'Search',
+                      prefixIcon: const Icon(Icons.search_outlined),
+                      suffixIcon: IconButton(onPressed: (){
+                        setState((){
+                          filterProduct = "";
+                          searchText.clear();
+                        });
+                      }, icon: const Icon(Icons.clear))
+                    ),
                   ),
                 ),
-              ),
-              Expanded(
-                  child: _buildProductList()
-              ),
-            ],
+                Expanded(
+                    child: _buildProductList(cart)
+                ),
+              ],
+            ),
           ),
         ),
       ),
       floatingActionButton: Stack(
         children: [
           FloatingActionButton(
-            onPressed: (){
-              Navigator.push(
+            onPressed: () async{
+              await Navigator.push(
                 context,
-                  pageAnimationFromBottomToTop(const ShoppingCart())
+                  pageAnimationFromBottomToTop(const ShoppingCart()),
               );
+              setState(() {});
             },
             tooltip: 'View shopping cart',
             child: const Icon(Icons.shopping_cart_rounded),
@@ -115,13 +112,15 @@ class _MeatState extends State<Meat> {
     );
   }
 
-  Widget _buildProductItem(DocumentSnapshot document){
+  Widget _buildProductItem(DocumentSnapshot document, Cart cart){
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+    bool isInCart = cart.isProductInCart(data['title'].toString());
+
     if(filterProduct.isEmpty){
-      return productListTile(data);
+      return productListTile(data, isInCart, cart);
     }
     if(data['title'].toString().toLowerCase().contains(filterProduct.toLowerCase())){
-      return productListTile(data);
+      return productListTile(data, isInCart, cart);
     }
     else{
       return const SizedBox.shrink();
@@ -129,104 +128,116 @@ class _MeatState extends State<Meat> {
 
   }
 
-  Padding productListTile(Map<String, dynamic> data) {
+  Padding productListTile(Map<String, dynamic> data, bool isInCart, Cart cart) {
+    Product product = Product(
+        title: data['title'].toString(),
+        price: double.parse(data['price'].toString().replaceAll(RegExp(r'[^0-9.]'), '')),
+        pricePer: data['pricePer'].toString(),
+        imageUrl: data['imageUrl'].toString()
+    );
+    int quantity = productQuantities[product] ?? 1; // Get quantity for the product
+    bool flag = productFlags[product] ?? true; // Get flag for the product
+    if (isInCart) {
+      flag = false; // Set flag to false if the product is in the cart
+      quantity = cart.getQuantity(product) ?? 1; // Get quantity from the cart
+    } else{
+      flag = true; // Set flag to true if the product is not in the cart
+      quantity = 1; // Set quantity to 1 if the product is not in the cart
+    }
+
     return Padding(
-    padding: const EdgeInsets.all(8.0),
+    padding: const EdgeInsets.all(5.0),
     child: Column(
       children: [
-        Slidable(
-          endActionPane: ActionPane(
-            motion: const ScrollMotion(),
+        SizedBox(
+          height: 100,
+          width: MediaQuery.of(context).size.width,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Expanded(
-                flex: 1,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                      color: Colors.white
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
+                  flex: 3,
+                  child: Image.network(data['imageUrl'].toString())),
+              Expanded(
+                  flex: 6,
+                  child:
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Text(data['title'].toString(), overflow: TextOverflow.visible, maxLines: 2, style: Theme.of(context).textTheme.labelLarge,),
+                      Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children:[
+                            Text(data['price'].toString(), style: Theme.of(context).textTheme.labelLarge,),
+                            const SizedBox(width: 5),
+                            Text(data['pricePer'].toString(), style: Theme.of(context).textTheme.labelMedium)
+                        ]
+                      ),
+
+                    ],
+                  )
+              ),
+              Expanded(
+                  flex: 1,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 500),
+                    child: flag ? IconButton(
+                      key: const Key('1'),
+                      onPressed: () {
+                        //add to cart
+                        cart.addToCart(product, quantity);
+
+                        showToast(text: 'Successfully Added to cart');
+                        setState(() {
+                          productFlags[product] = !flag; // Update flag in the map
+                        });
+                      },
+                      icon: const Icon(Icons.add_shopping_cart_rounded),
+                    ) : Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      key: const Key('2'),
                       children: [
-                        IconButton(
-                            onPressed: (){
-                              setState(() {
-                                quantity += 1;
-                              });
+                        Flexible(
+                          flex: 1,
+                          child: IconButton(
+                              onPressed: (){
+                                setState(() {
+                                  quantity += 1;
+                                });
+                                productQuantities[product] = quantity; // Update quantity in the map
+                                cart.addToCart(product, 1);
                               },
-                            icon: const Icon(Icons.add)),
-                        Text('$quantity'),
-                        IconButton(
-                            onPressed: (){
-                              setState(() {
-                                if(quantity > 1){
-                                  quantity -= 1;
-                                }
-                              });
+
+                              icon: const Icon(Icons.add)),
+                        ),
+                        Flexible(
+                            flex: 1,
+                            child: Text('$quantity', style: Theme.of(context).textTheme.labelLarge,)),
+                        Flexible(
+                          flex: 1,
+                          child: IconButton(
+                              onPressed: (){
+                                setState(() {
+                                  if(quantity > 0){
+                                    quantity -= 1;
+                                  }
+                                  if(quantity == 0){
+                                    productFlags[product] = !flag; // Update flag in the map
+                                    quantity = 1;
+                                  }
+                                });
+                                productQuantities[product] = quantity; // Update quantity in the map
+                                cart.reduceQtyFromCart(product, 1);
+                                productQuantities[product] = quantity; // Update quantity in the map
                               },
-                            icon: const Icon(Icons.remove)),
+                              icon: const Icon(Icons.remove)),
+                        ),
                       ],
                     ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 3),
-              SlidableAction(onPressed: ((context){
-                //add to cart
-                Product product = Product(
-                    title: data['title'].toString(),
-                    price: double.parse(data['price'].toString().replaceAll(RegExp(r'[^0-9.]'), '')),
-                    pricePer: data['pricePer'].toString(),
-                    imageUrl: data['imageUrl'].toString()
-                );
-                final cart = context.read<Cart>();
-                cart.addToCart(product, quantity);
-                setState(() {
-                  quantity = 1;
-                });
-
-                showToast(text: 'Successfully Added to cart');
-              }),
-                padding: const EdgeInsets.all(2.0),
-                flex: 1,
-                borderRadius: const BorderRadius.all(Radius.circular(15)),
-                backgroundColor: Colors.green,
-                icon: Icons.add_shopping_cart_rounded
-              ),
+                  )
+              )
             ],
-          ),
-          child: SizedBox(
-            height: 100,
-            width: MediaQuery.of(context).size.width,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Expanded(
-                    flex: 1,
-                    child: Image.network(data['imageUrl'].toString())),
-                Expanded(
-                    flex: 2,
-                    child:
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Text(data['title'].toString(), overflow: TextOverflow.visible, maxLines: 2, style: Theme.of(context).textTheme.labelLarge,),
-                        Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children:[
-                              Text(data['price'].toString(), style: Theme.of(context).textTheme.labelLarge,),
-                              const SizedBox(width: 5),
-                              Text(data['pricePer'].toString(), style: Theme.of(context).textTheme.labelMedium)
-                          ]
-                        ),
-
-                      ],
-                )
-                ),
-              ],
-            ),
           ),
         ),
         const Divider(thickness: 1)
@@ -235,7 +246,7 @@ class _MeatState extends State<Meat> {
   );
   }
 
-  Widget _buildProductList(){
+  Widget _buildProductList(Cart cart){
     return StreamBuilder(
         stream: widget.snapshot,
         builder: (context, snapshot){
@@ -249,11 +260,8 @@ class _MeatState extends State<Meat> {
             // If there is no data or the data is empty, display a message
             return const Text('No messages');
           } else {
-            return SlidableAutoCloseBehavior(
-              closeWhenOpened: true,
-              child: ListView(
-                children: snapshot.data!.docs.map((document) => _buildProductItem(document)).toList(),
-              ),
+            return ListView(
+              children: snapshot.data!.docs.map((document) => _buildProductItem(document, cart)).toList(),
             );
           }
         }

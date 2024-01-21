@@ -56,81 +56,73 @@ class _ShoppingCartState extends State<ShoppingCart> {
                         int quantity = value.cart.values.elementAt(index);
                         return  Column(
                           children: [
-                            Slidable(
-                              endActionPane: ActionPane(
-                                motion: const ScrollMotion(),
+                            SizedBox(
+                              height: 100,
+                              width: MediaQuery.of(context).size.width,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   Expanded(
-                                    flex: 1,
-                                    child: Container(
-                                      decoration: const BoxDecoration(
-                                          borderRadius: BorderRadius.all(Radius.circular(15)),
-                                          color: Colors.blue
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          children: [
-                                            IconButton(
+                                      flex: 3,
+                                      child: Image.network(product.imageUrl)
+                                  ),
+                                  Expanded(
+                                      flex: 6,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Text(product.title, overflow: TextOverflow.visible, maxLines: 2, style: Theme.of(context).textTheme.labelLarge,),
+                                          Row(
+                                            children: [
+                                              Text('€${product.price.toString()}', style: Theme.of(context).textTheme.labelLarge,),
+                                              Text(product.pricePer, style: Theme.of(context).textTheme.labelMedium,)
+                                            ],
+                                          )
+                                        ],
+                                      )
+                                  ),
+                                  Expanded(
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        key: const Key('2'),
+                                        children: [
+                                          Flexible(
+                                            flex: 1,
+                                            child: IconButton(
                                                 onPressed: (){
-                                                  final cart = context.read<Cart>();
                                                   setState(() {
                                                     quantity += 1;
-                                                    cart.updateQuantity(product, quantity);
                                                   });
+                                                  // Update quantity in the map
+                                                  value.addToCart(product, 1);
                                                 },
+
                                                 icon: const Icon(Icons.add)),
-                                            Text('$quantity'),
-                                            IconButton(
+                                          ),
+                                          Flexible(
+                                              flex: 1,
+                                              child: Text('$quantity', style: Theme.of(context).textTheme.labelLarge,)),
+                                          Flexible(
+                                            flex: 1,
+                                            child: IconButton(
                                                 onPressed: (){
-                                                  final cart = context.read<Cart>();
                                                   setState(() {
-                                                    if(quantity > 1){
+                                                    if(quantity > 0){
                                                       quantity -= 1;
-                                                      cart.updateQuantity(product, quantity);
+                                                    }
+                                                    if(quantity == 0){
+                                                      quantity = 1;
                                                     }
                                                   });
+                                                  value.reduceQtyFromCart(product, 1);
                                                 },
                                                 icon: const Icon(Icons.remove)),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 3),
-                                  SlidableAction(onPressed: ((context){
-                                    //remove from cart
-                                    final cart = context.read<Cart>();
-                                    cart.removeFromCart(product);
-                                    setState(() {});
-                                    showToast(text: 'Successfully removed from cart');
-                                  }),
-                                      padding: const EdgeInsets.all(2.0),
-                                      flex: 1,
-                                      borderRadius: const BorderRadius.all(Radius.circular(15)),
-                                      backgroundColor: Colors.red,
-                                      icon: Icons.delete_forever_rounded
-                                  ),
+                                  )
                                 ],
-                              ),
-                              child: SizedBox(
-                                height: 150,
-                                width: MediaQuery.of(context).size.width,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Image.network(product.imageUrl),
-                                    Expanded(child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(product.title, overflow: TextOverflow.visible, maxLines: 2,),
-                                        Text('€${product.price.toString()}'),
-                                        Text(product.pricePer)
-                                      ],
-                                    )
-                                    ),
-                                  ],
-                                ),
                               ),
                             ),
                             const Divider(

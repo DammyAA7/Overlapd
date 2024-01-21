@@ -111,6 +111,31 @@ class Cart extends ChangeNotifier{
     }
   }
 
+  bool isProductInCart(String productName) {
+    // Check if the product is in the cart based on its title
+    return cart.keys.any((product) => product.title == productName);
+  }
+
+  int? getQuantity(Product product) {
+    // Get the quantity of a product in the cart based on its title
+    if (cart.containsKey(product)) {
+      // If the product exists, update the quantity
+      return cart[product];
+    }
+    return null;
+  }
+
+
+  void reduceQtyFromCart(Product product, int quantity){
+    if (cart.containsKey(product)) {
+      // If the product exists, update the quantity
+      cart.update(product, (existingQuantity) => existingQuantity - quantity);
+    }
+    if(cart[product] == 0){
+      cart.remove(product);
+    }
+  }
+
   void removeFromCart(Product product){
     cart.remove(product);
   }
