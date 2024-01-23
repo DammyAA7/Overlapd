@@ -144,7 +144,7 @@ class _HomeState extends State<Home> {
   GestureDetector selectStoreTile(
       BuildContext context,
       String imageName,
-      Map<String, Map<String, Stream<QuerySnapshot>>> range,
+      Map<String, Map<String,Map <String, Stream<QuerySnapshot>>>> range,
       String storeName
       ) {
     return GestureDetector(

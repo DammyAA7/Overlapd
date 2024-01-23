@@ -114,6 +114,11 @@ class _MeatState extends State<Meat> {
 
   Widget _buildProductItem(DocumentSnapshot document, Cart cart){
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+
+    if (data['price'] == 'Currently out of stock') {
+      return const SizedBox.shrink();
+    }
+
     bool isInCart = cart.isProductInCart(data['title'].toString());
 
     if(filterProduct.isEmpty){

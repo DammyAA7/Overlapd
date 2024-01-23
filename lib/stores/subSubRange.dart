@@ -1,22 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:overlapd/stores/productListPage.dart';
-import 'package:overlapd/stores/range.dart';
 import 'package:overlapd/stores/shoppingCart.dart';
-import 'package:overlapd/stores/subSubRange.dart';
+import 'package:overlapd/stores/range.dart';
+
 import '../utilities/widgets.dart';
 import 'groceryRange.dart';
 
-class SubRange extends StatefulWidget {
-  final Map<String,Map <String, Stream<QuerySnapshot>>> subRange;
+class SubSubRange extends StatefulWidget {
+  final Map <String, Stream<QuerySnapshot>> subRange;
   final String categoryName;
-  const SubRange({super.key, required this.subRange, required this.categoryName});
+  const SubSubRange({super.key, required this.subRange,required this.categoryName});
 
   @override
-  State<SubRange> createState() => _SubRangeState();
+  State<SubSubRange> createState() => _SubSubRangeState();
 }
 
-class _SubRangeState extends State<SubRange> {
+class _SubSubRangeState extends State<SubSubRange> {
   MapRange range = MapRange();
   @override
   Widget build(BuildContext context) {
@@ -27,8 +27,7 @@ class _SubRangeState extends State<SubRange> {
         leading: IconButton(
           onPressed: () {
             Navigator.pop(
-              context,
-              pageAnimationlr(Range(groceryRange: range.tescoGroceryRange)),
+              context
             );
           },
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
@@ -54,8 +53,7 @@ class _SubRangeState extends State<SubRange> {
             onTap: (){
               Navigator.push(
                   context,
-                  pageAnimationrl
-                    (SubSubRange(subRange:widget.subRange[key]!, categoryName:key)));
+                  pageAnimationrl(Meat(snapshot: widget.subRange[key]!)));
             },
             child: Column(
               children: [
