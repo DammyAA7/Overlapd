@@ -114,11 +114,6 @@ class _MeatState extends State<Meat> {
   }
 
   Widget _buildProductItem(List data, Cart cart){
-
-    if (data[3] == 'Currently out of stock') {
-      return const SizedBox.shrink();
-    }
-
     bool isInCart = cart.isProductInCart(data[0].toString());
 
     if(filterProduct.isEmpty){
@@ -162,7 +157,12 @@ class _MeatState extends State<Meat> {
             children: [
               Expanded(
                   flex: 3,
-                  child: Image.network(data[5].toString())),
+                  child: Image.network(data[5].toString(),
+                    errorBuilder: (context, error, stackTrace){
+                      return Image.network("https://digitalcontent.api.tesco.com/v2/media/ghs-mktg/b0b04216-fa73-466d-a9d7-c9fcfa1ce9b3/no-image.jpeg");
+                    },
+                  ),
+              ),
               Expanded(
                   flex: 6,
                   child:
@@ -265,6 +265,7 @@ class _MeatState extends State<Meat> {
               if(index == 0 || productList[index][1] == 'Currently out of stock'){
                 return const SizedBox.shrink();
               }
+
               return _buildProductItem(productList[index], cart);
             },
           );

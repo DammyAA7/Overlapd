@@ -11,7 +11,7 @@ exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
         email: req.body.email,
         limit: 1,
     });
-    const serviceCharge = Math.min(Math.floor(parseInt(req.body.amount) * 0.11), 329);
+    const serviceCharge = Math.min(Math.ceil(parseInt(req.body.amount) * 0.11), 329);
 
     if (customerList.data.length !== 0){
         customerId = customerList.data[0].id;
@@ -48,7 +48,8 @@ exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
                 currency: 'eur',
                 ephemeralKey: ephemeralKey.secret,
                 customer: customerId,
-                publishableKey: 'pk_test_51OWmrwIaruu0MDtu9f0fOLYUdaDsxU6FHsV2TtXLw6CstWMCKPwZhhldZEWSmsStYYTYpfeRfzGVAZ9tfLKODOYt00gDUZP4EI'
+                publishableKey: 'pk_test_51OWmrwIaruu0MDtu9f0fOLYUdaDsxU6FHsV2TtXLw6CstWMCKPwZhhldZEWSmsStYYTYpfeRfzGVAZ9tfLKODOYt00gDUZP4EI',
+                status: paymentIntent.status
             });
         }
     });
@@ -175,6 +176,26 @@ exports.StripeWebhook = functions.https.onRequest(async (req, res) => {
             case 'identity.verification_session.verified':
               const identityVerificationSessionVerified = event.data.object;
                _updateStatus(uid, "verified");
+              break;
+            case 'payment_intent.amount_capturable_updated':
+              const paymentIntentAmountCapturableUpdated = event.data.object;
+                  // Then define and call a function to handle the event payment_intent.amount_capturable_updated
+              break;
+            case 'payment_intent.canceled':
+              const paymentIntentCanceled = event.data.object;
+                  // Then define and call a function to handle the event payment_intent.canceled
+              break;
+            case 'payment_intent.created':
+              const paymentIntentCreated = event.data.object;
+                  // Then define and call a function to handle the event payment_intent.created
+              break;
+            case 'payment_intent.processing':
+              const paymentIntentProcessing = event.data.object;
+                  // Then define and call a function to handle the event payment_intent.processing
+                  break;
+            case 'payment_intent.succeeded':
+              const paymentIntentSucceeded = event.data.object;
+                  // Then define and call a function to handle the event payment_intent.succeeded
               break;
             // ... handle other event types
             default:
