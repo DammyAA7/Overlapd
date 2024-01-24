@@ -8,7 +8,7 @@ import '../utilities/widgets.dart';
 import 'groceryRange.dart';
 
 class SubRange extends StatefulWidget {
-  final Map<String,Map <String, Stream<QuerySnapshot>>> subRange;
+  final Map<String,Map <String, Future<List<List>>>> subRange;
   final String categoryName;
   const SubRange({super.key, required this.subRange, required this.categoryName});
 

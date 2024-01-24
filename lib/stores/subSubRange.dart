@@ -8,7 +8,7 @@ import '../utilities/widgets.dart';
 import 'groceryRange.dart';
 
 class SubSubRange extends StatefulWidget {
-  final Map <String, Stream<QuerySnapshot>> subRange;
+  final Map <String, Future<List<List>>> subRange;
   final String categoryName;
   const SubSubRange({super.key, required this.subRange,required this.categoryName});
 
@@ -53,7 +53,7 @@ class _SubSubRangeState extends State<SubSubRange> {
             onTap: (){
               Navigator.push(
                   context,
-                  pageAnimationrl(Meat(snapshot: widget.subRange[key]!)));
+                  pageAnimationrl(Meat(productCSV: widget.subRange[key]!)));
             },
             child: Column(
               children: [

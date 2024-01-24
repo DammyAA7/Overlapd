@@ -12,14 +12,15 @@ import '../utilities/widgets.dart';
 
 class Meat extends StatefulWidget {
   static const id = 'meat_page';
-  final Stream<QuerySnapshot> snapshot;
-  const Meat({super.key, required this.snapshot});
+  final Future<List<List>> productCSV;
+  const Meat({super.key, required this.productCSV});
 
   @override
   State<Meat> createState() => _MeatState();
 }
 
 class _MeatState extends State<Meat> {
+  List<List> productList = [];
   int quantity = 1;
   String filterProduct = "";
   bool scroll = true;
@@ -112,19 +113,18 @@ class _MeatState extends State<Meat> {
     );
   }
 
-  Widget _buildProductItem(DocumentSnapshot document, Cart cart){
-    Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+  Widget _buildProductItem(List data, Cart cart){
 
-    if (data['price'] == 'Currently out of stock') {
+    if (data[3] == 'Currently out of stock') {
       return const SizedBox.shrink();
     }
 
-    bool isInCart = cart.isProductInCart(data['title'].toString());
+    bool isInCart = cart.isProductInCart(data[0].toString());
 
     if(filterProduct.isEmpty){
       return productListTile(data, isInCart, cart);
     }
-    if(data['title'].toString().toLowerCase().contains(filterProduct.toLowerCase())){
+    if(data[0].toString().toLowerCase().contains(filterProduct.toLowerCase())){
       return productListTile(data, isInCart, cart);
     }
     else{
@@ -133,12 +133,12 @@ class _MeatState extends State<Meat> {
 
   }
 
-  Padding productListTile(Map<String, dynamic> data, bool isInCart, Cart cart) {
+  Padding productListTile(List data, bool isInCart, Cart cart) {
     Product product = Product(
-        title: data['title'].toString(),
-        price: double.parse(data['price'].toString().replaceAll(RegExp(r'[^0-9.]'), '')),
-        pricePer: data['pricePer'].toString(),
-        imageUrl: data['imageUrl'].toString()
+        title: data[0].toString(),
+        price: double.parse(data[1].toString().replaceAll(RegExp(r'[^0-9.]'), '')),
+        pricePer: data[3].toString(),
+        imageUrl: data[5].toString()
     );
     int quantity = productQuantities[product] ?? 1; // Get quantity for the product
     bool flag = productFlags[product] ?? true; // Get flag for the product
@@ -162,7 +162,7 @@ class _MeatState extends State<Meat> {
             children: [
               Expanded(
                   flex: 3,
-                  child: Image.network(data['imageUrl'].toString())),
+                  child: Image.network(data[5].toString())),
               Expanded(
                   flex: 6,
                   child:
@@ -170,13 +170,13 @@ class _MeatState extends State<Meat> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Text(data['title'].toString(), overflow: TextOverflow.visible, maxLines: 2, style: Theme.of(context).textTheme.labelLarge,),
+                      Text(data[0].toString(), overflow: TextOverflow.visible, maxLines: 2, style: Theme.of(context).textTheme.labelLarge,),
                       Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children:[
-                            Text(data['price'].toString(), style: Theme.of(context).textTheme.labelLarge,),
+                            Text(data[1].toString(), style: Theme.of(context).textTheme.labelLarge,),
                             const SizedBox(width: 5),
-                            Text(data['pricePer'].toString(), style: Theme.of(context).textTheme.labelMedium)
+                            Text(data[3].toString(), style: Theme.of(context).textTheme.labelMedium)
                         ]
                       ),
 
@@ -252,25 +252,29 @@ class _MeatState extends State<Meat> {
   }
 
   Widget _buildProductList(Cart cart){
-    return StreamBuilder(
-        stream: widget.snapshot,
+    return FutureBuilder(
         builder: (context, snapshot){
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (snapshot.connectionState == ConnectionState.none &&
+              snapshot.hasData) {
             // If the data is still loading, return a loading indicator
             return const CircularProgressIndicator();
-          } else if (snapshot.hasError) {
-            // If there's an error, display an error message
-            return Text('Error: ${snapshot.error}');
-          } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.docs.isEmpty) {
-            // If there is no data or the data is empty, display a message
-            return const Text('No messages');
-          } else {
-            return ListView(
-              children: snapshot.data!.docs.map((document) => _buildProductItem(document, cart)).toList(),
-            );
           }
-        }
+          return ListView.builder(
+            itemCount: productList.length,
+            itemBuilder: (context, index){
+              if(index == 0 || productList[index][1] == 'Currently out of stock'){
+                return const SizedBox.shrink();
+              }
+              return _buildProductItem(productList[index], cart);
+            },
+          );
+          }, future: loadCSV(),
     );
+  }
+
+  Future loadCSV() async{
+    productList = await widget.productCSV;
+    return productList;
   }
 
 }

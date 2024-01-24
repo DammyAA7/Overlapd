@@ -8,7 +8,7 @@ import 'package:overlapd/stores/subRange.dart';
 import '../utilities/widgets.dart';
 
 class Range extends StatefulWidget {
-  final Map<String, Map<String,Map <String, Stream<QuerySnapshot>>>> groceryRange;
+  final Map<String, Map<String,Map <String, Future<List<List>>>>> groceryRange;
   final String? storeName;
   const Range({super.key, required this.groceryRange, this.storeName});
 

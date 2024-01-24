@@ -58,6 +58,7 @@ dependencies:
   flutter_stripe: ^10.0.0
   http: ^1.1.2
   url_launcher: ^6.2.3
+  csv: ^5.1.1
 
 dev_dependencies:
   flutter_test:
@@ -86,6 +87,20 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/storeLogos/
+    - assets/Tesco/Fresh Food/Cheese/
+    - assets/Tesco/Fresh Food/Yoghurt/
+    - assets/Tesco/Fresh Food/Fresh Fruit/
+    - assets/Tesco/Fresh Food/Fresh Vegetables/
+    - assets/Tesco/Fresh Food/Salads & Dips/
+    - assets/Tesco/Fresh Food/Milk, Butter & Eggs/
+    - assets/Tesco/Fresh Food/Fresh Meat & Poultry/
+    - assets/Tesco/Fresh Food/Stuffing & Accompaniments/
+    - assets/Tesco/Fresh Food/Chilled Fish & Sea Food/
+    - assets/Tesco/Fresh Food/Cooked Meat/
+    - assets/Tesco/Fresh Food/Continental Meats & Antipasti/
+    - assets/Tesco/Fresh Food/Chilled Food/
+    - assets/Tesco/Fresh Food/Chilled Desserts/
+    - assets/Tesco/Fresh Food/Dairy Alternatives/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

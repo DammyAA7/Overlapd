@@ -237,10 +237,6 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
                 setState(() {
                   chosenStore = newValue.toString();
                   if (chosenStore == 'SuperValu'){
-                    Navigator.pushReplacement(
-                      context,
-                      pageAnimationFromTopToBottom( Meat(snapshot: _fireStore.collection("SuperValu").snapshots())),
-                    );
                   } else if(chosenStore == 'Tesco'){
                     Navigator.pushReplacement(
                       context,
