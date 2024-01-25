@@ -6,6 +6,7 @@ import 'package:overlapd/stores/groceryRange.dart';
 import 'package:overlapd/stores/shoppingCart.dart';
 import 'package:overlapd/utilities/toast.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../utilities/widgets.dart';
 
 
@@ -150,10 +151,10 @@ class _MeatState extends State<Meat> {
     child: Column(
       children: [
         SizedBox(
-          height: 100,
+          height: 120,
           width: MediaQuery.of(context).size.width,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Expanded(
                   flex: 3,
@@ -163,6 +164,7 @@ class _MeatState extends State<Meat> {
                     },
                   ),
               ),
+              const SizedBox(width: 5),
               Expanded(
                   flex: 6,
                   child:
@@ -179,6 +181,9 @@ class _MeatState extends State<Meat> {
                             Text(data[3].toString(), style: Theme.of(context).textTheme.labelMedium)
                         ]
                       ),
+                      Expanded(child: TextButton(onPressed: (){
+                        launchUrl(Uri.parse(data[4]), mode: LaunchMode.inAppBrowserView);
+                      }, child: Text('View Details', style: Theme.of(context).textTheme.labelLarge,)))
 
                     ],
                   )

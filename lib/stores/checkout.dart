@@ -1,12 +1,13 @@
 
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import '../deliveries/delivery_service.dart';
+import '../screens/home.dart';
 import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/deliveryDetailsUtilities.dart';
 import '../utilities/networkUtilities.dart';
@@ -23,6 +24,7 @@ class Checkout extends StatefulWidget {
 
 class _CheckoutState extends State<Checkout> {
   final FirebaseAuthService _auth = FirebaseAuthService();
+  final DeliveryService _service = DeliveryService();
   String? setAddress;
   Position? currentLocation;
   @override
@@ -188,7 +190,7 @@ class _CheckoutState extends State<Checkout> {
                         ],
                       ),
                       solidButton(context, 'Checkout', () async{
-                        await initPayment((double.parse(value.stripEuroSign(value.calculateTotalAmount())) * 100).toInt().toString(), _auth.getUsername(), context);
+                        await initPayment((double.parse(value.stripEuroSign(value.calculateTotalAmount())) * 100).toInt().toString(), _auth.getUsername(), context, value);
                       }, true),
                     ],
                   ),
@@ -200,7 +202,7 @@ class _CheckoutState extends State<Checkout> {
     );
   }
 
-  Future<void> initPayment(String amount, String email, BuildContext context) async{
+  Future<void> initPayment(String amount, String email, BuildContext context, Cart value) async{
     try{
       final response = await http.post(Uri.parse(
           'https://us-central1-overlapd-13268.cloudfunctions.net/StripePaymentIntent'),
@@ -220,9 +222,19 @@ class _CheckoutState extends State<Checkout> {
           )
       );
       await Stripe.instance.presentPaymentSheet();
+      _checkout('12 Dalriada Court', 'Tesco', value.cart, value.calculateTotalAmount());
     } catch(e){
       print(e);
     }
+  }
+
+  void _checkout(String setAddress, String chosenStore, Map<Product, int> products, String amount) async{
+    List<Map<String, dynamic>> productListMap = context.read<Cart>().toMapList();
+    await _service.openDelivery(setAddress, chosenStore, productListMap, amount);
+    context.read<Cart>().clearCart();
+    Navigator.of(context).pushReplacement(
+        pageAnimationFromTopToBottom(const Home()));
+    showToast(text: 'Order Confirmed');
   }
 
 

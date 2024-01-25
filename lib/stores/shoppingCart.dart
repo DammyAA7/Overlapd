@@ -16,7 +16,6 @@ class ShoppingCart extends StatefulWidget {
 }
 
 class _ShoppingCartState extends State<ShoppingCart> {
-  final DeliveryService _service = DeliveryService();
   @override
   Widget build(BuildContext context) {
     return Consumer<Cart>(
@@ -147,7 +146,6 @@ class _ShoppingCartState extends State<ShoppingCart> {
                 ),
               ),
               solidButton(context, 'Continue to Checkout', (){
-                //_checkout('12 Dalriada Court', 'Tesco', value.cart, value.calculateTotalAmount());
                 Navigator.push(
                     context,
                     pageAnimationFromBottomToTop(const Checkout())
@@ -158,15 +156,6 @@ class _ShoppingCartState extends State<ShoppingCart> {
         ),
       ),
     );
-  }
-
-  void _checkout(String setAddress, String chosenStore, Map<Product, int> products, String amount) async{
-    List<Map<String, dynamic>> productListMap = context.read<Cart>().toMapList();
-    await _service.openDelivery(setAddress, chosenStore, productListMap, amount);
-    context.read<Cart>().clearCart();
-    Navigator.of(context).pushReplacement(
-        pageAnimationFromTopToBottom(const Home()));
-    showToast(text: 'Delivery Confirmed');
   }
 
 }

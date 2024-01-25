@@ -43,7 +43,7 @@ exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
         }else{
             res.json({
                 paymentIntent: paymentIntent.client_secret,
-                paymentIntentData: paymentIntent,
+                status: paymentIntent.status,
                 amount: req.body.amount,
                 currency: 'eur',
                 ephemeralKey: ephemeralKey.secret,
