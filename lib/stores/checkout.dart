@@ -27,6 +27,7 @@ class _CheckoutState extends State<Checkout> {
   final DeliveryService _service = DeliveryService();
   String? setAddress;
   Position? currentLocation;
+  bool deliveryTime = true;
   @override
   Widget build(BuildContext context) {
     return Consumer<Cart>(
@@ -149,6 +150,105 @@ class _CheckoutState extends State<Checkout> {
                 Text(
                   'Delivery date & time',
                   style: Theme.of(context).textTheme.titleLarge,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      GestureDetector(
+                        child: Container(
+                          width: 150,
+                          height: 70,
+                          decoration: BoxDecoration(
+                              color: deliveryTime ? const Color(0xFF6EE8C5) : Colors.grey,
+                              borderRadius: BorderRadius.circular(15)
+                          ),
+                          child: Center(
+                              child: Text(
+                                'Asap',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              )
+                          ),
+                        ),
+                        onTap: (){
+                          setState(() {
+                            if(!deliveryTime){
+                              deliveryTime = !deliveryTime;
+                            }
+
+                          });
+                        },
+                      ),
+                      GestureDetector(
+                        child: Container(
+                          width: 150,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: !deliveryTime ? const Color(0xFF6EE8C5) : Colors.grey,
+                            borderRadius: BorderRadius.circular(15)
+                          ),
+                          child: Center(
+                              child: Text(
+                                'Schedule time',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              )
+                          ),
+                        ),
+                        onTap: (){
+                          setState(() {
+                            if(deliveryTime){
+                              deliveryTime = !deliveryTime;
+                            }
+                          });
+                          showModalBottomSheet(
+                              context: context,
+                              builder: (BuildContext context){
+                                return SizedBox(
+                                  height: MediaQuery.of(context).size.height * 0.8,
+                                  width: MediaQuery.of(context).size.width,
+                                );
+                              }
+
+                          );
+                        },
+                      )
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    horizontalTitleGap: 5,
+                    leading: Icon(
+                        Icons.access_time_outlined,
+                        color: deliveryTime ? Colors.grey : Colors.black
+                    ),
+                    title: Text(
+                      'Choose time',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: deliveryTime ? Colors.grey : Colors.black
+                      ),
+                    ),
+                  ),
+                  onTap: (){
+                    if(!deliveryTime){
+                      showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context){
+                            return SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.8,
+                              width: MediaQuery.of(context).size.width,
+                            );
+                          }
+
+                      );
+                    }
+                  },
                 ),
                 const Divider(thickness: 1),
                 Text(

@@ -151,83 +151,80 @@ class _MeatState extends State<Meat> {
     child: Column(
       children: [
         SizedBox(
-          height: 120,
+          //height: 120,
           width: MediaQuery.of(context).size.width,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Expanded(
-                  flex: 3,
-                  child: Image.network(data[5].toString(),
-                    errorBuilder: (context, error, stackTrace){
-                      return Image.network("https://digitalcontent.api.tesco.com/v2/media/ghs-mktg/b0b04216-fa73-466d-a9d7-c9fcfa1ce9b3/no-image.jpeg");
-                    },
-                  ),
-              ),
-              const SizedBox(width: 5),
-              Expanded(
-                  flex: 6,
-                  child:
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Text(data[0].toString(), overflow: TextOverflow.visible, maxLines: 2, style: Theme.of(context).textTheme.labelLarge,),
-                      Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children:[
-                            Text(data[1].toString(), style: Theme.of(context).textTheme.labelLarge,),
-                            const SizedBox(width: 5),
-                            Text(data[3].toString(), style: Theme.of(context).textTheme.labelMedium)
-                        ]
-                      ),
-                      Expanded(child: TextButton(onPressed: (){
-                        launchUrl(Uri.parse(data[4]), mode: LaunchMode.inAppBrowserView);
-                      }, child: Text('View Details', style: Theme.of(context).textTheme.labelLarge,)))
-
-                    ],
-                  )
-              ),
-              Expanded(
-                  flex: 1,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 500),
-                    child: flag ? IconButton(
-                      key: const Key('1'),
-                      onPressed: () {
-                        //add to cart
-                        cart.addToCart(product, quantity);
-
-                        showToast(text: 'Successfully Added to cart');
-                        setState(() {
-                          productFlags[product] = !flag; // Update flag in the map
-                        });
+          child: IntrinsicHeight(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Expanded(
+                    flex: 3,
+                    child: Image.network(data[5].toString(),
+                      errorBuilder: (context, error, stackTrace){
+                        return Image.network("https://digitalcontent.api.tesco.com/v2/media/ghs-mktg/b0b04216-fa73-466d-a9d7-c9fcfa1ce9b3/no-image.jpeg");
                       },
-                      icon: const Icon(Icons.add_shopping_cart_rounded),
-                    ) : Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      key: const Key('2'),
+                    ),
+                ),
+                const SizedBox(width: 5),
+                Expanded(
+                    flex: 6,
+                    child:
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Flexible(
-                          flex: 1,
-                          child: IconButton(
-                              onPressed: (){
-                                setState(() {
-                                  quantity += 1;
-                                });
-                                productQuantities[product] = quantity; // Update quantity in the map
-                                cart.addToCart(product, 1);
-                              },
-
-                              icon: const Icon(Icons.add)),
+                        Text(data[0].toString(), overflow: TextOverflow.visible, maxLines: 2, style: Theme.of(context).textTheme.labelLarge,),
+                        Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children:[
+                              Text(data[1].toString(), style: Theme.of(context).textTheme.labelLarge,),
+                              const SizedBox(width: 5),
+                              Text(data[3].toString(), style: Theme.of(context).textTheme.labelMedium)
+                          ]
                         ),
-                        Flexible(
+                        GestureDetector(onTap: (){
+                          launchUrl(Uri.parse(data[4]), mode: LaunchMode.inAppBrowserView);
+                        }, child: Text('View Details', style: Theme.of(context).textTheme.labelLarge,))
+
+                      ],
+                    )
+                ),
+                Expanded(
+                    flex: 1,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 500),
+                      child: flag ? IconButton(
+                        key: const Key('1'),
+                        onPressed: () {
+                          //add to cart
+                          cart.addToCart(product, quantity);
+
+                          showToast(text: 'Successfully Added to cart');
+                          setState(() {
+                            productFlags[product] = !flag; // Update flag in the map
+                          });
+                        },
+                        icon: const Icon(Icons.add_shopping_cart_rounded),
+                      ) : Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        key: const Key('2'),
+                        children: [
+                          Flexible(
                             flex: 1,
-                            child: Text('$quantity', style: Theme.of(context).textTheme.labelLarge,)),
-                        Flexible(
-                          flex: 1,
-                          child: IconButton(
-                              onPressed: (){
+                            child: GestureDetector(
+                                onTap: (){
+                                  setState(() {
+                                    quantity += 1;
+                                  });
+                                  productQuantities[product] = quantity; // Update quantity in the map
+                                  cart.addToCart(product, 1);
+                                },
+
+                                child: const Icon(Icons.add)),
+                          ),
+                          Text('$quantity', style: Theme.of(context).textTheme.labelLarge,),
+                          GestureDetector(
+                              onTap: (){
                                 setState(() {
                                   if(quantity > 0){
                                     quantity -= 1;
@@ -235,19 +232,20 @@ class _MeatState extends State<Meat> {
                                   if(quantity == 0){
                                     productFlags[product] = !flag; // Update flag in the map
                                     quantity = 1;
+                                    showToast(text: 'Removed from cart');
                                   }
                                 });
                                 productQuantities[product] = quantity; // Update quantity in the map
                                 cart.reduceQtyFromCart(product, 1);
                                 productQuantities[product] = quantity; // Update quantity in the map
                               },
-                              icon: const Icon(Icons.remove)),
-                        ),
-                      ],
-                    ),
-                  )
-              )
-            ],
+                              child: const Icon(Icons.remove)),
+                        ],
+                      ),
+                    )
+                )
+              ],
+            ),
           ),
         ),
         const Divider(thickness: 1)
