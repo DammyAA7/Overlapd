@@ -28,6 +28,7 @@ class _CheckoutState extends State<Checkout> {
   String? setAddress;
   Position? currentLocation;
   bool deliveryTime = true;
+  int scheduleDelivery = -1; // -1 indicates no checkbox is initially selected
   @override
   Widget build(BuildContext context) {
     return Consumer<Cart>(
@@ -227,7 +228,7 @@ class _CheckoutState extends State<Checkout> {
                         color: deliveryTime ? Colors.grey : Colors.black
                     ),
                     title: Text(
-                      'Choose time',
+                        deliveryTime ? 'Now' : 'Choose time',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -240,9 +241,29 @@ class _CheckoutState extends State<Checkout> {
                       showModalBottomSheet(
                           context: context,
                           builder: (BuildContext context){
-                            return SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.8,
-                              width: MediaQuery.of(context).size.width,
+                            return StatefulBuilder(
+                              builder: (BuildContext context, StateSetter setState){
+                                return SizedBox(
+                                  height: MediaQuery.of(context).size.height * 0.5,
+                                  width: MediaQuery.of(context).size.width,
+                                  child: ListView.builder(
+                                      itemCount: 3,
+                                      itemBuilder: (BuildContext context, int index){
+                                        return CheckboxListTile(
+                                          title: Text('Option ${index + 1}', style: Theme.of(context).textTheme.bodyMedium,),
+                                          value: scheduleDelivery == index,
+                                          onChanged: (bool? value) {
+                                            if (value == true) {
+                                              setState(() {
+                                                scheduleDelivery = index;
+                                              });
+                                            }
+                                          },
+                                        );
+                                      }
+                                  ),
+                                );
+                              },
                             );
                           }
 
