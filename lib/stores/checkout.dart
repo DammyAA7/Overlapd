@@ -29,6 +29,51 @@ class _CheckoutState extends State<Checkout> {
   Position? currentLocation;
   bool deliveryTime = true;
   int scheduleDelivery = -1; // -1 indicates no checkbox is initially selected
+  List scheduleDeliveryTimes = [];
+  String chosenScheduleDeliveryTime = '';
+  //var now = DateTime.now();
+  var now = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 10, 0, 0);
+  void updateChosenScheduleDeliveryTime(String newTime) {
+    setState(() {
+      chosenScheduleDeliveryTime = newTime;
+    });
+  }
+  void filterScheduleDeliveryTimes() {
+    List<String> newScheduleDeliveryTimes = [];
+    if(now.isBefore(DateTime(now.year, now.month, now.day, 10, 0, 0))){
+      newScheduleDeliveryTimes = [
+        'Morning (${now.hour + 1 <= 8 ? 8 : now.hour + 1}am - 12pm)',
+        'Afternoon (12pm - 4pm)',
+        'Evening (4pm - 8pm)',
+      ];
+    } else if(now.isBefore(DateTime(now.year, now.month, now.day, 14, 0, 0))){
+      newScheduleDeliveryTimes = [
+        'Afternoon (${now.hour + 1 <= 12 ? 12 : now.hour - 11}pm - 4pm)',
+        'Evening (4pm - 8pm)',
+      ];
+    }
+    else if(now.isBefore(DateTime(now.year, now.month, now.day, 18, 0, 0))){
+      newScheduleDeliveryTimes = [
+        'Evening (${now.hour + 1 <= 16 ? 4 : now.hour - 11}pm - 8pm)',
+      ];
+    } else{
+      newScheduleDeliveryTimes = [
+        'Morning (8am - 12pm)',
+        'Afternoon (12pm - 4pm)',
+        'Evening (4pm - 8pm)',
+      ];
+    }
+    setState(() {
+      scheduleDeliveryTimes = newScheduleDeliveryTimes;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    filterScheduleDeliveryTimes();
+    print(DateTime.now());
+  }
   @override
   Widget build(BuildContext context) {
     return Consumer<Cart>(
@@ -228,7 +273,7 @@ class _CheckoutState extends State<Checkout> {
                         color: deliveryTime ? Colors.grey : Colors.black
                     ),
                     title: Text(
-                        deliveryTime ? 'Now' : 'Choose time',
+                        deliveryTime ? 'Now' : chosenScheduleDeliveryTime == '' ? 'Choose time' : chosenScheduleDeliveryTime,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -238,6 +283,7 @@ class _CheckoutState extends State<Checkout> {
                   ),
                   onTap: (){
                     if(!deliveryTime){
+                      filterScheduleDeliveryTimes();
                       showModalBottomSheet(
                           context: context,
                           builder: (BuildContext context){
@@ -246,21 +292,32 @@ class _CheckoutState extends State<Checkout> {
                                 return SizedBox(
                                   height: MediaQuery.of(context).size.height * 0.5,
                                   width: MediaQuery.of(context).size.width,
-                                  child: ListView.builder(
-                                      itemCount: 3,
-                                      itemBuilder: (BuildContext context, int index){
-                                        return CheckboxListTile(
-                                          title: Text('Option ${index + 1}', style: Theme.of(context).textTheme.bodyMedium,),
-                                          value: scheduleDelivery == index,
-                                          onChanged: (bool? value) {
-                                            if (value == true) {
-                                              setState(() {
-                                                scheduleDelivery = index;
-                                              });
-                                            }
-                                          },
-                                        );
-                                      }
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      children: [
+                                        now.isAfter(DateTime(now.year, now.month, now.day, 18, 0, 0)) ? const Text('Scheduled Deliveries available tomorrow') : const SizedBox.shrink(),
+                                        Expanded(
+                                          child: ListView.builder(
+                                              itemCount: scheduleDeliveryTimes.length,
+                                              itemBuilder: (BuildContext context, int index){
+                                                return CheckboxListTile(
+                                                  title: Text(scheduleDeliveryTimes[index], style: Theme.of(context).textTheme.bodyMedium,),
+                                                  value: scheduleDelivery == index,
+                                                  onChanged: (bool? value) {
+                                                    if (value == true) {
+                                                      setState(() {
+                                                        scheduleDelivery = index;
+                                                        updateChosenScheduleDeliveryTime(scheduleDeliveryTimes[index]);
+                                                      });
+                                                    }
+                                                  },
+                                                );
+                                              }
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 );
                               },
@@ -271,6 +328,7 @@ class _CheckoutState extends State<Checkout> {
                     }
                   },
                 ),
+                now.hour + 1 > 20 || now.hour + 1 < 8? const Text('All stores are currently closed') : const SizedBox.shrink(),
                 const Divider(thickness: 1),
                 Text(
                   'Shopping preferences',
