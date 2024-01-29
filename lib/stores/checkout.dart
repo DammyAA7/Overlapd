@@ -31,8 +31,7 @@ class _CheckoutState extends State<Checkout> {
   int scheduleDelivery = -1; // -1 indicates no checkbox is initially selected
   List scheduleDeliveryTimes = [];
   String chosenScheduleDeliveryTime = '';
-  //var now = DateTime.now();
-  var now = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 21, 00, 0);
+  var now = DateTime.now();
   void updateChosenScheduleDeliveryTime(String newTime) {
     setState(() {
       chosenScheduleDeliveryTime = newTime;

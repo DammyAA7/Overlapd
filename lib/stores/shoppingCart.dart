@@ -86,7 +86,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                               value: true,
                                               onChanged: (bool? value){},
                                               title: Text('Allow Substitute', style: Theme.of(context).textTheme.labelLarge,),
-                                              contentPadding: EdgeInsets.only(right: 35),
+                                              contentPadding: const EdgeInsets.only(right: 35),
                                               materialTapTargetSize: MaterialTapTargetSize.padded,
                                             ),
                                           ],
