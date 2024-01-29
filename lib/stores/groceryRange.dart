@@ -283,8 +283,8 @@ class Cart extends ChangeNotifier{
     cart.update(product, (value) => quantity);
   }
 
-  String calculateTotalAmount() {
-    double totalAmount = 0;
+  String calculateTotalAmount(bool deliveryType) {
+    double totalAmount = deliveryType ? 1 : 0;
     cart.forEach((product, quantity) {
       totalAmount += product.price * quantity;
     });
@@ -292,9 +292,9 @@ class Cart extends ChangeNotifier{
     return formattedTotalAmount;
   }
 
-  String totalAmountPlusFees() {
+  String totalAmountPlusFees(bool deliveryType) {
     double totalAmount = 0;
-    double deliveryFees = 5.99;
+    double deliveryFees = deliveryType ? 6.99 : 5.99;
     cart.forEach((product, quantity) {
       totalAmount += product.price * quantity;
     });

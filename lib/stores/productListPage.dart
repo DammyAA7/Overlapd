@@ -151,7 +151,6 @@ class _MeatState extends State<Meat> {
     child: Column(
       children: [
         SizedBox(
-          //height: 120,
           width: MediaQuery.of(context).size.width,
           child: IntrinsicHeight(
             child: Row(
@@ -185,7 +184,6 @@ class _MeatState extends State<Meat> {
                         GestureDetector(onTap: (){
                           launchUrl(Uri.parse(data[4]), mode: LaunchMode.inAppBrowserView);
                         }, child: Text('View Details', style: Theme.of(context).textTheme.labelLarge,))
-
                       ],
                     )
                 ),

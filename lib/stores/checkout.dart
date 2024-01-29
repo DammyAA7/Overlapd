@@ -32,7 +32,7 @@ class _CheckoutState extends State<Checkout> {
   List scheduleDeliveryTimes = [];
   String chosenScheduleDeliveryTime = '';
   //var now = DateTime.now();
-  var now = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 10, 0, 0);
+  var now = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 21, 00, 0);
   void updateChosenScheduleDeliveryTime(String newTime) {
     setState(() {
       chosenScheduleDeliveryTime = newTime;
@@ -40,28 +40,29 @@ class _CheckoutState extends State<Checkout> {
   }
   void filterScheduleDeliveryTimes() {
     List<String> newScheduleDeliveryTimes = [];
-    if(now.isBefore(DateTime(now.year, now.month, now.day, 10, 0, 0))){
+    if (now.isAfter(DateTime(now.year, now.month, now.day, 17, 0, 0)) && now.isBefore(DateTime(now.year, now.month, now.day, 23, 59, 59))
+    || now.isAfter(DateTime(now.year, now.month, now.day, 0, 0, 0)) && now.isBefore(DateTime(now.year, now.month, now.day, 7, 59, 59))
+    ){
       newScheduleDeliveryTimes = [
-        'Morning (${now.hour + 1 <= 8 ? 8 : now.hour + 1}am - 12pm)',
-        'Afternoon (12pm - 4pm)',
-        'Evening (4pm - 8pm)',
-      ];
-    } else if(now.isBefore(DateTime(now.year, now.month, now.day, 14, 0, 0))){
-      newScheduleDeliveryTimes = [
-        'Afternoon (${now.hour + 1 <= 12 ? 12 : now.hour - 11}pm - 4pm)',
-        'Evening (4pm - 8pm)',
+        'Slot (8am - 12pm)',
+        'Slot (12pm - 4pm)',
+        'Slot (4pm - 8pm)',
       ];
     }
-    else if(now.isBefore(DateTime(now.year, now.month, now.day, 18, 0, 0))){
+    else if(now.isAfter(DateTime(now.year, now.month, now.day, 16, 0, 0))){
+      now.hour -  7< 10 ? newScheduleDeliveryTimes.add('Slot (${now.hour - 11}pm - ${now.hour - 7}pm)') : null;
+    } else if(now.isAfter(DateTime(now.year, now.month, now.day, 12, 0, 0))){
       newScheduleDeliveryTimes = [
-        'Evening (${now.hour + 1 <= 16 ? 4 : now.hour - 11}pm - 8pm)',
+        'Slot (${now.hour - 11}pm - ${now.hour - 7}pm)',
       ];
-    } else{
+      now.hour - 3 < 10 ? newScheduleDeliveryTimes.add('Slot (${now.hour - 7}pm - ${now.hour - 3}pm)') : null;
+    }
+    else if(now.isAfter(DateTime(now.year, now.month, now.day, 8, 0, 0))){
       newScheduleDeliveryTimes = [
-        'Morning (8am - 12pm)',
-        'Afternoon (12pm - 4pm)',
-        'Evening (4pm - 8pm)',
+        'Slot (${now.hour  + 1}${now.hour  + 1 == 12 ? 'pm' : 'am'} - ${now.hour  - 7}pm)',
+        'Slot (${now.hour - 7}pm - ${now.hour - 3}pm)',
       ];
+      now.hour + 1 < 10 ? newScheduleDeliveryTimes.add('Slot (${now.hour - 3}pm - ${now.hour + 1}pm)') : null;
     }
     setState(() {
       scheduleDeliveryTimes = newScheduleDeliveryTimes;
@@ -296,7 +297,7 @@ class _CheckoutState extends State<Checkout> {
                                     padding: const EdgeInsets.all(8.0),
                                     child: Column(
                                       children: [
-                                        now.isAfter(DateTime(now.year, now.month, now.day, 18, 0, 0)) ? const Text('Scheduled Deliveries available tomorrow') : const SizedBox.shrink(),
+                                        now.isAfter(DateTime(now.year, now.month, now.day, 17, 0, 0)) ? const Text('Scheduled Deliveries available tomorrow') : const SizedBox.shrink(),
                                         Expanded(
                                           child: ListView.builder(
                                               itemCount: scheduleDeliveryTimes.length,
@@ -343,14 +344,14 @@ class _CheckoutState extends State<Checkout> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Subtotal:'),
-                          Text(value.calculateTotalAmount())
+                          Text(value.calculateTotalAmount(false))
                         ],
                       ),
-                      const Row(
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Delivery fees:'),
-                          Text('€5.99')
+                          const Text('Delivery fees:'),
+                          deliveryTime ? const Text('€6.99') : const Text('€5.99')
                         ],
                       ),
                       Row(
@@ -365,11 +366,11 @@ class _CheckoutState extends State<Checkout> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Total:'),
-                          Text(value.totalAmountPlusFees())
+                          Text(value.totalAmountPlusFees(deliveryTime))
                         ],
                       ),
                       solidButton(context, 'Checkout', () async{
-                        await initPayment((double.parse(value.stripEuroSign(value.calculateTotalAmount())) * 100).toInt().toString(), _auth.getUsername(), context, value);
+                        await initPayment((double.parse(value.stripEuroSign(value.calculateTotalAmount(deliveryTime))) * 100).toInt().toString(), _auth.getUsername(), context, value);
                       }, true),
                     ],
                   ),
@@ -386,7 +387,7 @@ class _CheckoutState extends State<Checkout> {
       final response = await http.post(Uri.parse(
           'https://us-central1-overlapd-13268.cloudfunctions.net/StripePaymentIntent'),
         body: {
-          'amount': amount,
+          'amount': amount ,
           'email': email
         });
 
@@ -401,7 +402,7 @@ class _CheckoutState extends State<Checkout> {
           )
       );
       await Stripe.instance.presentPaymentSheet();
-      _checkout('12 Dalriada Court', 'Tesco', value.cart, value.calculateTotalAmount());
+      _checkout('12 Dalriada Court', 'Tesco', value.cart, value.totalAmountPlusFees(deliveryTime));
     } catch(e){
       print(e);
     }

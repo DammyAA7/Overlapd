@@ -56,77 +56,89 @@ class _ShoppingCartState extends State<ShoppingCart> {
                         return  Column(
                           children: [
                             SizedBox(
-                              height: 100,
                               width: MediaQuery.of(context).size.width,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                      flex: 3,
-                                      child: Image.network(product.imageUrl)
-                                  ),
-                                  Expanded(
-                                      flex: 6,
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                        children: [
-                                          Text(product.title, overflow: TextOverflow.visible, maxLines: 2, style: Theme.of(context).textTheme.labelLarge,),
-                                          Row(
-                                            children: [
-                                              Text('€${product.price.toString()}', style: Theme.of(context).textTheme.labelLarge,),
-                                              Text(product.pricePer, style: Theme.of(context).textTheme.labelMedium,)
-                                            ],
-                                          )
-                                        ],
-                                      )
-                                  ),
-                                  Expanded(
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        key: const Key('2'),
-                                        children: [
-                                          Flexible(
-                                            flex: 1,
-                                            child: IconButton(
-                                                onPressed: (){
-                                                  setState(() {
-                                                    quantity += 1;
-                                                  });
-                                                  // Update quantity in the map
-                                                  value.addToCart(product, 1);
-                                                },
-
-                                                icon: const Icon(Icons.add)),
-                                          ),
-                                          Flexible(
+                              child: IntrinsicHeight(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                        flex: 3,
+                                        child: Image.network(product.imageUrl,
+                                          errorBuilder: (context, error, stackTrace){
+                                            return Image.network("https://digitalcontent.api.tesco.com/v2/media/ghs-mktg/b0b04216-fa73-466d-a9d7-c9fcfa1ce9b3/no-image.jpeg");
+                                          },
+                                        ),
+                                    ),
+                                    Expanded(
+                                        flex: 6,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                          children: [
+                                            Text(product.title, overflow: TextOverflow.visible, maxLines: 2, style: Theme.of(context).textTheme.labelLarge,),
+                                            Row(
+                                              children: [
+                                                Text('€${product.price.toString()}', style: Theme.of(context).textTheme.labelLarge,),
+                                                Text(product.pricePer, style: Theme.of(context).textTheme.labelMedium,)
+                                              ],
+                                            ),
+                                            CheckboxListTile(
+                                              value: true,
+                                              onChanged: (bool? value){},
+                                              title: Text('Allow Substitute', style: Theme.of(context).textTheme.labelLarge,),
+                                              contentPadding: EdgeInsets.only(right: 35),
+                                              materialTapTargetSize: MaterialTapTargetSize.padded,
+                                            ),
+                                          ],
+                                        )
+                                    ),
+                                    Expanded(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          key: const Key('2'),
+                                          children: [
+                                            Flexible(
                                               flex: 1,
-                                              child: Text('$quantity', style: Theme.of(context).textTheme.labelLarge,)),
-                                          Flexible(
-                                            flex: 1,
-                                            child: IconButton(
-                                                onPressed: (){
-                                                  setState(() {
-                                                    if(quantity > 0){
-                                                      quantity -= 1;
-                                                    }
-                                                    if(quantity == 0){
-                                                      quantity = 1;
-                                                    }
-                                                  });
-                                                  value.reduceQtyFromCart(product, 1);
-                                                },
-                                                icon: const Icon(Icons.remove)),
-                                          ),
-                                        ],
-                                      ),
-                                  )
-                                ],
+                                              child: IconButton(
+                                                  onPressed: (){
+                                                    setState(() {
+                                                      quantity += 1;
+                                                    });
+                                                    // Update quantity in the map
+                                                    value.addToCart(product, 1);
+                                                  },
+
+                                                  icon: const Icon(Icons.add)),
+                                            ),
+                                            Flexible(
+                                                flex: 1,
+                                                child: Text('$quantity', style: Theme.of(context).textTheme.labelLarge,)),
+                                            Flexible(
+                                              flex: 1,
+                                              child: IconButton(
+                                                  onPressed: (){
+                                                    setState(() {
+                                                      if(quantity > 0){
+                                                        quantity -= 1;
+                                                      }
+                                                      if(quantity == 0){
+                                                        quantity = 1;
+                                                      }
+                                                    });
+                                                    value.reduceQtyFromCart(product, 1);
+                                                  },
+                                                  icon: const Icon(Icons.remove)),
+                                            ),
+                                          ],
+                                        ),
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
                             const Divider(
                               thickness: 1,
-                            )
+                            ),
                           ],
                         );
                       }
@@ -141,7 +153,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Total:'),
-                    Text(value.calculateTotalAmount())
+                    Text(value.calculateTotalAmount(false))
                   ],
                 ),
               ),
