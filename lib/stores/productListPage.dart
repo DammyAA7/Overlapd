@@ -134,7 +134,8 @@ class _MeatState extends State<Meat> {
         title: data[0].toString(),
         price: double.parse(data[1].toString().replaceAll(RegExp(r'[^0-9.]'), '')),
         pricePer: data[3].toString(),
-        imageUrl: data[5].toString()
+        imageUrl: data[5].toString(),
+        substitutable: true
     );
     int quantity = productQuantities[product] ?? 1; // Get quantity for the product
     bool flag = productFlags[product] ?? true; // Get flag for the product

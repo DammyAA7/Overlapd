@@ -83,8 +83,12 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                               ],
                                             ),
                                             CheckboxListTile(
-                                              value: true,
-                                              onChanged: (bool? value){},
+                                              value: product.substitutable,
+                                              onChanged: (bool? value){
+                                                setState(() {
+                                                  product.setSubstitutable(!product.substitutable);
+                                                });
+                                              },
                                               title: Text('Allow Substitute', style: Theme.of(context).textTheme.labelLarge,),
                                               contentPadding: const EdgeInsets.only(right: 35),
                                               materialTapTargetSize: MaterialTapTargetSize.padded,
@@ -153,7 +157,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Total:'),
-                    Text(value.calculateTotalAmount(false))
+                    Text(value.calculateTotalAmount())
                   ],
                 ),
               ),

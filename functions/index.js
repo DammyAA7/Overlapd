@@ -27,7 +27,7 @@ exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
     );
     const paymentIntent = await stripe.paymentIntents.create({
       customer: customerId,
-      amount: parseInt(req.body.amount) + 599 + serviceCharge,
+      amount: parseInt(req.body.amount) + parseInt(req.body.deliveryFee) + serviceCharge,
       currency: 'eur',
       capture_method: 'manual',
       automatic_payment_methods: {

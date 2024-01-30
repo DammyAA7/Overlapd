@@ -180,8 +180,6 @@ class MapRange{
     final rawProducts = await rootBundle.loadString("assets/Tesco/$category/$subCategory/$subSubCategory.csv");
     List<List<dynamic>> listData = const CsvToListConverter().convert(rawProducts);
     return listData;
-
-    //return fireStore.collection('Tesco').doc(document).collection(subCollection).doc(subSubcollection).collection(subSubcollection).snapshots();
   }
 
 
@@ -192,12 +190,14 @@ class Product {
   final double price;
   final String pricePer;
   final String imageUrl;
+  bool substitutable;
 
   Product({
     required this.title,
     required this.price,
     required this.pricePer,
-    required this.imageUrl
+    required this.imageUrl,
+    this.substitutable = true
   });
 
   Map<String, dynamic> toMap() {
@@ -206,7 +206,12 @@ class Product {
       'price': price,
       'pricePer': pricePer,
       'imageUrl': imageUrl,
+      'substitutable': substitutable
     };
+  }
+
+  void setSubstitutable(bool value) {
+    substitutable = value;
   }
 
   @override
@@ -283,8 +288,8 @@ class Cart extends ChangeNotifier{
     cart.update(product, (value) => quantity);
   }
 
-  String calculateTotalAmount(bool deliveryType) {
-    double totalAmount = deliveryType ? 1 : 0;
+  String calculateTotalAmount() {
+    double totalAmount = 0;
     cart.forEach((product, quantity) {
       totalAmount += product.price * quantity;
     });

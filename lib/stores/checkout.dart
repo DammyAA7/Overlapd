@@ -67,12 +67,11 @@ class _CheckoutState extends State<Checkout> {
       scheduleDeliveryTimes = newScheduleDeliveryTimes;
     });
   }
-
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
-    filterScheduleDeliveryTimes();
-    print(DateTime.now());
+    print(context.read<Cart>().toMapList());
   }
   @override
   Widget build(BuildContext context) {
@@ -223,7 +222,6 @@ class _CheckoutState extends State<Checkout> {
                             if(!deliveryTime){
                               deliveryTime = !deliveryTime;
                             }
-
                           });
                         },
                       ),
@@ -243,22 +241,14 @@ class _CheckoutState extends State<Checkout> {
                               )
                           ),
                         ),
-                        onTap: (){
+                        onTap: () async {
                           setState(() {
                             if(deliveryTime){
                               deliveryTime = !deliveryTime;
                             }
                           });
-                          showModalBottomSheet(
-                              context: context,
-                              builder: (BuildContext context){
-                                return SizedBox(
-                                  height: MediaQuery.of(context).size.height * 0.8,
-                                  width: MediaQuery.of(context).size.width,
-                                );
-                              }
-
-                          );
+                          filterScheduleDeliveryTimes();
+                          await showDeliverySlots();
                         },
                       )
                     ],
@@ -281,50 +271,10 @@ class _CheckoutState extends State<Checkout> {
                       ),
                     ),
                   ),
-                  onTap: (){
+                  onTap: () async {
                     if(!deliveryTime){
                       filterScheduleDeliveryTimes();
-                      showModalBottomSheet(
-                          context: context,
-                          builder: (BuildContext context){
-                            return StatefulBuilder(
-                              builder: (BuildContext context, StateSetter setState){
-                                return SizedBox(
-                                  height: MediaQuery.of(context).size.height * 0.5,
-                                  width: MediaQuery.of(context).size.width,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Column(
-                                      children: [
-                                        now.isAfter(DateTime(now.year, now.month, now.day, 17, 0, 0)) ? const Text('Scheduled Deliveries available tomorrow') : const SizedBox.shrink(),
-                                        Expanded(
-                                          child: ListView.builder(
-                                              itemCount: scheduleDeliveryTimes.length,
-                                              itemBuilder: (BuildContext context, int index){
-                                                return CheckboxListTile(
-                                                  title: Text(scheduleDeliveryTimes[index], style: Theme.of(context).textTheme.bodyMedium,),
-                                                  value: scheduleDelivery == index,
-                                                  onChanged: (bool? value) {
-                                                    if (value == true) {
-                                                      setState(() {
-                                                        scheduleDelivery = index;
-                                                        updateChosenScheduleDeliveryTime(scheduleDeliveryTimes[index]);
-                                                      });
-                                                    }
-                                                  },
-                                                );
-                                              }
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          }
-
-                      );
+                      await showDeliverySlots();
                     }
                   },
                 ),
@@ -343,7 +293,7 @@ class _CheckoutState extends State<Checkout> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Subtotal:'),
-                          Text(value.calculateTotalAmount(false))
+                          Text(value.calculateTotalAmount())
                         ],
                       ),
                       Row(
@@ -369,7 +319,7 @@ class _CheckoutState extends State<Checkout> {
                         ],
                       ),
                       solidButton(context, 'Checkout', () async{
-                        await initPayment((double.parse(value.stripEuroSign(value.calculateTotalAmount(deliveryTime))) * 100).toInt().toString(), _auth.getUsername(), context, value);
+                        await initPayment((double.parse(value.stripEuroSign(value.calculateTotalAmount())) * 100).toInt().toString(), _auth.getUsername(), context, value);
                       }, true),
                     ],
                   ),
@@ -386,8 +336,9 @@ class _CheckoutState extends State<Checkout> {
       final response = await http.post(Uri.parse(
           'https://us-central1-overlapd-13268.cloudfunctions.net/StripePaymentIntent'),
         body: {
-          'amount': amount ,
-          'email': email
+          'amount': amount,
+          'email': email,
+          'deliveryFee': deliveryTime ? '699' : '599'
         });
 
       final jsonResponse = jsonDecode(response.body);
@@ -438,5 +389,49 @@ class _CheckoutState extends State<Checkout> {
         });
       }
     }
+  }
+
+  Future showDeliverySlots(){
+    return showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context){
+          return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState){
+              return SizedBox(
+                height: MediaQuery.of(context).size.height * 0.3,
+                width: MediaQuery.of(context).size.width,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      now.isAfter(DateTime(now.year, now.month, now.day, 17, 0, 0)) ? const Text('Scheduled Deliveries available tomorrow') : const SizedBox.shrink(),
+                      Expanded(
+                        child: ListView.builder(
+                            itemCount: scheduleDeliveryTimes.length,
+                            itemBuilder: (BuildContext context, int index){
+                              return CheckboxListTile(
+                                title: Text(scheduleDeliveryTimes[index], style: Theme.of(context).textTheme.bodyMedium,),
+                                value: scheduleDelivery == index,
+                                onChanged: (bool? value) {
+                                  if (value == true) {
+                                    setState(() {
+                                      scheduleDelivery = index;
+                                      updateChosenScheduleDeliveryTime(scheduleDeliveryTimes[index]);
+                                    });
+                                  }
+                                },
+                              );
+                            }
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        }
+
+    );
   }
 }
