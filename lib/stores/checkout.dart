@@ -24,7 +24,9 @@ class Checkout extends StatefulWidget {
 
 class _CheckoutState extends State<Checkout> {
   final FirebaseAuthService _auth = FirebaseAuthService();
+  TextEditingController searchText = TextEditingController();
   final DeliveryService _service = DeliveryService();
+  String predictions = '';
   String? setAddress;
   Position? currentLocation;
   bool deliveryTime = true;
@@ -131,8 +133,12 @@ class _CheckoutState extends State<Checkout> {
                                       child: Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: TextFormField(
-                                          onChanged: (value){
-                                            placeAutoComplete(value);
+                                          onChanged: (value) async {
+                                            predictions = value;
+                                            setState(() {
+                                              placeAutoComplete(predictions);
+                                              print(placePredictions.length);
+                                            });
                                           },
                                           textInputAction: TextInputAction.search,
                                           decoration: const InputDecoration(
@@ -167,13 +173,9 @@ class _CheckoutState extends State<Checkout> {
                                   Expanded(
                                     child: ListView.builder(
                                         itemCount: placePredictions.length,
-                                        itemBuilder: (context,index) => locationListTile(placePredictions[index].description!, () {
-                                          setState(() {
-                                            setAddress = placePredictions[index].description;
-                                            getCoordinates(setAddress!);
-                                            Navigator.of(context).pop();
-                                          });
-                                        })
+                                        itemBuilder: (context,index) {
+                                          return _buildAddressResult(index);
+                                        }
                                     ),
                                   )
 
@@ -320,7 +322,7 @@ class _CheckoutState extends State<Checkout> {
                       ),
                       solidButton(context, 'Checkout', () async{
                         await initPayment((double.parse(value.stripEuroSign(value.calculateTotalAmount())) * 100).toInt().toString(), _auth.getUsername(), context, value);
-                      }, true),
+                      }, (chosenScheduleDeliveryTime != '' && setAddress != null) || (deliveryTime && setAddress != null) ? true : false),
                     ],
                   ),
                 ),
@@ -352,7 +354,7 @@ class _CheckoutState extends State<Checkout> {
           )
       );
       await Stripe.instance.presentPaymentSheet();
-      _checkout('12 Dalriada Court', 'Tesco', value.cart, value.totalAmountPlusFees(deliveryTime));
+      _checkout(setAddress!, 'Tesco', value.cart, value.totalAmountPlusFees(deliveryTime));
     } catch(e){
       print(e);
     }
@@ -375,13 +377,12 @@ class _CheckoutState extends State<Checkout> {
         'maps/api/place/autocomplete/json',
         {
           "input": query,
-          "types": "address",
+          "components": "country:ie",
           "key": "AIzaSyDFcJ0SWLhnTZVktTPn8jB5nJ2hpuSfwNk"
         });
 
     String? response = await NetworkUtility.fetchUrl(uri);
-
-    if (response !=null){
+    if (response != null){
       PlaceAutocompleteResponse result = PlaceAutocompleteResponse.parseAutocompleteResult(response);
       if(result.predictions != null){
         setState(() {
@@ -390,6 +391,24 @@ class _CheckoutState extends State<Checkout> {
       }
     }
   }
+
+  Widget _buildAddressResult(int index){
+    placeAutoComplete(predictions);
+    if(predictions.isEmpty){
+      return const SizedBox.shrink();
+    }
+    else{
+      return locationListTile(placePredictions[index].description!, () {
+        setState(() {
+          setAddress = placePredictions[index].description;
+          getCoordinates(setAddress!);
+          Navigator.of(context).pop();
+        });
+
+      });
+    }
+  }
+
 
   Future showDeliverySlots(){
     return showModalBottomSheet(
