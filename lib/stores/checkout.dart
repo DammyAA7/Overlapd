@@ -30,7 +30,9 @@ class _CheckoutState extends State<Checkout> {
   String? setAddress;
   Position? currentLocation;
   bool deliveryTime = true;
+  bool shoppingPreference = true;
   int scheduleDelivery = -1; // -1 indicates no checkbox is initially selected
+  int number = 0;
   List scheduleDeliveryTimes = [];
   String chosenScheduleDeliveryTime = '';
   var now = DateTime.now();
@@ -177,7 +179,17 @@ class _CheckoutState extends State<Checkout> {
                                           return _buildAddressResult(index);
                                         }
                                     ),
-                                  )
+                                  ),
+                                  setAddress != null ?
+                                      Column(
+                                        children: [
+                                          Text("House Number ${placePredictions[number].terms?.buildingNumber}"),
+                                          Text("Street Address ${placePredictions[number].terms?.streetAddress}"),
+                                          Text("Locality ${placePredictions[number].terms?.locality}"),
+                                          Text("Area ${placePredictions[number].terms?.area}"),
+                                        ],
+                                      ) :
+                                      const SizedBox.shrink()
 
                                 ],
                               ),
@@ -282,9 +294,64 @@ class _CheckoutState extends State<Checkout> {
                 ),
                 now.hour + 1 > 20 || now.hour + 1 < 8? const Text('All stores are currently closed') : const SizedBox.shrink(),
                 const Divider(thickness: 1),
-                Text(
-                  'Shopping preferences',
-                  style: Theme.of(context).textTheme.titleLarge,
+                GestureDetector(
+                  child: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    horizontalTitleGap: 5,
+                    leading: const Icon(
+                        Icons.shopping_basket_outlined,
+                        color: Colors.black
+                    ),
+                    title: Text(
+                      'Shopping preferences',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                  onTap: () async {
+                    showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context){
+                          return StatefulBuilder(
+                            builder: (BuildContext context, StateSetter setState){
+                              return SizedBox(
+                                height: MediaQuery.of(context).size.height * 0.2,
+                                width: MediaQuery.of(context).size.width,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    children: [
+                                      Column(
+                                      children: [
+                                        CheckboxListTile(
+                                          title: const Text("Picker has full discretion over substitutable items"),
+                                          value: shoppingPreference,
+                                          onChanged: (bool? value) {
+                                            setState(() {
+                                              shoppingPreference = !shoppingPreference;
+                                            });
+                                          },
+                                        ),
+                                        CheckboxListTile(
+                                          title: const Text("Picker will contact you to get your approval"),
+                                          value: !shoppingPreference,
+                                          onChanged: (bool? value) {
+                                            setState(() {
+                                              shoppingPreference = !shoppingPreference;
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        }
+
+                    );
+                  },
                 ),
                 const Spacer(),
                 Padding(
@@ -398,11 +465,13 @@ class _CheckoutState extends State<Checkout> {
       return const SizedBox.shrink();
     }
     else{
+      placePredictions[index].terms;
       return locationListTile(placePredictions[index].description!, () {
         setState(() {
           setAddress = placePredictions[index].description;
+          number = index;
           getCoordinates(setAddress!);
-          Navigator.of(context).pop();
+          //Navigator.of(context).pop();
         });
 
       });

@@ -229,3 +229,7 @@ exports.StripeAccountBalance = functions.https.onRequest(async (req, res) => {
     }
 });
 
+exports.GoogleFindAddress = functions.https.onRequest(async (req, res) => {
+
+});
+

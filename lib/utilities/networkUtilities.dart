@@ -15,17 +15,66 @@ class NetworkUtility{
   }
 }
 
+class PredictionTerms {
+  final String? buildingNumber;
+  final String? streetAddress;
+  final String? locality;
+  final String? area;
+
+  PredictionTerms({
+    this.buildingNumber,
+    this.streetAddress,
+    this.locality,
+    this.area,
+  });
+
+  factory PredictionTerms.fromJson(List<dynamic> terms) {
+    String? buildingNumber;
+    String? streetAddress;
+    String? locality;
+    String? area;
+
+    // Assuming the terms are ordered as per your specification:
+    // 0: Building Number (if exists)
+    // 1: Street Address (if exists)
+    // 2: Locality
+    // 3: Area
+    if (terms.isNotEmpty) {
+      // Initialize all values to null to handle cases with less than 4 terms
+      buildingNumber = null;
+      streetAddress = null;
+      locality = null;
+      area = null;
+
+      // Assign values based on available terms
+      // The index is checked against the length of terms to avoid out-of-bounds access
+      buildingNumber = terms.length > 4 ? terms[0]['value'] : null;
+      streetAddress = terms.length > 3 ? terms[terms.length - 4]['value'] : null;
+      locality = terms.length > 2 ? terms[terms.length - 3]['value'] : null;
+      area = terms.length > 1 ? terms[terms.length - 2]['value'] : null;
+    }
+    return PredictionTerms(
+      buildingNumber: buildingNumber,
+      streetAddress: streetAddress,
+      locality: locality,
+      area: area,
+    );
+  }
+}
+
 class AutocompletePrediction{
   final String? description;
   final StructuredFormatting? structuredFormatting;
   final String? placeId;
   final String? reference;
+  final PredictionTerms? terms;
 
   AutocompletePrediction({
     this.description,
     this.structuredFormatting,
     this.placeId,
-    this.reference
+    this.reference,
+    this.terms,
   });
 
   factory AutocompletePrediction.fromJson(Map<String, dynamic> json) {
@@ -35,6 +84,9 @@ class AutocompletePrediction{
       reference: json['reference'] as String?,
       structuredFormatting: json['structured_formatting'] != null
           ? StructuredFormatting.fromJson(json['structured_formatting'])
+          : null,
+      terms: json['terms'] != null // Check if terms exist and parse accordingly
+          ? PredictionTerms.fromJson(json['terms'])
           : null,
     );
   }
