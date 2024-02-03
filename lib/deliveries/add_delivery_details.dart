@@ -139,9 +139,7 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
                                         child: ElevatedButton.icon(
                                             onPressed: ()  async{
                                               currentLocation = await determinePosition();
-                                              String? formattedAddress = await getAddressFromCoordinates(currentLocation!.latitude, currentLocation!.longitude);
                                               setState(() {
-                                                setAddress = formattedAddress;
                                                 Navigator.of(context).pop();
                                               });
                                             },

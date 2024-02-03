@@ -4,6 +4,24 @@ import 'package:geolocator/geolocator.dart';
 import 'networkUtilities.dart';
 import 'package:http/http.dart' as http;
 
+class AddressComponents {
+  final String? buildingNumber;
+  final String? streetAddress;
+  final String? locality;
+  final String? area;
+  final String? postcode;
+  final String? fullAddress;
+
+  AddressComponents({
+    this.buildingNumber,
+    this.streetAddress,
+    this.locality,
+    this.area,
+    this.postcode,
+    this.fullAddress
+  });
+}
+
 Widget locationListTile(String location, VoidCallback press){
   return Column(
     children: [
@@ -24,7 +42,7 @@ Widget locationListTile(String location, VoidCallback press){
   );
 }
 
-Future<String?> getAddressFromCoordinates(double latitude, double longitude) async {
+Future<AddressComponents?> getAddressDetailsFromCoordinates(double latitude, double longitude) async {
   Uri uri = Uri.https(
     "maps.googleapis.com",
     'maps/api/geocode/json',
@@ -34,18 +52,53 @@ Future<String?> getAddressFromCoordinates(double latitude, double longitude) asy
     },
   );
 
-  String? response = await NetworkUtility.fetchUrl(uri);
+  try {
+    final response = await http.get(uri);
+    if (response.statusCode == 200) {
+      Map<String, dynamic> decodedResponse = json.decode(response.body);
+      if (decodedResponse.containsKey("results") &&
+          decodedResponse["results"] is List &&
+          (decodedResponse["results"] as List).isNotEmpty) {
+        // Extract the address components from the first result
+        String? buildingNumber;
+        String? streetAddress;
+        String? locality;
+        String? area;
+        String? postcode;
+        String? fullAddress;
 
-  if (response != null) {
-    Map<String, dynamic> decodedResponse = json.decode(response);
-    if (decodedResponse.containsKey("results") &&
-        decodedResponse["results"] is List &&
-        (decodedResponse["results"] as List).isNotEmpty) {
-      // Extract the first formatted address from the results
-      return decodedResponse["results"][0]["formatted_address"];
+        fullAddress = decodedResponse["results"][0]["formatted_address"];
+        List<dynamic> addressComponents = decodedResponse["results"][0]["address_components"];
+
+
+        for (var component in addressComponents) {
+          List<String> types = List<String>.from(component["types"]);
+          if (types.contains("street_number")) {
+            buildingNumber = component["long_name"];
+          } else if (types.contains("route")) {
+            streetAddress = component["long_name"];
+          } else if (types.contains("neighborhood") || types.contains("locality")) {
+            locality = component["long_name"];
+          } else if (types.contains("administrative_area_level_1")) {
+            area = component["long_name"];
+          } else if (types.contains("postal_code")) {
+            postcode = component["long_name"];
+          }
+        }
+
+        return AddressComponents(
+          buildingNumber: buildingNumber,
+          streetAddress: streetAddress,
+          locality: locality,
+          area: area,
+          postcode: postcode,
+          fullAddress: fullAddress
+        );
+      }
     }
+  } catch (e) {
+    print(e.toString());
   }
-
   return null;
 }
 
