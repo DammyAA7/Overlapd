@@ -268,7 +268,6 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
             ),
             const SizedBox(height: 10),
             Row(children: [
-              Expanded(flex: 8,child: alphanumericInputBox('Enter Item', true, false, _itemController),),
               const SizedBox(width: 10.0),
               Expanded(flex: 2,child: solidButton(
                   context, '+',

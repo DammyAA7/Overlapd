@@ -56,12 +56,14 @@ Widget alphanumericInputBox(
     bool autoCorrect,
     bool obscureText,
     InputBoxController inputBoxController,
+    String? initialValue
     ) {
   return widgetInputBox(
     hintText: hintText,
     autoCorrect: autoCorrect,
     obscureText: obscureText,
     textType: TextInputType.text,
+    initialValue: initialValue,
     onChanged: (value) {
       // You can perform any additional actions when the text changes here
     },
@@ -75,6 +77,51 @@ Widget alphanumericInputBox(
       }
       return null; // No error
     },
+  );
+}
+
+Widget addressInputBox(
+    String hintText,
+    bool autoCorrect,
+    bool obscureText,
+    String? initialValue
+    ) {
+  return TextFormField(
+    initialValue: initialValue,
+    obscureText: obscureText,
+    autocorrect: autoCorrect,
+    keyboardType: TextInputType.number,
+    style: const TextStyle(
+      color: Color(0xFF727E7B),
+      fontFamily: 'Darker Grotesque',
+      fontSize: 22.0,
+    ),
+    decoration: InputDecoration(
+      contentPadding:
+      const EdgeInsets.only(left: 15, right: 15, top: 20, bottom: 20),
+      filled: true,
+      fillColor: const Color(0xFF6EE8C5).withOpacity(0.1),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20.0),
+        borderSide: BorderSide(
+          color: const Color(0xFF6EE8C5).withOpacity(0.6),
+          width: 2.5,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20.0),
+        borderSide: BorderSide(
+          style: BorderStyle.solid,
+          color: const Color(0xFF6EE8C5).withOpacity(0.6),
+          width: 4.5,
+        ),
+      ),
+      hintStyle: const TextStyle(
+          color: Color(0xFF727E7B),
+          fontSize: 22.0
+      ),
+      hintText: hintText,
+    ),
   );
 }
 
@@ -192,6 +239,7 @@ Widget widgetInputBox({
   required TextInputType textType,
   Function(String)? onChanged,
   TextInputFormatter? inputFormatter,
+  String? initialValue,
   String? Function(String?)? validator,
   required InputBoxController inputBoxController,
 }) {
@@ -208,7 +256,8 @@ Widget widgetInputBox({
 
   bool hasError = validator != null && validator(inputBoxController.controller.text) != null;
 
-  return TextField(
+  return TextFormField(
+    initialValue: initialValue,
     controller: inputBoxController.controller,
     onChanged: onChanged,
     obscureText: obscureText,
