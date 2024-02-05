@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:overlapd/stores/checkout.dart';
 import 'package:provider/provider.dart';
-import '../deliveries/delivery_service.dart';
-import '../screens/home.dart';
-import '../utilities/toast.dart';
 import '../utilities/widgets.dart';
 import 'groceryRange.dart';
 
@@ -82,16 +79,18 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                                 Text(product.pricePer, style: Theme.of(context).textTheme.labelMedium,)
                                               ],
                                             ),
-                                            CheckboxListTile(
-                                              value: product.substitutable,
-                                              onChanged: (bool? value){
-                                                setState(() {
-                                                  product.setSubstitutable(!product.substitutable);
-                                                });
-                                              },
-                                              title: Text('Allow Substitute', style: Theme.of(context).textTheme.labelLarge,),
-                                              contentPadding: const EdgeInsets.only(right: 35),
-                                              materialTapTargetSize: MaterialTapTargetSize.padded,
+                                            Flexible(
+                                              child: CheckboxListTile(
+                                                value: product.substitutable,
+                                                onChanged: (bool? value){
+                                                  setState(() {
+                                                    product.setSubstitutable(!product.substitutable);
+                                                  });
+                                                },
+                                                title: Text('Substitutable', overflow: TextOverflow.ellipsis, maxLines: 1, style: Theme.of(context).textTheme.labelLarge,),
+                                                contentPadding: const EdgeInsets.only(right: 35),
+                                                materialTapTargetSize: MaterialTapTargetSize.padded,
+                                              ),
                                             ),
                                           ],
                                         )

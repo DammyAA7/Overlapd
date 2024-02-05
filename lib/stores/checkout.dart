@@ -116,6 +116,7 @@ class _CheckoutState extends State<Checkout> {
                   onPressed: (){
                     showModalBottomSheet(
                         context: context,
+                        enableDrag: false,
                         isScrollControlled: true,
                         builder: (BuildContext context){
                           return StatefulBuilder(
@@ -125,99 +126,106 @@ class _CheckoutState extends State<Checkout> {
                                   width: MediaQuery.of(context).size.width,
                                   child: Padding(
                                     padding: const EdgeInsets.all(10.0),
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          children: [
-                                            const Icon(Icons.add_location_alt_outlined),
-                                            const SizedBox(width: 5),
-                                            const Text('Set Delivery Location'),
-                                            const Spacer(),
-                                            IconButton(
-                                                onPressed: () => Navigator.of(context).pop(),
-                                                icon: const Icon(Icons.arrow_drop_down_outlined, size: 35,)),
-                                          ],
-                                        ),
-                                        setAddress != null ?
-                                        Column(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            IconButton(onPressed: (){
-                                              setState(() {
-                                                setAddress = null;
-                                                placePredictions.clear();
-                                              });
-                                            }, icon: const Icon(Icons.backspace_outlined)),
-                                            const Text("House Number"),
-                                            addressInputBox('Building number', true, false, houseNumber!),
-                                            const Text("Street Address"),
-                                            addressInputBox('Street Address', true, false, streetAddress!),
-                                            const Text("Locality"),
-                                            addressInputBox('Locality', true, false, locality!),
-                                            const Text("County"),
-                                            addressInputBox('County', true, false, county!),
-                                            const Text("Postal code"),
-                                            addressInputBox('Postal code', true, false, postalCode ?? ""),
-                                          ],
-                                        ) :
-                                        Form(
-                                            child: Padding(
-                                                  padding: const EdgeInsets.all(8.0),
-                                                  child: TextFormField(
-                                                    controller: searchText,
-                                                    onChanged: (value) async {
-                                                      predictions = value;
-                                                      setState(() {
-                                                        placeAutoComplete(predictions);
-                                                      });
-                                                    },
-                                                    textInputAction: TextInputAction.search,
-                                                    decoration: const InputDecoration(
-                                                        hintText: "Search your location",
-                                                        prefixIcon: Icon(Icons.search)
+                                    child: SingleChildScrollView(
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              const Icon(Icons.add_location_alt_outlined),
+                                              const SizedBox(width: 5),
+                                              const Text('Set Delivery Location'),
+                                              const Spacer(),
+                                              IconButton(
+                                                  onPressed: () => Navigator.of(context).pop(),
+                                                  icon: const Icon(Icons.arrow_drop_down_outlined, size: 35,)),
+                                            ],
+                                          ),
+                                          setAddress != null ?
+                                          Column(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              IconButton(onPressed: (){
+                                                setState(() {
+                                                  setAddress = null;
+                                                  placePredictions.clear();
+                                                });
+                                              }, icon: const Icon(Icons.backspace_outlined)),
+                                              const Text("House Number"),
+                                              addressInputBox('Building number', true, false, houseNumber ?? ""),
+                                              const Text("Street Address"),
+                                              addressInputBox('Street Address', true, false, streetAddress ?? ""),
+                                              const Text("Locality"),
+                                              addressInputBox('Locality', true, false, locality ?? ""),
+                                              const Text("County"),
+                                              addressInputBox('County', true, false, county ?? ""),
+                                              const Text("Postal code"),
+                                              addressInputBox('Postal code', true, false, postalCode ?? ""),
+                                              Padding(
+                                                padding: const EdgeInsets.only(top: 8.0),
+                                                child: solidButton(context, "Save Address", () => null, true),
+                                              ),
+                                            ],
+                                          ) :
+                                          Form(
+                                              child: Padding(
+                                                    padding: const EdgeInsets.all(8.0),
+                                                    child: TextFormField(
+                                                      controller: searchText,
+                                                      onChanged: (value) async {
+                                                        predictions = value;
+                                                        setState(() {
+                                                          placeAutoComplete(predictions);
+                                                        });
+                                                      },
+                                                      textInputAction: TextInputAction.search,
+                                                      decoration: const InputDecoration(
+                                                          hintText: "Search your location",
+                                                          prefixIcon: Icon(Icons.search)
+                                                      ),
                                                     ),
+                                                  )
+                                              ),
+                                          setAddress != null ? const SizedBox.shrink() : Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: ElevatedButton.icon(
+                                                  onPressed: ()  async{
+                                                    currentLocation = await determinePosition();
+                                                    AddressComponents? formattedAddress = await getAddressDetailsFromCoordinates(currentLocation!.latitude, currentLocation!.longitude);
+                                                    setState(() {
+                                                      setAddress = formattedAddress?.fullAddress;
+                                                      houseNumber = formattedAddress?.buildingNumber;
+                                                      streetAddress = formattedAddress?.streetAddress;
+                                                      locality = formattedAddress?.locality;
+                                                      county = formattedAddress?.area;
+                                                      postalCode = formattedAddress?.postcode;
+                                                      //Navigator.of(context).pop();
+                                                    });
+                                                  },
+                                                  icon: const Icon(Icons.my_location_rounded),
+                                                  label: const Text('Use my Current Location'),
+                                                  style: ElevatedButton.styleFrom(
+                                                      elevation: 0,
+                                                      fixedSize: Size(MediaQuery.of(context).size.width, 50),
+                                                      shape: const RoundedRectangleBorder(
+                                                          borderRadius: BorderRadius.all(Radius.circular(10))
+                                                      )
                                                   ),
-                                                )
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: ElevatedButton.icon(
-                                                onPressed: ()  async{
-                                                  currentLocation = await determinePosition();
-                                                  AddressComponents? formattedAddress = await getAddressDetailsFromCoordinates(currentLocation!.latitude, currentLocation!.longitude);
-                                                  setState(() {
-                                                    setAddress = formattedAddress?.fullAddress;
-                                                    houseNumber = formattedAddress?.buildingNumber;
-                                                    streetAddress = formattedAddress?.streetAddress;
-                                                    locality = formattedAddress?.locality;
-                                                    county = formattedAddress?.area;
-                                                    postalCode = formattedAddress?.postcode;
-                                                    //Navigator.of(context).pop();
-                                                  });
-                                                },
-                                                icon: const Icon(Icons.my_location_rounded),
-                                                label: const Text('Use my Current Location'),
-                                                style: ElevatedButton.styleFrom(
-                                                    elevation: 0,
-                                                    fixedSize: Size(MediaQuery.of(context).size.width, 50),
-                                                    shape: const RoundedRectangleBorder(
-                                                        borderRadius: BorderRadius.all(Radius.circular(10))
-                                                    )
                                                 ),
                                               ),
-                                            ),
-                                            Expanded(
-                                              child: ListView.builder(
-                                                  itemCount: placePredictions.length,
-                                                  itemBuilder: (context,index) {
-                                                    return _buildAddressResult(index);
-                                                  }
+                                              setAddress != null ? const SizedBox.shrink() : LimitedBox(
+                                                maxHeight: MediaQuery.of(context).size.height,
+                                                child: ListView.builder(
+                                                    itemCount: placePredictions.length,
+                                                    itemBuilder: (context,index) {
+                                                      return _buildAddressResult(index);
+                                                    }
+                                                ),
                                               ),
-                                            ),
-
-                                      ],
+                                      
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 );
