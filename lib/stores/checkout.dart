@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:geolocator/geolocator.dart';
@@ -24,10 +25,12 @@ class Checkout extends StatefulWidget {
 
 class _CheckoutState extends State<Checkout> {
   final FirebaseAuthService _auth = FirebaseAuthService();
+  late final String _UID = _auth.getUserId();
   TextEditingController searchText = TextEditingController();
   final DeliveryService _service = DeliveryService();
   String predictions = '';
   String? setAddress;
+  String? fullAddress;
   Position? currentLocation;
   bool deliveryTime = true;
   bool shoppingPreference = true;
@@ -147,24 +150,63 @@ class _CheckoutState extends State<Checkout> {
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               IconButton(onPressed: (){
-                                                setState(() {
+                                                setState((){
                                                   setAddress = null;
                                                   placePredictions.clear();
                                                 });
                                               }, icon: const Icon(Icons.backspace_outlined)),
                                               const Text("House Number"),
-                                              addressInputBox('Building number', true, false, houseNumber ?? ""),
+                                              addressInputBox('Building number', true, false, houseNumber ?? "", TextInputType.number, (newValue) {
+                                                setState(() {
+                                                  houseNumber = newValue;
+                                                });
+                                              },),
                                               const Text("Street Address"),
-                                              addressInputBox('Street Address', true, false, streetAddress ?? ""),
+                                              addressInputBox('Street Address', true, false, streetAddress ?? "", TextInputType.streetAddress, (newValue) {
+                                                setState(() {
+                                                  streetAddress = newValue;
+                                                });
+                                              },),
                                               const Text("Locality"),
-                                              addressInputBox('Locality', true, false, locality ?? ""),
+                                              addressInputBox('Locality', true, false, locality ?? "", TextInputType.streetAddress, (newValue) {
+                                                setState(() {
+                                                  locality = newValue;
+                                                });
+                                              },),
                                               const Text("County"),
-                                              addressInputBox('County', true, false, county ?? ""),
+                                              addressInputBox('County', true, false, county ?? "", TextInputType.streetAddress, (newValue) {
+                                                setState(() {
+                                                  county = newValue;
+                                                });
+                                              },),
                                               const Text("Postal code"),
-                                              addressInputBox('Postal code', true, false, postalCode ?? ""),
+                                              addressInputBox('Postal code', true, false, postalCode ?? "", TextInputType.streetAddress, (newValue) {
+                                                setState(() {
+                                                  postalCode = newValue;
+                                                });
+                                              },),
                                               Padding(
                                                 padding: const EdgeInsets.only(top: 8.0),
-                                                child: solidButton(context, "Save Address", () => null, true),
+                                                child: solidButton(context, "Save Address", () async{
+                                                  Map<String, dynamic> addressBook = {
+                                                    'House Number': houseNumber,
+                                                    'Street Address': streetAddress,
+                                                    'Locality': locality,
+                                                    'County': county,
+                                                    'Postal Code': postalCode,
+                                                    'Full Address': fullAddress
+                                                  };
+                                                  setState(() {
+                                                    fullAddress = '${houseNumber!} ${streetAddress!}, ${locality!}, ${postalCode!}, ${county!}';
+                                                  });
+
+                                                  print(fullAddress);
+                                                  await FirebaseFirestore.instance
+                                                      .collection('users')
+                                                      .doc(_UID)
+                                                      .update({'Address Book':FieldValue.arrayUnion([addressBook])});
+                                                }
+                                                , fieldsFilled()),
                                               ),
                                             ],
                                           ) :
@@ -223,7 +265,6 @@ class _CheckoutState extends State<Checkout> {
                                                     }
                                                 ),
                                               ),
-                                      
                                         ],
                                       ),
                                     ),
@@ -236,9 +277,9 @@ class _CheckoutState extends State<Checkout> {
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
                   ),
-                  child: setAddress == null
+                  child: fullAddress == null
                       ? const Text('Set Delivery Location')
-                      : Text(setAddress!, overflow: TextOverflow.clip, maxLines: 1,),
+                      : Text(fullAddress!, overflow: TextOverflow.clip, maxLines: 1,),
                 ),
                 const Divider(thickness: 1),
                 Text(
@@ -511,6 +552,24 @@ class _CheckoutState extends State<Checkout> {
           //Navigator.of(context).pop();
 
       });
+    }
+  }
+
+  bool fieldsFilled(){
+    if(setAddress == null || setAddress!.isEmpty){
+      return false;
+    } else if(houseNumber == null || houseNumber!.isEmpty){
+      return false;
+    } else if(streetAddress == null || streetAddress!.isEmpty) {
+      return false;
+    } else if(locality == null || locality!.isEmpty) {
+      return false;
+    } else if(county == null || county!.isEmpty) {
+      return false;
+    } else if(postalCode == null || postalCode!.isEmpty) {
+      return false;
+    } else{
+      return true;
     }
   }
 

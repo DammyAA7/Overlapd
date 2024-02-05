@@ -84,16 +84,18 @@ Widget addressInputBox(
     String hintText,
     bool autoCorrect,
     bool obscureText,
-    String? initialValue
+    String? initialValue,
+    TextInputType type,
+    Function(String) onSaved,
     ) {
   return TextFormField(
     initialValue: initialValue,
     obscureText: obscureText,
     autocorrect: autoCorrect,
-    keyboardType: TextInputType.number,
+    keyboardType: type,
+    onChanged: onSaved,
     style: const TextStyle(
       color: Color(0xFF727E7B),
-      fontFamily: 'Darker Grotesque',
       fontSize: 22.0,
     ),
     decoration: InputDecoration(
