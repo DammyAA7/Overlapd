@@ -144,6 +144,7 @@ class _CheckoutState extends State<Checkout> {
                                                   icon: const Icon(Icons.arrow_drop_down_outlined, size: 35,)),
                                             ],
                                           ),
+                                          hasAddressStored(),
                                           setAddress != null ?
                                           Column(
                                             mainAxisAlignment: MainAxisAlignment.start,
@@ -616,5 +617,42 @@ class _CheckoutState extends State<Checkout> {
         }
 
     );
+  }
+  Widget hasAddressStored(){
+    return StreamBuilder(
+        stream: _auth.getAccountInfo(_UID),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // If the data is still loading, return a loading indicator
+            return const CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            // If there's an error, display an error message
+            return Text('Error: ${snapshot.error}');
+          } else if (!snapshot.hasData || snapshot.data == null) {
+            // If there is no data or the data is empty, display a message
+            return const Text('');
+          } else {
+            final data = snapshot.data!.data() as Map<String, dynamic>;
+            if (data.containsKey('Address Book') && data['Address Book'] is List) {
+              final List<dynamic> addressBook = data['Address Book'];
+              if (addressBook.isNotEmpty) {
+                print('Address Book:');
+                for (final address in addressBook) {
+                  print(address); // This will print each address map in the console
+                }
+                return Text('check console');
+                    } else {
+                return Text('Address Book is empty.');
+              }
+            } else {
+              return Text('No Address Book found.');
+            }
+          }
+        }
+    );
+  }
+
+  Widget addDeliveryAddress(){
+    return Column();
   }
 }
