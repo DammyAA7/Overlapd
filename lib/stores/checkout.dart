@@ -1,17 +1,14 @@
 
 import 'dart:convert';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:overlapd/deliveries/addressList.dart';
 import 'package:provider/provider.dart';
 import '../deliveries/delivery_service.dart';
 import '../screens/home.dart';
 import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
-import '../utilities/deliveryDetailsUtilities.dart';
-import '../utilities/networkUtilities.dart';
 import '../utilities/toast.dart';
 import '../utilities/widgets.dart';
 import 'groceryRange.dart';
@@ -25,7 +22,6 @@ class Checkout extends StatefulWidget {
 
 class _CheckoutState extends State<Checkout> {
   final FirebaseAuthService _auth = FirebaseAuthService();
-  late final String _UID = _auth.getUserId();
   TextEditingController searchText = TextEditingController();
   final DeliveryService _service = DeliveryService();
   String predictions = '';
@@ -117,162 +113,9 @@ class _CheckoutState extends State<Checkout> {
                 ),
                 TextButton(
                   onPressed: (){
-                    showModalBottomSheet(
-                        context: context,
-                        enableDrag: false,
-                        isScrollControlled: true,
-                        builder: (BuildContext context){
-                          return StatefulBuilder(
-                              builder: (BuildContext context, StateSetter setState){
-                                return SizedBox(
-                                  height: MediaQuery.of(context).size.height * 0.8,
-                                  width: MediaQuery.of(context).size.width,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: SingleChildScrollView(
-                                      child: Column(
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-                                              const Icon(Icons.add_location_alt_outlined),
-                                              const SizedBox(width: 5),
-                                              const Text('Set Delivery Location'),
-                                              const Spacer(),
-                                              IconButton(
-                                                  onPressed: () => Navigator.of(context).pop(),
-                                                  icon: const Icon(Icons.arrow_drop_down_outlined, size: 35,)),
-                                            ],
-                                          ),
-                                          hasAddressStored(),
-                                          setAddress != null ?
-                                          Column(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              IconButton(onPressed: (){
-                                                setState((){
-                                                  setAddress = null;
-                                                  placePredictions.clear();
-                                                });
-                                              }, icon: const Icon(Icons.backspace_outlined)),
-                                              const Text("House Number"),
-                                              addressInputBox('Building number', true, false, houseNumber ?? "", TextInputType.number, (newValue) {
-                                                setState(() {
-                                                  houseNumber = newValue;
-                                                });
-                                              },),
-                                              const Text("Street Address"),
-                                              addressInputBox('Street Address', true, false, streetAddress ?? "", TextInputType.streetAddress, (newValue) {
-                                                setState(() {
-                                                  streetAddress = newValue;
-                                                });
-                                              },),
-                                              const Text("Locality"),
-                                              addressInputBox('Locality', true, false, locality ?? "", TextInputType.streetAddress, (newValue) {
-                                                setState(() {
-                                                  locality = newValue;
-                                                });
-                                              },),
-                                              const Text("County"),
-                                              addressInputBox('County', true, false, county ?? "", TextInputType.streetAddress, (newValue) {
-                                                setState(() {
-                                                  county = newValue;
-                                                });
-                                              },),
-                                              const Text("Postal code"),
-                                              addressInputBox('Postal code', true, false, postalCode ?? "", TextInputType.streetAddress, (newValue) {
-                                                setState(() {
-                                                  postalCode = newValue;
-                                                });
-                                              },),
-                                              Padding(
-                                                padding: const EdgeInsets.only(top: 8.0),
-                                                child: solidButton(context, "Save Address", () async{
-                                                  Map<String, dynamic> addressBook = {
-                                                    'House Number': houseNumber,
-                                                    'Street Address': streetAddress,
-                                                    'Locality': locality,
-                                                    'County': county,
-                                                    'Postal Code': postalCode,
-                                                    'Full Address': fullAddress
-                                                  };
-                                                  setState(() {
-                                                    fullAddress = '${houseNumber!} ${streetAddress!}, ${locality!}, ${postalCode!}, ${county!}';
-                                                  });
-
-                                                  print(fullAddress);
-                                                  await FirebaseFirestore.instance
-                                                      .collection('users')
-                                                      .doc(_UID)
-                                                      .update({'Address Book':FieldValue.arrayUnion([addressBook])});
-                                                }
-                                                , fieldsFilled()),
-                                              ),
-                                            ],
-                                          ) :
-                                          Form(
-                                              child: Padding(
-                                                    padding: const EdgeInsets.all(8.0),
-                                                    child: TextFormField(
-                                                      controller: searchText,
-                                                      onChanged: (value) async {
-                                                        predictions = value;
-                                                        setState(() {
-                                                          placeAutoComplete(predictions);
-                                                        });
-                                                      },
-                                                      textInputAction: TextInputAction.search,
-                                                      decoration: const InputDecoration(
-                                                          hintText: "Search your location",
-                                                          prefixIcon: Icon(Icons.search)
-                                                      ),
-                                                    ),
-                                                  )
-                                              ),
-                                          setAddress != null ? const SizedBox.shrink() : Padding(
-                                                padding: const EdgeInsets.all(8.0),
-                                                child: ElevatedButton.icon(
-                                                  onPressed: ()  async{
-                                                    currentLocation = await determinePosition();
-                                                    AddressComponents? formattedAddress = await getAddressDetailsFromCoordinates(currentLocation!.latitude, currentLocation!.longitude);
-                                                    setState(() {
-                                                      setAddress = formattedAddress?.fullAddress;
-                                                      houseNumber = formattedAddress?.buildingNumber;
-                                                      streetAddress = formattedAddress?.streetAddress;
-                                                      locality = formattedAddress?.locality;
-                                                      county = formattedAddress?.area;
-                                                      postalCode = formattedAddress?.postcode;
-                                                      //Navigator.of(context).pop();
-                                                    });
-                                                  },
-                                                  icon: const Icon(Icons.my_location_rounded),
-                                                  label: const Text('Use my Current Location'),
-                                                  style: ElevatedButton.styleFrom(
-                                                      elevation: 0,
-                                                      fixedSize: Size(MediaQuery.of(context).size.width, 50),
-                                                      shape: const RoundedRectangleBorder(
-                                                          borderRadius: BorderRadius.all(Radius.circular(10))
-                                                      )
-                                                  ),
-                                                ),
-                                              ),
-                                              setAddress != null ? const SizedBox.shrink() : LimitedBox(
-                                                maxHeight: MediaQuery.of(context).size.height,
-                                                child: ListView.builder(
-                                                    itemCount: placePredictions.length,
-                                                    itemBuilder: (context,index) {
-                                                      return _buildAddressResult(index);
-                                                    }
-                                                ),
-                                              ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              });
-                        }
+                    Navigator.push(
+                        context,
+                      pageAnimationrl(const AddressList()),
                     );
                   },
                   style: TextButton.styleFrom(
@@ -514,66 +357,6 @@ class _CheckoutState extends State<Checkout> {
   }
 
 
-  List<AutocompletePrediction> placePredictions = [];
-  void placeAutoComplete(String query) async{
-    Uri uri = Uri.https(
-        "maps.googleapis.com",
-        'maps/api/place/autocomplete/json',
-        {
-          "input": query,
-          "components": "country:ie",
-          "key": "AIzaSyDFcJ0SWLhnTZVktTPn8jB5nJ2hpuSfwNk"
-        });
-
-    String? response = await NetworkUtility.fetchUrl(uri);
-    if (response != null){
-      PlaceAutocompleteResponse result = PlaceAutocompleteResponse.parseAutocompleteResult(response);
-      if(result.predictions != null){
-        setState(() {
-          placePredictions = result.predictions!;
-        });
-      }
-    }
-  }
-
-  Widget _buildAddressResult(int index){
-    placeAutoComplete(predictions);
-    if(predictions.isEmpty){
-      return const SizedBox.shrink();
-    }
-    else{
-      return locationListTile(placePredictions[index].description!, () {
-          setAddress = placePredictions[index].description;
-          number = index;
-          getCoordinates(setAddress!);
-          houseNumber = placePredictions[number].terms?.buildingNumber;
-          streetAddress = placePredictions[number].terms?.streetAddress;
-          locality = placePredictions[number].terms?.locality;
-          county = placePredictions[number].terms?.area;
-          //Navigator.of(context).pop();
-
-      });
-    }
-  }
-
-  bool fieldsFilled(){
-    if(setAddress == null || setAddress!.isEmpty){
-      return false;
-    } else if(houseNumber == null || houseNumber!.isEmpty){
-      return false;
-    } else if(streetAddress == null || streetAddress!.isEmpty) {
-      return false;
-    } else if(locality == null || locality!.isEmpty) {
-      return false;
-    } else if(county == null || county!.isEmpty) {
-      return false;
-    } else if(postalCode == null || postalCode!.isEmpty) {
-      return false;
-    } else{
-      return true;
-    }
-  }
-
 
   Future showDeliverySlots(){
     return showModalBottomSheet(
@@ -617,42 +400,5 @@ class _CheckoutState extends State<Checkout> {
         }
 
     );
-  }
-  Widget hasAddressStored(){
-    return StreamBuilder(
-        stream: _auth.getAccountInfo(_UID),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // If the data is still loading, return a loading indicator
-            return const CircularProgressIndicator();
-          } else if (snapshot.hasError) {
-            // If there's an error, display an error message
-            return Text('Error: ${snapshot.error}');
-          } else if (!snapshot.hasData || snapshot.data == null) {
-            // If there is no data or the data is empty, display a message
-            return const Text('');
-          } else {
-            final data = snapshot.data!.data() as Map<String, dynamic>;
-            if (data.containsKey('Address Book') && data['Address Book'] is List) {
-              final List<dynamic> addressBook = data['Address Book'];
-              if (addressBook.isNotEmpty) {
-                print('Address Book:');
-                for (final address in addressBook) {
-                  print(address); // This will print each address map in the console
-                }
-                return Text('check console');
-                    } else {
-                return Text('Address Book is empty.');
-              }
-            } else {
-              return Text('No Address Book found.');
-            }
-          }
-        }
-    );
-  }
-
-  Widget addDeliveryAddress(){
-    return Column();
   }
 }
