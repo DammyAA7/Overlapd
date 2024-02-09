@@ -26,6 +26,7 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
   String? county;
   String? postalCode;
   String predictions = '';
+  bool defaultAddress = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -150,6 +151,17 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
                   postalCode = newValue;
                 });
               },),
+              CheckboxListTile(
+                value: defaultAddress,
+                onChanged: (bool? value){
+                  setState(() {
+                    defaultAddress = !defaultAddress;
+                  });
+                },
+                title: Text('Set as Default', overflow: TextOverflow.ellipsis, maxLines: 1, style: Theme.of(context).textTheme.labelLarge,),
+                //contentPadding: const EdgeInsets.only(right: 35),
+                //materialTapTargetSize: MaterialTapTargetSize.padded,
+              ),
           ],
                 ),
         )
@@ -168,6 +180,8 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
             'Postal Code': postalCode,
             'Full Address': fullAddress
           };
+
+          await setDefaultAddress(_UID, addressBook, defaultAddress);
 
           await FirebaseFirestore.instance
               .collection('users')
@@ -246,4 +260,47 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
       return true;
     }
   }
+
+  Future<void> setDefaultAddress(String userId, Map<String, dynamic> newAddress, bool defaultAddress) async {
+    final userDoc = FirebaseFirestore.instance.collection('users').doc(userId);
+    final docSnapshot = await userDoc.get();
+
+    if (docSnapshot.exists && docSnapshot.data()!.containsKey('Address Book')) {
+      List<dynamic> addressBook = List<dynamic>.from(docSnapshot.data()!['Address Book']);
+
+      // If defaultAddress is true, reset Default flag for all existing addresses
+      if (defaultAddress) {
+        addressBook = addressBook.map((address) {
+          final Map<String, dynamic> modifiedAddress = Map<String, dynamic>.from(address);
+          modifiedAddress['Default'] = false; // Reset default flag for all other addresses
+          return modifiedAddress;
+        }).toList();
+      }
+
+      // Check if the new address already exists in the Address Book
+      int existingAddressIndex = addressBook.indexWhere((address) =>
+      Map<String, dynamic>.from(address)['Full Address'] == newAddress['Full Address']);
+
+      if (existingAddressIndex != -1) {
+        // Update existing address with new data and potentially set it as default
+        addressBook[existingAddressIndex] = newAddress;
+        addressBook[existingAddressIndex]['Default'] = defaultAddress;
+      } else {
+        // Add new address with its default status
+        newAddress['Default'] = defaultAddress;
+        addressBook.add(newAddress);
+      }
+
+      // Update the Address Book in Firestore with the modified list
+      await userDoc.update({'Address Book': addressBook});
+    } else {
+      // If no Address Book exists or the document doesn't exist, create one with the new address
+      newAddress['Default'] = defaultAddress;
+      await userDoc.set({'Address Book': [newAddress]});
+    }
+  }
+
+
+
+
 }
