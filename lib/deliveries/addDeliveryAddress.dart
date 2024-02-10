@@ -21,12 +21,16 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
   String? fullAddress;
   Position? currentLocation;
   String? houseNumber;
+  String? aptNumber;
   String? streetAddress;
   String? locality;
   String? county;
   String? postalCode;
+  String? fullStreetAddress;
   String predictions = '';
   bool defaultAddress = false;
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,6 +52,7 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
               locality = '';
               county = '';
               postalCode = '';
+              fullStreetAddress = null;
             });
 
           },
@@ -94,6 +99,7 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
                     locality = formattedAddress?.locality;
                     county = formattedAddress?.area;
                     postalCode = formattedAddress?.postcode;
+                    fullStreetAddress = '${houseNumber ?? ''} ${streetAddress ?? ''}';
                   });
                 },
                 icon: const Icon(Icons.my_location_rounded),
@@ -121,18 +127,21 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("House Number"),
-              addressInputBox('Building number', true, false, houseNumber ?? "", TextInputType.number, (newValue) {
-                setState(() {
-                  houseNumber = newValue;
-                });
-              },),
               const Text("Street Address"),
-              addressInputBox('Street Address', true, false, streetAddress ?? "", TextInputType.streetAddress, (newValue) {
+              addressInputBox('Street Address', true, false, fullStreetAddress ?? "", TextInputType.streetAddress, (newValue) {
                 setState(() {
                   streetAddress = newValue;
                 });
               },),
+
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: addressInputBox('Apt, suite or unit', true, false, aptNumber ?? "", TextInputType.number, (newValue) {
+                  setState(() {
+                    houseNumber = newValue;
+                  });
+                },),
+              ),
               const Text("Locality"),
               addressInputBox('Locality', true, false, locality ?? "", TextInputType.streetAddress, (newValue) {
                 setState(() {
@@ -173,8 +182,7 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
             fullAddress = '${houseNumber!} ${streetAddress!}, ${locality!}, ${postalCode!}, ${county!}';
           });
           Map<String, dynamic> addressBook = {
-            'House Number': houseNumber,
-            'Street Address': streetAddress,
+            'Street Address': fullStreetAddress,
             'Locality': locality,
             'County': county,
             'Postal Code': postalCode,
@@ -196,6 +204,7 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
           locality = '';
           county = '';
           postalCode = '';
+          fullStreetAddress = null;
           Navigator.pop(context);
           Navigator.pop(context);
         }
@@ -210,6 +219,7 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
         'maps/api/place/autocomplete/json',
         {
           "input": query,
+          "types": "street_address||postal_code||street_number||point_of_interest",
           "components": "country:ie",
           "key": "AIzaSyDFcJ0SWLhnTZVktTPn8jB5nJ2hpuSfwNk"
         });
@@ -234,31 +244,20 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
     else{
       return locationListTile(placePredictions[index].description!, () {
         setAddress = placePredictions[index].description;
-        getCoordinates(setAddress!);
+        //getCoordinates(setAddress!);
         houseNumber = placePredictions[index].terms?.buildingNumber;
         streetAddress = placePredictions[index].terms?.streetAddress;
         locality = placePredictions[index].terms?.locality;
         county = placePredictions[index].terms?.area;
+        fullStreetAddress = '${houseNumber ?? ''} ${streetAddress ?? ''}';
+
       });
     }
   }
 
-  bool fieldsFilled(){
-    if(setAddress == null || setAddress!.isEmpty){
-      return false;
-    } else if(houseNumber == null || houseNumber!.isEmpty){
-      return false;
-    } else if(streetAddress == null || streetAddress!.isEmpty) {
-      return false;
-    } else if(locality == null || locality!.isEmpty) {
-      return false;
-    } else if(county == null || county!.isEmpty) {
-      return false;
-    } else if(postalCode == null || postalCode!.isEmpty) {
-      return false;
-    } else{
-      return true;
-    }
+  bool fieldsFilled() {
+    List<String?> fields = [setAddress, fullStreetAddress, locality, county, postalCode];
+    return fields.every((field) => field != null && field.isNotEmpty);
   }
 
   Future<void> setDefaultAddress(String userId, Map<String, dynamic> newAddress, bool defaultAddress) async {

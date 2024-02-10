@@ -48,10 +48,18 @@ class PredictionTerms {
 
       // Assign values based on available terms
       // The index is checked against the length of terms to avoid out-of-bounds access
-      buildingNumber = terms.length > 4 ? terms[0]['value'] : null;
-      streetAddress = terms.length > 3 ? terms[terms.length - 4]['value'] : null;
-      locality = terms.length > 2 ? terms[terms.length - 3]['value'] : null;
-      area = terms.length > 1 ? terms[terms.length - 2]['value'] : null;
+      if (terms.length == 4 && RegExp(r'^\d+$').hasMatch(terms.first['value'])) {
+        // If there are 4 terms and the first is a building number, assign values accordingly
+        buildingNumber = terms.first['value'];
+        streetAddress = terms[1]['value'];
+        area = terms[2]['value']; // Assuming the third term is the area if locality is missing
+        locality = null; // Locality is left as null
+      } else {
+        buildingNumber = terms.length > 4 ? terms[0]['value'] : null;
+        streetAddress = terms.length > 3 ? terms[terms.length - 4]['value'] : null;
+        locality = terms.length > 2 ? terms[terms.length - 3]['value'] : null;
+        area = terms.length > 1 ? terms[terms.length - 2]['value'] : null;
+      }
     }
     return PredictionTerms(
       buildingNumber: buildingNumber,

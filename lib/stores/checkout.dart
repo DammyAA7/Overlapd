@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:overlapd/deliveries/addressList.dart';
 import 'package:provider/provider.dart';
@@ -41,6 +42,16 @@ class _CheckoutState extends State<Checkout> {
   String? postalCode;
   final InputBoxController _itemController = InputBoxController();
   var now = DateTime.now();
+  late Box<String?> savedAddress;
+
+  Future<void> initHive() async {
+    await Hive.openBox<String>('delivery_Address');
+    savedAddress = Hive.box('delivery_Address');
+
+
+    setState(() {});
+  }
+
   void updateChosenScheduleDeliveryTime(String newTime) {
     setState(() {
       chosenScheduleDeliveryTime = newTime;
@@ -80,7 +91,6 @@ class _CheckoutState extends State<Checkout> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    print(context.read<Cart>().toMapList());
   }
   @override
   Widget build(BuildContext context) {

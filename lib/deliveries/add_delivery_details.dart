@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:overlapd/stores/groceryRange.dart';
 import 'package:overlapd/stores/range.dart';
-import 'package:overlapd/stores/productListPage.dart';
 import 'package:overlapd/utilities/networkUtilities.dart';
-import 'package:overlapd/utilities/toast.dart';
 import '../screens/home.dart';
 import '../utilities/deliveryDetailsUtilities.dart';
 import '../utilities/widgets.dart';
@@ -28,36 +26,12 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
   String? chosenStore;
   String? setAddress;
   Position? currentLocation;
-  final DeliveryService _service = DeliveryService();
-  final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
   MapRange range = MapRange();
   bool canConfirmDelivery() {
     return items.isNotEmpty;
   }
 
-  List<AutocompletePrediction> placePredictions = [];
 
-  void placeAutoComplete(String query) async{
-    Uri uri = Uri.https(
-        "maps.googleapis.com",
-        'maps/api/place/autocomplete/json',
-      {
-        "input": query,
-        "types": "address",
-        "key": "AIzaSyDFcJ0SWLhnTZVktTPn8jB5nJ2hpuSfwNk"
-      });
-
-    String? response = await NetworkUtility.fetchUrl(uri);
-
-    if (response !=null){
-      PlaceAutocompleteResponse result = PlaceAutocompleteResponse.parseAutocompleteResult(response);
-      if(result.predictions != null){
-        setState(() {
-          placePredictions = result.predictions!;
-        });
-      }
-    }
-  }
 
   String calculateTotalAmount() {
     num totalQuantity = 0;
@@ -124,7 +98,6 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
                                             padding: const EdgeInsets.all(8.0),
                                             child: TextFormField(
                                               onChanged: (value){
-                                                placeAutoComplete(value);
                                               },
                                               textInputAction: TextInputAction.search,
                                               decoration: const InputDecoration(
@@ -154,18 +127,6 @@ class _DeliveryDetailsState extends State<DeliveryDetails> {
                                             ),
                                         ),
                                       ),
-                                      Expanded(
-                                        child: ListView.builder(
-                                          itemCount: placePredictions.length,
-                                            itemBuilder: (context,index) => locationListTile(placePredictions[index].description!, () {
-                                              setState(() {
-                                                setAddress = placePredictions[index].description;
-                                                getCoordinates(setAddress!);
-                                                Navigator.of(context).pop();
-                                              });
-                                            })
-                                        ),
-                                      )
 
                                     ],
                                   ),

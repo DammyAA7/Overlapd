@@ -68,9 +68,17 @@ class _AddressListState extends State<AddressList> {
               itemCount: addressBook.length,
               itemBuilder: (context, index) {
                 final address = addressBook[index] as Map<String, dynamic>;
-                return ListTile(
-                  title: Text(address['Full Address'] ?? 'No address'),
-                  subtitle: Text('House Number: ${address['House Number'] ?? 'N/A'}'),
+                return SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: IntrinsicHeight(
+                    child: Column(
+                      children: [
+                        Text(address['Full Address'] ?? 'No address'),
+                        const Divider()
+                      ],
+                    ),
+                  ),
+
                   // Add more fields as necessary
                 );
               },
