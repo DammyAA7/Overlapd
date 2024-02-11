@@ -96,6 +96,7 @@ class _CheckoutState extends State<Checkout> {
   Widget build(BuildContext context) {
     return Consumer<Cart>(
       builder: (context, value, child) => Scaffold(
+        resizeToAvoidBottomInset: false,
           appBar: AppBar(
             automaticallyImplyLeading: false,
             centerTitle: true,

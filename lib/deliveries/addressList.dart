@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:overlapd/deliveries/addDeliveryAddress.dart';
+import 'package:overlapd/deliveries/editAddress.dart';
+import 'package:overlapd/utilities/toast.dart';
 
 import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/widgets.dart';
@@ -18,6 +20,7 @@ class _AddressListState extends State<AddressList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: true,
@@ -64,6 +67,7 @@ class _AddressListState extends State<AddressList> {
           final List<dynamic> addressBook = data['Address Book'];
           if (data.containsKey('Address Book') && data['Address Book'] is List && addressBook.isNotEmpty) {
             return ListView.builder(
+              padding: const EdgeInsets.only(bottom: 70),
               shrinkWrap: true,
               itemCount: addressBook.length,
               itemBuilder: (context, index) {
@@ -71,11 +75,69 @@ class _AddressListState extends State<AddressList> {
                 return SizedBox(
                   width: MediaQuery.of(context).size.width,
                   child: IntrinsicHeight(
-                    child: Column(
-                      children: [
-                        Text(address['Full Address'] ?? 'No address'),
-                        const Divider()
-                      ],
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(child: Text(address['Full Address'] ?? 'No address', maxLines: 4, overflow: TextOverflow.visible,)),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 5.0, bottom: 5.0, right: 5.0, left: 2.0),
+                                child: GestureDetector(
+                                  child: const Icon(Icons.edit),
+                                  onTap: (){
+                                    Navigator.push(context, pageAnimationrl(EditAddress(addressDetails: address)));
+                                  },
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(5.0),
+                                child: GestureDetector(child: const Icon(Icons.delete_outline),
+                                  onTap: (){
+                                    final bool isDefaultAddress = address['Default'] == true;
+                                    // Check if the address is the default address
+                                    if (isDefaultAddress) {
+                                      // Inform the user that the default address cannot be deleted
+                                      showToast(text:'Default address cannot be deleted.');
+
+                                    } else{
+                                      showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) => AlertDialog(
+                                            title: const Text('Are you sure you want to delete this address'),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(context, 'No'),
+                                                child: const Text('No'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () async{
+                                                  List<dynamic> updatedAddressBook = List.from(addressBook)
+                                                    ..removeAt(index);
+
+                                                  // Update the document in Firestore
+                                                  await FirebaseFirestore.instance
+                                                      .collection('users')
+                                                      .doc(_UID)
+                                                      .update({'Address Book': updatedAddressBook});
+                                                  Navigator.pop(context, 'Yes');
+                                                  showToast(text: 'Address deleted successfully');
+                                                },
+                                                child: const Text('Yes'),
+                                              ),
+                                            ],
+                                          ));
+                                    }
+
+                                  },),
+                              ),
+                            ],
+                          ),
+                          address['Default'] ? Text('Default Address', style: Theme.of(context).textTheme.labelMedium,) : const SizedBox.shrink(),
+                          const Divider()
+                        ],
+                      ),
                     ),
                   ),
 

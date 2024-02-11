@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:overlapd/utilities/toast.dart';
 import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/networkUtilities.dart';
 import '../utilities/deliveryDetailsUtilities.dart';
@@ -34,7 +35,7 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: true,
@@ -179,7 +180,7 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
         padding: const EdgeInsets.all(8.0),
         child: solidButton(context, "Save Address", () async{
           setState(() {
-            fullAddress = '${houseNumber!} ${streetAddress!}, ${locality!}, ${postalCode!}, ${county!}';
+            fullAddress = '${houseNumber ?? ''} ${streetAddress!}, ${locality!}, ${postalCode!}, ${county!}';
           });
           Map<String, dynamic> addressBook = {
             'Street Address': fullStreetAddress,
@@ -190,11 +191,6 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
           };
 
           await setDefaultAddress(_UID, addressBook, defaultAddress);
-
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(_UID)
-              .update({'Address Book':FieldValue.arrayUnion([addressBook])});
           setAddress = null;
           searchText.clear();
           predictions = '';
@@ -267,6 +263,17 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
     if (docSnapshot.exists && docSnapshot.data()!.containsKey('Address Book')) {
       List<dynamic> addressBook = List<dynamic>.from(docSnapshot.data()!['Address Book']);
 
+      // Check for address uniqueness before adding/updating
+      bool addressExists = addressBook.any((address) {
+        return Map<String, dynamic>.from(address)['Full Address'] == newAddress['Full Address'];
+      });
+
+      if (addressExists) {
+        // Address already exists, inform the user or update the existing address
+        showToast(text: 'This address already exists.');
+        return; // Stop the function execution
+      }
+
       // If defaultAddress is true, reset Default flag for all existing addresses
       if (defaultAddress) {
         addressBook = addressBook.map((address) {
@@ -275,23 +282,13 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
           return modifiedAddress;
         }).toList();
       }
-
-      // Check if the new address already exists in the Address Book
-      int existingAddressIndex = addressBook.indexWhere((address) =>
-      Map<String, dynamic>.from(address)['Full Address'] == newAddress['Full Address']);
-
-      if (existingAddressIndex != -1) {
-        // Update existing address with new data and potentially set it as default
-        addressBook[existingAddressIndex] = newAddress;
-        addressBook[existingAddressIndex]['Default'] = defaultAddress;
-      } else {
-        // Add new address with its default status
-        newAddress['Default'] = defaultAddress;
-        addressBook.add(newAddress);
-      }
+      // Add new address with its default status
+      newAddress['Default'] = defaultAddress;
+      addressBook.add(newAddress);
 
       // Update the Address Book in Firestore with the modified list
       await userDoc.update({'Address Book': addressBook});
+
     } else {
       // If no Address Book exists or the document doesn't exist, create one with the new address
       newAddress['Default'] = defaultAddress;
