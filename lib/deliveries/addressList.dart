@@ -123,6 +123,13 @@ class _AddressListState extends State<AddressList> {
                                                         .collection('users')
                                                         .doc(_UID)
                                                         .update({'Address Book': updatedAddressBook});
+
+                                                    // Fetch user's last selected address for comparison
+                                                    final userDoc = await _auth.getAccountInfoGet(_UID);
+                                                    final userData = userDoc.data();
+                                                    if (userData != null && userData['lastAddressSelected'] != null && userData['lastAddressSelected']['Full Address'] == address['Full Address']) {
+                                                      await FirebaseFirestore.instance.collection('users').doc(_UID).update({'lastAddressSelected': FieldValue.delete()});
+                                                    }
                                                     Navigator.pop(context, 'Yes');
                                                     showToast(text: 'Address deleted successfully');
                                                   },

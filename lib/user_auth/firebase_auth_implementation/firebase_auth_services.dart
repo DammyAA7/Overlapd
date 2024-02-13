@@ -73,5 +73,10 @@ class FirebaseAuthService{
         uid).snapshots();
   }
 
+  Future<DocumentSnapshot<Map<String, dynamic>>> getAccountInfoGet(String uid) {
+    return FirebaseFirestore.instance.collection('users').doc(
+        uid).get();
+  }
+
 
 }

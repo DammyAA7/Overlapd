@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
@@ -23,6 +22,7 @@ class Checkout extends StatefulWidget {
 
 class _CheckoutState extends State<Checkout> {
   final FirebaseAuthService _auth = FirebaseAuthService();
+  late final String _UID = _auth.getUserId();
   TextEditingController searchText = TextEditingController();
   final DeliveryService _service = DeliveryService();
   String predictions = '';
@@ -44,13 +44,6 @@ class _CheckoutState extends State<Checkout> {
   var now = DateTime.now();
   late Box<String?> savedAddress;
 
-  Future<void> initHive() async {
-    await Hive.openBox<String>('delivery_Address');
-    savedAddress = Hive.box('delivery_Address');
-
-
-    setState(() {});
-  }
 
   void updateChosenScheduleDeliveryTime(String newTime) {
     setState(() {
@@ -91,6 +84,7 @@ class _CheckoutState extends State<Checkout> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    loadLastSelectedOrDefaultAddress();
   }
   @override
   Widget build(BuildContext context) {
@@ -123,11 +117,14 @@ class _CheckoutState extends State<Checkout> {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 TextButton(
-                  onPressed: (){
-                    Navigator.push(
+                  onPressed: () async{
+                    await Navigator.push(
                         context,
                       pageAnimationrl(const AddressList()),
                     );
+                    setState(() {
+                      loadLastSelectedOrDefaultAddress();
+                    });
                   },
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
@@ -320,7 +317,7 @@ class _CheckoutState extends State<Checkout> {
                       ),
                       solidButton(context, 'Checkout', () async{
                         await initPayment((double.parse(value.stripEuroSign(value.calculateTotalAmount())) * 100).toInt().toString(), _auth.getUsername(), context, value);
-                      }, (chosenScheduleDeliveryTime != '' && setAddress != null) || (deliveryTime && setAddress != null) ? true : false),
+                      }, (chosenScheduleDeliveryTime != '' && fullAddress != null) || (deliveryTime && fullAddress != null) ? true : false),
                     ],
                   ),
                 ),
@@ -352,7 +349,7 @@ class _CheckoutState extends State<Checkout> {
           )
       );
       await Stripe.instance.presentPaymentSheet();
-      _checkout(setAddress!, 'Tesco', value.cart, value.totalAmountPlusFees(deliveryTime));
+      _checkout(fullAddress!, 'Tesco', value.cart, value.totalAmountPlusFees(deliveryTime));
     } catch(e){
       print(e);
     }
@@ -412,4 +409,31 @@ class _CheckoutState extends State<Checkout> {
 
     );
   }
+
+  Future<void> loadLastSelectedOrDefaultAddress() async {
+    final userDocSnapshot = await _auth.getAccountInfoGet(_UID); // Assuming this returns a Future<DocumentSnapshot>
+    Map<String, dynamic>? userData = userDocSnapshot.data();
+    if (userData != null) {
+      if (userData.containsKey('lastAddressSelected') && userData['lastAddressSelected'] != null) {
+        // Last selected address exists, use it
+        setState(() {
+          fullAddress = userData['lastAddressSelected']['Full Address'];
+        });
+      } else if (userData.containsKey('Address Book') && userData['Address Book'].isNotEmpty) {
+        // Check for a default address in the address book
+        final defaultAddress = (userData['Address Book'] as List).cast<Map<String, dynamic>?>().firstWhere(
+              (address) => address != null && address['Default'] == true,
+          orElse: () => null,
+        );
+
+        if (defaultAddress != null) {
+          // Default address exists, use it
+          setState(() {
+            fullAddress = defaultAddress['Full Address'];
+          });
+        }
+      }
+    }
+  }
+
 }
