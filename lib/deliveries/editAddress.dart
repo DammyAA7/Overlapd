@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
 import '../utilities/widgets.dart';
+
 
 class EditAddress extends StatefulWidget {
   final Map<String, dynamic> addressDetails;
@@ -11,6 +11,32 @@ class EditAddress extends StatefulWidget {
 }
 
 class _EditAddressState extends State<EditAddress> {
+  late TextEditingController streetAddressController;
+  late TextEditingController localityController;
+  late TextEditingController countyController;
+  late TextEditingController postalCodeController;
+  bool isDefault = false;
+  bool isModified = false;
+
+  @override
+  void initState() {
+    super.initState();
+    streetAddressController = TextEditingController(text: widget.addressDetails['Street Address']);
+    localityController = TextEditingController(text: widget.addressDetails['Locality']);
+    countyController = TextEditingController(text: widget.addressDetails['County']);
+    postalCodeController = TextEditingController(text: widget.addressDetails['Postal Code']);
+    isDefault = widget.addressDetails['Default'] ?? false;
+  }
+
+  void checkForModifications() {
+    setState(() {
+      isModified = streetAddressController.text != widget.addressDetails['Street Address'] ||
+          localityController.text != widget.addressDetails['Locality'] ||
+          countyController.text != widget.addressDetails['County'] ||
+          postalCodeController.text != widget.addressDetails['Postal Code'] ||
+          isDefault != (widget.addressDetails['Default'] ?? false);
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,39 +64,37 @@ class _EditAddressState extends State<EditAddress> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text("Street Address"),
-              addressInputBox('Street Address', true, false, widget.addressDetails['Street Address'] ?? "", TextInputType.streetAddress, (newValue) {
-                setState(() {
-
-                });
-              },),
+              addressInputBox('Street Address', true, false, streetAddressController.text, TextInputType.streetAddress, (newValue) {
+                streetAddressController.text = newValue;
+                checkForModifications();
+              }),
 
               const Text("Locality"),
-              addressInputBox('Locality', true, false, widget.addressDetails['Locality'] ?? "", TextInputType.streetAddress, (newValue) {
-                setState(() {
+              addressInputBox('Locality', true, false, localityController.text, TextInputType.streetAddress, (newValue) {
+                localityController.text = newValue;
+                checkForModifications();
+              }),
 
-                });
-              },),
               const Text("County"),
-              addressInputBox('County', true, false, widget.addressDetails['County'] ?? "", TextInputType.streetAddress, (newValue) {
-                setState(() {
-                });
-              },),
+              addressInputBox('County', true, false, countyController.text, TextInputType.streetAddress, (newValue) {
+                countyController.text = newValue;
+                checkForModifications();
+              }),
+
               const Text("Postal code"),
-              addressInputBox('Postal code', true, false, widget.addressDetails['Postal Code'] ?? "", TextInputType.streetAddress, (newValue) {
-                setState(() {
-
-                });
-              },),
+              addressInputBox('Postal code', true, false, postalCodeController.text, TextInputType.streetAddress, (newValue) {
+                postalCodeController.text = newValue;
+                checkForModifications();
+              }),
               CheckboxListTile(
-                value: widget.addressDetails['Default'],
-                onChanged: (bool? value){
+                value: isDefault,
+                onChanged: (bool? value) {
                   setState(() {
-
+                    isDefault = value ?? false;
+                    checkForModifications();
                   });
                 },
-                title: Text('Set as Default', overflow: TextOverflow.ellipsis, maxLines: 1, style: Theme.of(context).textTheme.labelLarge,),
-                //contentPadding: const EdgeInsets.only(right: 35),
-                //materialTapTargetSize: MaterialTapTargetSize.padded,
+                title: Text('Set as Default', overflow: TextOverflow.ellipsis, maxLines: 1, style: Theme.of(context).textTheme.labelLarge),
               ),
             ],
           ),
@@ -78,9 +102,10 @@ class _EditAddressState extends State<EditAddress> {
       ),
       bottomSheet: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: solidButton(context, 'Save Address', () {
+        child: solidButton(context, 'Update Address', () {
           Navigator.pop(context);
-        }, true),
+        },
+          isModified && streetAddressController.text.isNotEmpty && localityController.text.isNotEmpty && countyController.text.isNotEmpty && postalCodeController.text.isNotEmpty,),
       ),
     );
   }
