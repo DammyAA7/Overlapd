@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:overlapd/utilities/toast.dart';
+import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/widgets.dart';
 
 
@@ -17,6 +20,8 @@ class _EditAddressState extends State<EditAddress> {
   late TextEditingController postalCodeController;
   bool isDefault = false;
   bool isModified = false;
+  final FirebaseAuthService _auth = FirebaseAuthService();
+  late final String _UID = _auth.getUserId();
 
   @override
   void initState() {
@@ -89,10 +94,14 @@ class _EditAddressState extends State<EditAddress> {
               CheckboxListTile(
                 value: isDefault,
                 onChanged: (bool? value) {
-                  setState(() {
-                    isDefault = value ?? false;
-                    checkForModifications();
-                  });
+                  if(!widget.addressDetails['Default']){
+                    setState(() {
+                      isDefault = value ?? false;
+                      checkForModifications();
+                    });
+                  } else{
+                    showToast(text: 'Cannot remove as default');
+                  }
                 },
                 title: Text('Set as Default', overflow: TextOverflow.ellipsis, maxLines: 1, style: Theme.of(context).textTheme.labelLarge),
               ),
@@ -102,8 +111,46 @@ class _EditAddressState extends State<EditAddress> {
       ),
       bottomSheet: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: solidButton(context, 'Update Address', () {
-          Navigator.pop(context);
+        child: solidButton(context, 'Update Address', () async{
+          if (isModified) {
+            // Fetch the current user document to get the address book
+            final userDoc = await _auth.getAccountInfoGet(_UID);
+            List<dynamic> addressBook = List.from(userDoc.data()?['Address Book'] ?? []);
+
+            // Find the index of the address being edited
+            int indexToUpdate = addressBook.indexWhere((address) => address['Full Address'] == widget.addressDetails['Full Address']);
+
+            // Check if address exists in the address book
+            if (indexToUpdate != -1) {
+              // Update the address details
+              addressBook[indexToUpdate] = {
+                'Street Address': streetAddressController.text,
+                'Locality': localityController.text,
+                'County': countyController.text,
+                'Postal Code': postalCodeController.text,
+                'Default': isDefault,
+                'Full Address': "${streetAddressController.text}, ${localityController.text}, ${postalCodeController.text}, ${countyController.text}",
+                // Preserve other fields that are not being edited
+              };
+
+              // If setting this address as default, ensure to reset the Default flag for all others
+              if (isDefault) {
+                for (int i = 0; i < addressBook.length; i++) {
+                  if (i != indexToUpdate) {
+                    addressBook[i]['Default'] = false;
+                  }
+                }
+              }
+
+              // Update the document in Firestore with the modified address book
+              await FirebaseFirestore.instance.collection('users').doc(_UID).update({
+                'Address Book': addressBook,
+                // Update lastAddressSelected if necessary
+              });
+            }
+            // Optionally return true to indicate a successful update
+            Navigator.pop(context);
+          }
         },
           isModified && streetAddressController.text.isNotEmpty && localityController.text.isNotEmpty && countyController.text.isNotEmpty && postalCodeController.text.isNotEmpty,),
       ),
