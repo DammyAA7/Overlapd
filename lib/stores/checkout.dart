@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:overlapd/deliveries/addressList.dart';
 import 'package:provider/provider.dart';
 import '../deliveries/delivery_service.dart';
@@ -12,6 +15,8 @@ import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/toast.dart';
 import '../utilities/widgets.dart';
 import 'groceryRange.dart';
+import 'dart:io';
+
 
 class Checkout extends StatefulWidget {
   const Checkout({super.key});
@@ -281,6 +286,18 @@ class _CheckoutState extends State<Checkout> {
                     );
                   },
                 ),
+                GestureDetector(
+                  onTap: _captureRewardCard,
+                  child: ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      horizontalTitleGap: 5,
+                    leading: const Icon(
+                        Icons.card_membership_outlined,
+                        color: Colors.black
+                    ),
+                    title: Text('Upload Reward Card', style: Theme.of(context).textTheme.titleLarge,)
+                  ),
+                ),
                 const Spacer(),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -434,6 +451,27 @@ class _CheckoutState extends State<Checkout> {
         }
       }
     }
+  }
+
+  void _captureRewardCard() async{
+    ImagePicker imagePicker = ImagePicker();
+    XFile? receipt = await imagePicker.pickImage(source: ImageSource.camera);
+    if( receipt== null) return;
+    Reference referenceRoot = FirebaseStorage.instance.ref();
+    Reference referenceDirImages = referenceRoot.child('Reward_Cards');
+    Reference referenceImageToUpload = referenceDirImages.child(_UID);
+    try{
+      await referenceImageToUpload.putFile(File(receipt.path));
+      String downloadURL = await referenceImageToUpload.getDownloadURL();
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_UID)
+          .update({'reward card': downloadURL});
+      showToast(text: "Successfully uploaded receipt");
+    }catch(e){
+      showToast(text: "Error uploading Image");
+    }
+
   }
 
 }
