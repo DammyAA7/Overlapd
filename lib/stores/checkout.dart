@@ -45,6 +45,7 @@ class _CheckoutState extends State<Checkout> {
   String? locality;
   String? county;
   String? postalCode;
+  String? rewardCardUrl;
   final InputBoxController _itemController = InputBoxController();
   var now = DateTime.now();
   late Box<String?> savedAddress;
@@ -90,6 +91,7 @@ class _CheckoutState extends State<Checkout> {
     // TODO: implement initState
     super.initState();
     loadLastSelectedOrDefaultAddress();
+    fetchRewardCard();
   }
   @override
   Widget build(BuildContext context) {
@@ -256,7 +258,7 @@ class _CheckoutState extends State<Checkout> {
                                       Column(
                                       children: [
                                         CheckboxListTile(
-                                          title: const Text("Picker has full discretion over substitutable items"),
+                                          title: Text("Picker has full discretion over substitutable items", style: Theme.of(context).textTheme.titleLarge,),
                                           value: shoppingPreference,
                                           onChanged: (bool? value) {
                                             setState(() {
@@ -265,7 +267,7 @@ class _CheckoutState extends State<Checkout> {
                                           },
                                         ),
                                         CheckboxListTile(
-                                          title: const Text("Picker will contact you to get your approval"),
+                                          title: Text("Picker will contact you to get your approval", style: Theme.of(context).textTheme.titleLarge,),
                                           value: !shoppingPreference,
                                           onChanged: (bool? value) {
                                             setState(() {
@@ -287,7 +289,7 @@ class _CheckoutState extends State<Checkout> {
                   },
                 ),
                 GestureDetector(
-                  onTap: _captureRewardCard,
+                  onTap: () => rewardCardUrl == null ? _captureRewardCard : _viewOrRetakeRewardCard(),
                   child: ListTile(
                       contentPadding: EdgeInsets.zero,
                       horizontalTitleGap: 5,
@@ -295,7 +297,9 @@ class _CheckoutState extends State<Checkout> {
                         Icons.card_membership_outlined,
                         color: Colors.black
                     ),
-                    title: Text('Upload Reward Card', style: Theme.of(context).textTheme.titleLarge,)
+                    title: Text(
+                      rewardCardUrl == null ? 'Upload Reward Card' : 'View Reward Card',
+                      style: Theme.of(context).textTheme.titleLarge,)
                   ),
                 ),
                 const Spacer(),
@@ -451,6 +455,42 @@ class _CheckoutState extends State<Checkout> {
         }
       }
     }
+  }
+
+  Future<void> fetchRewardCard() async {
+    // Fetch the reward card URL from Firestore
+    final userDoc = await _auth.getAccountInfoGet(_UID);
+    setState(() {
+      rewardCardUrl = userDoc.data()?['reward card'];
+    });
+  }
+
+  void _viewOrRetakeRewardCard() {
+    // Show the reward card with options to "OK" or "Retake"
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Reward Card'),
+          content: Image.network(rewardCardUrl!),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Retake'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _captureRewardCard(); // Retake the reward card
+              },
+            ),
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _captureRewardCard() async{
