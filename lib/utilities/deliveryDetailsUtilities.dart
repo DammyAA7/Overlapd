@@ -175,3 +175,11 @@ Future<Coordinates?> getCoordinates(String address) async {
   return null;
 }
 
+class DeliveryDetails {
+  late final String distanceToStore;
+  late final String storeToDestination;
+  late final int totalJourneyTime;
+
+  DeliveryDetails({required this.distanceToStore, required this.storeToDestination, required this.totalJourneyTime});
+}
+

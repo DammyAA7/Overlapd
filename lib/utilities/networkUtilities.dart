@@ -143,3 +143,70 @@ class PlaceAutocompleteResponse {
     return PlaceAutocompleteResponse.fromJson(parsed);
   }
 }
+
+class DistanceMatrixResponse {
+  final List<String>? destinationAddresses;
+  final List<String>? originAddresses;
+  final List<DistanceMatrixElement>? elements;
+  final String? status;
+
+  DistanceMatrixResponse({
+    this.destinationAddresses,
+    this.originAddresses,
+    this.elements,
+    this.status,
+  });
+
+  factory DistanceMatrixResponse.fromJson(Map<String, dynamic> json) {
+    return DistanceMatrixResponse(
+      destinationAddresses: List<String>.from(json["destination_addresses"]),
+      originAddresses: List<String>.from(json["origin_addresses"]),
+      elements: json["rows"] != null ? (json["rows"][0]["elements"] as List).map((e) => DistanceMatrixElement.fromJson(e)).toList() : [],
+      status: json["status"],
+    );
+  }
+}
+
+class DistanceMatrixElement {
+  final DistanceInfo? distance;
+  final DurationInfo? duration;
+  final String? status;
+
+  DistanceMatrixElement({this.distance, this.duration, this.status});
+
+  factory DistanceMatrixElement.fromJson(Map<String, dynamic> json) {
+    return DistanceMatrixElement(
+      distance: DistanceInfo.fromJson(json["distance"]),
+      duration: DurationInfo.fromJson(json["duration"]),
+      status: json["status"],
+    );
+  }
+}
+
+class DistanceInfo {
+  final String? text;
+  final int? value;
+
+  DistanceInfo({this.text, this.value});
+
+  factory DistanceInfo.fromJson(Map<String, dynamic> json) {
+    return DistanceInfo(
+      text: json["text"],
+      value: json["value"],
+    );
+  }
+}
+
+class DurationInfo {
+  final String? text;
+  final int? value;
+
+  DurationInfo({this.text, this.value});
+
+  factory DurationInfo.fromJson(Map<String, dynamic> json) {
+    return DurationInfo(
+      text: json["text"],
+      value: json["value"],
+    );
+  }
+}

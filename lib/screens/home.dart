@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -8,6 +9,8 @@ import 'package:overlapd/deliveries/delivery_service.dart';
 import 'package:overlapd/utilities/toast.dart';
 import '../stores/groceryRange.dart';
 import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
+import '../utilities/deliveryDetailsUtilities.dart';
+import '../utilities/networkUtilities.dart';
 import '../utilities/widgets.dart';
 import 'package:overlapd/utilities/homeUtilities.dart';
 import 'package:overlapd/stores/range.dart';
@@ -33,6 +36,12 @@ class _HomeState extends State<Home> {
   MapRange range = MapRange();
   bool isVerified = true;
   bool hasAccount = true;
+  List modeOfTransport = ['driving', 'walking', 'bicycling', 'transit'];
+  String chosenMode = 'driving';
+  Position? currentLocation;
+  String? distanceToStore;
+  String? storeToDestination;
+  int totalJourneyTime = 0;
   @override
   void initState() {
     // TODO: implement initState
@@ -105,7 +114,7 @@ class _HomeState extends State<Home> {
                           ),
                         ),
                         Expanded(
-                          flex: 5,
+                          flex: 10,
                           child: TabBarView(
                             children: [
                               Column(
@@ -121,18 +130,7 @@ class _HomeState extends State<Home> {
                       ],
                     ),
                   ),
-                  Expanded(flex:5, child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20)
-                        ),
-                      child: const Text('Recent Activity')
-                      ),
-                  )
-                  ),
-                  Expanded(flex:1, child: _requestDeliveryButton())
+                  _requestDeliveryButton()
                 ],
               ),
             )
@@ -178,16 +176,6 @@ class _HomeState extends State<Home> {
   }
 
   void _requestDelivery() async{
-    try {
-      await getCurrentLocation();
-      // Proceed with delivery request logic as location services are enabled
-      Navigator.of(context).pushReplacement(
-        pageAnimationFromBottomToTop(const DeliveryDetails()),
-      );
-    } catch (e) {
-      // Display a message to the user about the location issue
-      showToast(text: e.toString());
-    }
   }
 
   void _signOut() async {
@@ -539,47 +527,126 @@ class _HomeState extends State<Home> {
                 );
               }
             } else {
-              return ListView(
-                children: snapshot.data!.docs.map((document) {
-                  return _buildItem(document);
-                }).toList(),
+              return Column(
+                children: [
+                  DropdownButtonFormField2<String>(
+                    decoration: InputDecoration(
+                      // Add Horizontal padding using menuItemStyleData.padding so it matches
+                      // the menu padding when button's width is not specified.
+                      contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      // Add more decoration..
+                    ),
+                    isExpanded: true,
+                    hint: const Text(
+                      'Select a mode of transport',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    items: modeOfTransport.map((store)
+                    => DropdownMenuItem<String>(
+                      value: store,
+                      child: Text(store, style: const TextStyle(fontSize: 20)),
+                    )
+                    ).toList(),
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Please select store';
+                      }
+                      return null;
+                    },
+                    onChanged: (newValue){
+                      setState(() {
+                        chosenMode = newValue.toString();
+                      });
+                    },
+                    onSaved: (value) {
+                      chosenMode = value.toString();
+                    },
+                    buttonStyleData: const ButtonStyleData(
+                      padding: EdgeInsets.only(right: 8),
+                    ),
+                    iconStyleData: const IconStyleData(
+                      icon: Icon(
+                        Icons.arrow_drop_down,
+                        color: Colors.black45,
+                      ),
+                      iconSize: 24,
+                    ),
+                    dropdownStyleData: DropdownStyleData(
+                      elevation: 0,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    menuItemStyleData: const MenuItemStyleData(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView(
+                      children: snapshot.data!.docs.map((document) {
+                        return _buildItem(document);
+                      }).toList(),
+                    ),
+                  ),
+                ],
               );
             }
           }
         });
   }
 
-  Widget _buildItem(DocumentSnapshot document){
+  Widget _buildItem(DocumentSnapshot document) {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
     String orderNo = document.id;
-    return data['Placed by'] != _UID && data['accepted by'] == 'N/A' && !data['declined By']?.contains(_UID) ? Container(
-      alignment: Alignment.center,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Container(
-          padding: const EdgeInsets.all(8.0),
-          height: 140,
-          width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-            color: const Color(0xFF21D19F).withOpacity(0.5),
-            borderRadius: BorderRadius.circular(20)
-          ),
-          child: Column(
-            children: [
-               Text(data['Grocery Store']),
-              Text(data['Item Total']),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children:
-              [
-                ElevatedButton(onPressed: () => declineDelivery(orderNo), child: const Text('Decline')),
-                ElevatedButton(onPressed: () => acceptDelivery(orderNo), child: const Text('Accept'))
-              ],)
-            ],
-          ),
-        ),
-      ),
-    ) : const SizedBox.shrink();
+    Future<DeliveryDetails> deliveryDetails = getDistanceTime(data['Delivery Address']);
+    return FutureBuilder<DeliveryDetails>(
+      future: deliveryDetails,
+      builder: (BuildContext context, AsyncSnapshot<DeliveryDetails> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          // Assuming snapshot.data now contains the DeliveryDetails object
+          DeliveryDetails deliveryDetails = snapshot.data!;
+          return data['Placed by'] != _UID && data['accepted by'] == 'N/A' && !data['declined By']?.contains(_UID) ? Container(
+            alignment: Alignment.center,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                padding: const EdgeInsets.all(8.0),
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                    color: const Color(0xFF21D19F).withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(20)
+                ),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(data['Grocery Store']),
+                      Text('Distance to Store: ${deliveryDetails.distanceToStore}'),
+                      Text('Distance from Store to Destination: ${deliveryDetails.storeToDestination}'),
+                      Text('Total Journey Time: ${(deliveryDetails.totalJourneyTime / 60).round()} mins'),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ElevatedButton(onPressed: () => declineDelivery(orderNo), child: const Text('Decline')),
+                          ElevatedButton(onPressed: () => acceptDelivery(orderNo), child: const Text('Accept'))
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ) : const SizedBox.shrink();
+        }
+      },
+    );
   }
 
 
@@ -666,7 +733,49 @@ void _cancelDelivery() async{
     }
   }
 
+  Future<List?> distance(var destination, String mode, var origin) async{
+    Uri uri = Uri.https(
+        "maps.googleapis.com",
+        '/maps/api/distancematrix/json',
+        {
+          "destinations": destination,
+          "origins": origin.runtimeType == Position ? '${origin.latitude},${origin.longitude}' : origin,
+          "mode": mode,
+          "key": "AIzaSyDFcJ0SWLhnTZVktTPn8jB5nJ2hpuSfwNk"
+        });
 
+    String? response = await NetworkUtility.fetchUrl(uri);
+    if (response != null) {
+      final distanceMatrixResponse = DistanceMatrixResponse.fromJson(json.decode(response));
+      return [distanceMatrixResponse.elements?.first.distance?.text,distanceMatrixResponse.elements?.first.duration?.value];
+    }
+    return null;
+
+  }
+
+  Future<void> originToStore() async{
+    String tescoAddress = '14 Stocking Ave, Rathfarnham, Dublin';
+    currentLocation = await determinePosition();
+    List? values = await distance(tescoAddress, chosenMode, currentLocation!);
+    distanceToStore = values?[0];
+    totalJourneyTime = 0;
+    totalJourneyTime += values?[1] as int;
+  }
+
+  void storeToDestinationDistance(String destination) async{
+    String tescoAddress = '14 Stocking Ave, Rathfarnham, Dublin';
+    List? values = await distance(tescoAddress, chosenMode, destination);
+    storeToDestination = values?[0];
+    totalJourneyTime += values?[1] as int;
+  }
+
+  Future<DeliveryDetails> getDistanceTime(String destination) async{
+    String tescoAddress = '14 Stocking Ave, Rathfarnham, Dublin';
+    currentLocation = await determinePosition();
+    List? originToStore = await distance(tescoAddress, chosenMode, currentLocation!);
+    List? storeToDestinationDistance = await distance(tescoAddress, chosenMode, destination);
+    return DeliveryDetails(distanceToStore: originToStore?[0], storeToDestination: storeToDestinationDistance?[0], totalJourneyTime: (originToStore?[1] as int) + (storeToDestinationDistance?[1] as int));
+  }
 }
 
 
