@@ -544,22 +544,25 @@ class _HomeState extends State<Home> {
                       'Select a mode of transport',
                       style: TextStyle(fontSize: 20),
                     ),
-                    items: modeOfTransport.map((store)
+                    items: modeOfTransport.map((mode)
                     => DropdownMenuItem<String>(
-                      value: store,
-                      child: Text(store, style: const TextStyle(fontSize: 20)),
+                      value: mode,
+                      child: Text(mode, style: const TextStyle(fontSize: 20)),
                     )
                     ).toList(),
+                    value: chosenMode,
                     validator: (value) {
                       if (value == null) {
                         return 'Please select store';
                       }
                       return null;
                     },
-                    onChanged: (newValue){
-                      setState(() {
-                        chosenMode = newValue.toString();
-                      });
+                    onChanged: (String? newValue){
+                      if(newValue != null){
+                        setState(() {
+                          chosenMode = newValue;
+                        });
+                      }
                     },
                     onSaved: (value) {
                       chosenMode = value.toString();

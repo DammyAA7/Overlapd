@@ -115,11 +115,18 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
               ),
             ),
             Expanded(
-              child: ListView.builder(
-                  itemCount: placePredictions.length,
-                  itemBuilder: (context,index) {
-                    return _buildAddressResult(index);
-                  }
+              child: placePredictions.isNotEmpty
+                  ? ListView.builder(
+                itemCount: placePredictions.length,
+                itemBuilder: (context, index) {
+                  return _buildAddressResult(index);
+                },
+              )
+                  : predictions == '' ? const Center(
+                child: Text('Search for Address'),
+              ) : 
+              const Center(
+                child: Text('No results found'),
               ),
             ),
           ],
@@ -201,21 +208,54 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
           county = '';
           postalCode = '';
           fullStreetAddress = null;
-          Navigator.pop(context);
-          Navigator.pop(context);
         }
             , fieldsFilled()),
       ),
     );
   }
   List<AutocompletePrediction> placePredictions = [];
+  Future<bool> isAddressValid(String query) async {
+    if (query.isEmpty) {
+      return false;
+    }
+    Uri uri = Uri.https(
+      "maps.googleapis.com",
+      'maps/api/place/autocomplete/json',
+      {
+        "input": query,
+        "types": "street_address||postal_code||street_number||point_of_interest",
+        "location": "53.2779792,-6.3226545", // Latitude and Longitude
+        "radius": "5000",
+        "strictbounds": "true",
+        "components": "country:ie",
+        "key": "AIzaSyDFcJ0SWLhnTZVktTPn8jB5nJ2hpuSfwNk"
+      },
+    );
+
+    String? response = await NetworkUtility.fetchUrl(uri);
+    if (response != null) {
+      PlaceAutocompleteResponse result = PlaceAutocompleteResponse.parseAutocompleteResult(response);
+      return result.predictions != null && result.predictions!.isNotEmpty;
+    }
+    return false;
+  }
+
   void placeAutoComplete(String query) async{
+    if (query.isEmpty) {
+      setState(() {
+        placePredictions = [];
+      });
+      return;
+    }
     Uri uri = Uri.https(
         "maps.googleapis.com",
         'maps/api/place/autocomplete/json',
         {
           "input": query,
           "types": "street_address||postal_code||street_number||point_of_interest",
+          "location": "53.2779792,-6.3226545", // Latitude and Longitude
+          "radius": "5000",
+          "strictbounds": "true",
           "components": "country:ie",
           "key": "AIzaSyDFcJ0SWLhnTZVktTPn8jB5nJ2hpuSfwNk"
         });
@@ -263,14 +303,27 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
     if (docSnapshot.exists && docSnapshot.data()!.containsKey('Address Book')) {
       List<dynamic> addressBook = List<dynamic>.from(docSnapshot.data()!['Address Book']);
 
+      // Normalize new address for comparison
+      String newAddressNormalized = (newAddress['Full Address'] as String)
+          .toLowerCase() // Make lowercase
+          .replaceAll(',', '') // Remove commas
+          .replaceAll(RegExp(r"\s+"), ''); // Remove spaces
+
       // Check for address uniqueness before adding/updating
       bool addressExists = addressBook.any((address) {
-        return Map<String, dynamic>.from(address)['Full Address'] == newAddress['Full Address'];
+        String existingAddressNormalized = (Map<String, dynamic>.from(address)['Full Address'] as String)
+            .toLowerCase() // Make lowercase
+            .replaceAll(',', '') // Remove commas
+            .replaceAll(' ', ''); // Remove spaces
+        return existingAddressNormalized == newAddressNormalized;
       });
 
       if (addressExists) {
         // Address already exists, inform the user or update the existing address
         showToast(text: 'This address already exists.');
+        setState(() {
+          setAddress = null;
+        });
         return; // Stop the function execution
       }
 
@@ -290,10 +343,17 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
       await userDoc.update({'Address Book': addressBook});
 
     } else {
+      bool isValidAddress = await isAddressValid(newAddress['Full Address']);
+      if (!isValidAddress) {
+        showToast(text: 'The address is not valid.');
+        return; // Stop the function execution if address is not valid
+      }
       // If no Address Book exists or the document doesn't exist, create one with the new address
       newAddress['Default'] = defaultAddress;
       await userDoc.set({'Address Book': [newAddress]});
     }
+    Navigator.pop(context);
+    Navigator.pop(context);
   }
 
 
