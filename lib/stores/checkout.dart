@@ -370,15 +370,16 @@ class _CheckoutState extends State<Checkout> {
           )
       );
       await Stripe.instance.presentPaymentSheet();
-      _checkout(fullAddress!, 'Tesco', value.cart, value.totalAmountPlusFees(deliveryTime));
+      print("Payment Intent ${jsonResponse['id']}");
+      _checkout(fullAddress!, 'Tesco', value.cart, value.totalAmountPlusFees(deliveryTime), jsonResponse['id']);
     } catch(e){
       print(e);
     }
   }
 
-  void _checkout(String setAddress, String chosenStore, Map<Product, int> products, String amount) async{
+  void _checkout(String setAddress, String chosenStore, Map<Product, int> products, String amount, String paymentID) async{
     List<Map<String, dynamic>> productListMap = context.read<Cart>().toMapList();
-    await _service.openDelivery(setAddress, chosenStore, productListMap, amount);
+    await _service.openDelivery(setAddress, chosenStore, productListMap, amount, paymentID);
     context.read<Cart>().clearCart();
     Navigator.of(context).pushReplacement(
         pageAnimationFromTopToBottom(const Home()));

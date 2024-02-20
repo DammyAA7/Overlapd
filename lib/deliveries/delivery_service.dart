@@ -24,7 +24,7 @@ class DeliveryService extends ChangeNotifier {
         .set(details);
 
   }
-  Future<void> openDelivery(String address, String storeName, List productList, String total) async {
+  Future<void> openDelivery(String address, String storeName, List productList, String total, String paymentID) async {
     final userId = _auth.getUserId();
     String orderNo;
 
@@ -39,7 +39,7 @@ class DeliveryService extends ChangeNotifier {
       'complete': 'no',
       'cancelled': 'no',
       'declined By': '',
-      'live location': [0,0],
+      'payment id': paymentID,
       'receipt':'N/A'
     };
     final orderInfoDocRef = await FirebaseFirestore.instance

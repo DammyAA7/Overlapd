@@ -191,9 +191,15 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void acceptDelivery(String orderID) async{
+  void acceptDelivery(String orderID, String paymentIntentId, String accountId) async{
     try {
       //check if location services are enabled
+      await http.post(Uri.parse(
+          'https://us-central1-overlapd-13268.cloudfunctions.net/StripeUpdatePaymentIntent'),
+          body: {
+            'id': paymentIntentId,
+            'destination': accountId,
+          });
       currentPosition = await getCurrentLocation();
       // Retrieve the value of 'Placed by' from 'All Deliveries' collection
       DocumentSnapshot deliverySnapshot = await FirebaseFirestore.instance
@@ -605,16 +611,23 @@ class _HomeState extends State<Home> {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
     String orderNo = document.id;
     Future<DeliveryDetails> deliveryDetails = getDistanceTime(data['Delivery Address']);
-    return FutureBuilder<DeliveryDetails>(
-      future: deliveryDetails,
-      builder: (BuildContext context, AsyncSnapshot<DeliveryDetails> snapshot) {
+    Future<String> accountId =  FirebaseFirestore.instance
+        .collection('users')
+        .doc(_UID)
+        .get()
+        .then((doc) => doc.data()?['Stripe Account Id']);
+
+    return FutureBuilder(
+      future: Future.wait([deliveryDetails, accountId]),
+      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else {
           // Assuming snapshot.data now contains the DeliveryDetails object
-          DeliveryDetails deliveryDetails = snapshot.data!;
+          DeliveryDetails deliveryDetails = snapshot.data?[0];
+          String accountId = snapshot.data?[1];
           return data['Placed by'] != _UID && data['accepted by'] == 'N/A' && !data['declined By']?.contains(_UID) ? Container(
             alignment: Alignment.center,
             child: Padding(
@@ -638,7 +651,7 @@ class _HomeState extends State<Home> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           ElevatedButton(onPressed: () => declineDelivery(orderNo), child: const Text('Decline')),
-                          ElevatedButton(onPressed: () => acceptDelivery(orderNo), child: const Text('Accept'))
+                          ElevatedButton(onPressed: () => acceptDelivery(orderNo, data['payment id'], accountId), child: const Text('Accept'))
                         ],
                       )
                     ],

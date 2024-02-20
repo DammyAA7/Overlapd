@@ -33,15 +33,12 @@ exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
       automatic_payment_methods: {
         enabled: true,
       },
-      transfer_data:{
-        amount: 549,
-        destination: 'acct_1OYD9AIejXw0Dd0j'
-      }
     }, function (error, paymentIntent){
         if(error !=null){
             res.json({"error":error});
         }else{
             res.json({
+                id: paymentIntent.id,
                 paymentIntent: paymentIntent.client_secret,
                 status: paymentIntent.status,
                 amount: req.body.amount,
@@ -52,6 +49,18 @@ exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
                 status: paymentIntent.status
             });
         }
+    });
+});
+
+
+exports.StripeUpdatePaymentIntent = functions.https.onRequest(async(req, res) =>{
+    const paymentIntent = await stripe.paymentIntents.update(
+    req.body.id,
+    {
+      transfer_data:{
+        amount: 549,
+        destination: req.body.destination
+      }
     });
 });
 
