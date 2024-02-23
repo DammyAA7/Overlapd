@@ -22,6 +22,7 @@ class _PaymentState extends State<Payment> {
   int pending = 0;
   @override
   void initState() {
+    super.initState();
     // TODO: implement initState
     getCurrentStripeBalance();
   }

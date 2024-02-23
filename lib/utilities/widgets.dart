@@ -28,6 +28,29 @@ class InputBoxController {
   }
 }
 
+Widget multilineLetterInputBox(String hintText, bool autoCorrect, bool obscureText,
+    InputBoxController inputBoxController) {
+  return widgetInputBox(
+    hintText: hintText,
+    autoCorrect: autoCorrect,
+    obscureText: obscureText,
+    textType: TextInputType.multiline,
+    onChanged: (value) {
+      // You can perform any additional actions when the text changes here
+    },
+    inputBoxController: inputBoxController,
+    inputFormatter: FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z'-]")),
+    validator: (String? value) {
+      if (value != null && value.isNotEmpty) {
+        if (!RegExp(r"^[a-zA-Z'-]+$").hasMatch(value)) {
+          return 'Invalid character: Numbers are not allowed.';
+        }
+      }
+      return null; // No error
+    },
+  );
+}
+
 Widget letterInputBox(String hintText, bool autoCorrect, bool obscureText,
     InputBoxController inputBoxController) {
   return widgetInputBox(
@@ -259,6 +282,7 @@ Widget widgetInputBox({
   bool hasError = validator != null && validator(inputBoxController.controller.text) != null;
 
   return TextFormField(
+    maxLines: null,
     initialValue: initialValue,
     controller: inputBoxController.controller,
     onChanged: onChanged,
