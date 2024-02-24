@@ -1,7 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:overlapd/utilities/toast.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/widgets.dart';
 import 'home.dart';
@@ -69,7 +70,7 @@ class _SupportState extends State<Support> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               pageText(context, 'Title'),
-              letterInputBox('Enter Subject', true, false, title),
+              supportLetterInputBox('Enter Subject', true, false, title),
               pageText(context, 'Body'),
               multilineLetterInputBox('Enter complaint, suggestion or feedback', true, false, body),
               Padding(
@@ -83,17 +84,36 @@ class _SupportState extends State<Support> {
         padding: const EdgeInsets.all(8.0),
         child:solidButton(context, 'Submit', () {
           submitFeedback();
-          setState(() {
-            body.clear();
-            title.clear();
-          });
-          showToast(text: 'Your message has been sent');
 
         }, _areFieldsValid()),
       ),
     );
   }
-  submitFeedback(){
 
+  void submitFeedback() async {
+    // Create a map with the data you want to submit
+    Map<String, dynamic> feedbackData = {
+      'title': title.getText(),
+      'body': body.getText(),
+      'timestamp': FieldValue.serverTimestamp(), // This will add the current timestamp according to Firestore's server
+      'userId': _auth.getUsername(), // Assuming you want to track which user submitted the feedback
+    };
+
+    try {
+      // Add the feedback to the 'support' collection
+      await FirebaseFirestore.instance.collection('support').add(feedbackData);
+
+      // Show a success message
+      showToast(text: 'Your message has been sent successfully.');
+      // Optionally clear the fields if the submission was successful
+      setState(() {
+        body.clear();
+        title.clear();
+      });
+    } catch (e) {
+      // If there's any error, show an error message
+      showToast(text: 'Failed to send message: $e');
+      print('Error submitting feedback: $e');
+    }
   }
 }

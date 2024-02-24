@@ -39,15 +39,20 @@ Widget multilineLetterInputBox(String hintText, bool autoCorrect, bool obscureTe
       // You can perform any additional actions when the text changes here
     },
     inputBoxController: inputBoxController,
-    inputFormatter: FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z'-]")),
-    validator: (String? value) {
-      if (value != null && value.isNotEmpty) {
-        if (!RegExp(r"^[a-zA-Z'-]+$").hasMatch(value)) {
-          return 'Invalid character: Numbers are not allowed.';
-        }
-      }
-      return null; // No error
+  );
+}
+
+Widget supportLetterInputBox(String hintText, bool autoCorrect, bool obscureText,
+    InputBoxController inputBoxController) {
+  return widgetInputBox(
+    hintText: hintText,
+    autoCorrect: autoCorrect,
+    obscureText: obscureText,
+    textType: TextInputType.text,
+    onChanged: (value) {
+      // You can perform any additional actions when the text changes here
     },
+    inputBoxController: inputBoxController,
   );
 }
 
