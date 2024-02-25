@@ -49,7 +49,6 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
               predictions = '';
               houseNumber = '';
               streetAddress = '';
-              streetAddress = '';
               locality = '';
               county = '';
               postalCode = '';
@@ -138,7 +137,7 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
               const Text("Street Address"),
               addressInputBox('Street Address', true, false, fullStreetAddress ?? "", TextInputType.streetAddress, (newValue) {
                 setState(() {
-                  streetAddress = newValue;
+                  fullStreetAddress = newValue;
                 });
               },),
 
@@ -187,7 +186,7 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
         padding: const EdgeInsets.all(8.0),
         child: solidButton(context, "Save Address", () async{
           setState(() {
-            fullAddress = '${houseNumber ?? ''} ${streetAddress!}, ${locality!}, ${postalCode!}, ${county!}';
+            fullAddress = '${fullStreetAddress!}, ${locality!}, ${postalCode!}, ${county!}';
           });
           Map<String, dynamic> addressBook = {
             'Street Address': fullStreetAddress,
@@ -201,7 +200,6 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
           setAddress = null;
           searchText.clear();
           predictions = '';
-          houseNumber = '';
           streetAddress = '';
           streetAddress = '';
           locality = '';
@@ -214,31 +212,7 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
     );
   }
   List<AutocompletePrediction> placePredictions = [];
-  Future<bool> isAddressValid(String query) async {
-    if (query.isEmpty) {
-      return false;
-    }
-    Uri uri = Uri.https(
-      "maps.googleapis.com",
-      'maps/api/place/autocomplete/json',
-      {
-        "input": query,
-        "types": "street_address||postal_code||street_number||point_of_interest",
-        "location": "53.2779792,-6.3226545", // Latitude and Longitude
-        "radius": "5000",
-        "strictbounds": "true",
-        "components": "country:ie",
-        "key": "AIzaSyDFcJ0SWLhnTZVktTPn8jB5nJ2hpuSfwNk"
-      },
-    );
 
-    String? response = await NetworkUtility.fetchUrl(uri);
-    if (response != null) {
-      PlaceAutocompleteResponse result = PlaceAutocompleteResponse.parseAutocompleteResult(response);
-      return result.predictions != null && result.predictions!.isNotEmpty;
-    }
-    return false;
-  }
 
   void placeAutoComplete(String query) async{
     if (query.isEmpty) {
@@ -343,14 +317,10 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
       await userDoc.update({'Address Book': addressBook});
 
     } else {
-      bool isValidAddress = await isAddressValid(newAddress['Full Address']);
-      if (!isValidAddress) {
-        showToast(text: 'The address is not valid.');
-        return; // Stop the function execution if address is not valid
-      }
       // If no Address Book exists or the document doesn't exist, create one with the new address
       newAddress['Default'] = defaultAddress;
       await userDoc.set({'Address Book': [newAddress]});
+      showToast(text: 'The address has been added successfully');
     }
     Navigator.pop(context);
     Navigator.pop(context);

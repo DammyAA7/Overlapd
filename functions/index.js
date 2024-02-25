@@ -123,6 +123,7 @@ exports.StripeCreateConnectAccount = functions.https.onRequest(async (req, res) 
 
         res.json({
             id: account.id,
+            disabled_reason: account.disabled_reason
         });
     } catch (error) {
         console.error("Error creating account session:", error);

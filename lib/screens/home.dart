@@ -405,6 +405,10 @@ class _HomeState extends State<Home> {
                     .collection('users')
                     .doc(_UID)
                     .set({'Stripe Account Id': jsonAccountResponse['id']}, SetOptions(merge: true));
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(_UID)
+                    .set({'Stripe Account Enabled': jsonAccountResponse['disabled_reason']}, SetOptions(merge: true));
                 final accountLinkResponse = await http.post(
                     Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateAccountLink'),
                     body: {
@@ -440,8 +444,9 @@ class _HomeState extends State<Home> {
             try{
               String identityStatus = snapshot.data!['Stripe Identity Status'];
               String accountId = snapshot.data!['Stripe Account Id'];
+              String accountEnabled = snapshot.data!['Stripe Account Enabled'];
 
-              if (identityStatus == 'verified' && accountId.isNotEmpty) {
+              if (identityStatus == 'verified' && (accountId.isNotEmpty && accountEnabled != "requirements.past_due")) {
                 return _buildList();
               } else {
                 return Column(
