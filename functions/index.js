@@ -1,6 +1,7 @@
 const functions = require("firebase-functions");
 const stripe = require('stripe')('sk_test_51OWmrwIaruu0MDtuTh7GPThpzMdCA8h1Fldtd5HVnS5nPyjUdmUYuMV5kf7gQGNV1FwWMo1DCdFHo3lt45c1UjYv00vqvpo7zr');
-const endpointSecret = 'whsec_acOhx1XWucP3CYTq91fq3ceo85XIMNLo';
+const endpointSecretAccount = 'whsec_acOhx1XWucP3CYTq91fq3ceo85XIMNLo';
+const endpointSecretConnect = 'whsec_uLQlKHhvyKqpS63GU998YGytRNNtKpJI';
 const admin = require('firebase-admin');
 admin.initializeApp();
 
@@ -33,6 +34,10 @@ exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
       automatic_payment_methods: {
         enabled: true,
       },
+      transfer_data:{
+        amount: 549,
+        destination: 'acct_1OoCT4RCKHyiLr0F'
+      }
     }, function (error, paymentIntent){
         if(error !=null){
             res.json({"error":error});
@@ -58,7 +63,6 @@ exports.StripeUpdatePaymentIntent = functions.https.onRequest(async(req, res) =>
     req.body.id,
     {
       transfer_data:{
-        amount: 549,
         destination: req.body.destination
       }
     });
@@ -154,13 +158,13 @@ exports.StripeCreateAccountLink = functions.https.onRequest(async (req, res) => 
     }
 });
 
-exports.StripeWebhook = functions.https.onRequest(async (req, res) => {
+exports.StripeWebhookAccount = functions.https.onRequest(async (req, res) => {
       const sig = req.headers['stripe-signature'];
       const payloadData = req.rawBody;
       try {
         let event;
         try {
-            event = stripe.webhooks.constructEvent(payloadData, sig, endpointSecret);
+            event = stripe.webhooks.constructEvent(payloadData, sig, endpointSecretAccount);
           } catch (err) {
             return response.status(400).send(`Webhook Error: ${err.message}`);
 
@@ -218,8 +222,64 @@ exports.StripeWebhook = functions.https.onRequest(async (req, res) => {
     });
 
 
+exports.StripeWebhookConnect = functions.https.onRequest(async (req, res) => {
+      const sig = req.headers['stripe-signature'];
+      const payloadData = req.rawBody;
+      try {
+        let event;
+        try {
+            event = stripe.webhooks.constructEvent(payloadData, sig, endpointSecretConnect);
+          } catch (err) {
+            return response.status(400).send(`Webhook Error: ${err.message}`);
+
+          }
+        const uid = event.data.object.metadata.uid;
+        switch (event.type) {
+            case 'account.updated':
+                  const accountUpdated = event.data.object;
+                  console.log(`${accountUpdated}`);
+                  _updateAccountStatus(uid, accountUpdated.requirements.disabled_reason, accountUpdated.payouts_enabled, accountUpdated.capabilities.transfers, accountUpdated.capabilities.card_payments)
+                  break;
+            case 'balance.available':
+              const balanceAvailable = event.data.object;
+              // Then define and call a function to handle the event balance.available
+              break;
+            case 'payout.failed':
+              const payoutFailed = event.data.object;
+              // Then define and call a function to handle the event payout.failed
+              break;
+            case 'payout.paid':
+              const payoutPaid = event.data.object;
+              // Then define and call a function to handle the event payout.paid
+              break;
+            case 'payout.updated':
+              const payoutUpdated = event.data.object;
+              // Then define and call a function to handle the event payout.updated
+              break;
+            // ... handle other event types
+            default:
+              console.log(`Unhandled event type ${event.type}`);
+          }
+        return res.sendStatus(200);
+      } catch (error) {
+        return res.sendStatus(400).send(`Webhook Error: ${error.message}`);
+      }
+    });
+
+
 async function _updateStatus(uid, status) {
   await admin.firestore().collection("users").doc(uid).set({'Stripe Identity Status': status}, {merge: true});
+}
+
+async function _updateAccountStatus(uid, accountDisabled, payoutEnabled, transferActive, cardActive) {
+  const updates = {
+    'Stripe Account Disabled': accountDisabled,
+    'Stripe Account Payout Enabled': payoutEnabled,
+    'Stripe Account Transfers Active': transferActive,
+    'Stripe Account Card Payment Active': cardActive
+  };
+
+  await admin.firestore().collection("users").doc(uid).set(updates, {merge: true});
 }
 
 exports.StripeAccountBalance = functions.https.onRequest(async (req, res) => {
