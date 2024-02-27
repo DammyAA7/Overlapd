@@ -1,5 +1,7 @@
 const functions = require("firebase-functions");
-const stripe = require('stripe')('sk_test_51OWmrwIaruu0MDtuTh7GPThpzMdCA8h1Fldtd5HVnS5nPyjUdmUYuMV5kf7gQGNV1FwWMo1DCdFHo3lt45c1UjYv00vqvpo7zr');
+const stripe = require('stripe')('sk_test_51OWmrwIaruu0MDtuTh7GPThpzMdCA8h1Fldtd5HVnS5nPyjUdmUYuMV5kf7gQGNV1FwWMo1DCdFHo3lt45c1UjYv00vqvpo7zr', {
+  apiVersion: '2023-10-16',
+});
 const endpointSecretAccount = 'whsec_acOhx1XWucP3CYTq91fq3ceo85XIMNLo';
 const endpointSecretConnect = 'whsec_uLQlKHhvyKqpS63GU998YGytRNNtKpJI';
 const admin = require('firebase-admin');
@@ -34,10 +36,7 @@ exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
       automatic_payment_methods: {
         enabled: true,
       },
-      transfer_data:{
-        amount: 549,
-        destination: 'acct_1OoCT4RCKHyiLr0F'
-      }
+      transfer_group: 'order'
     }, function (error, paymentIntent){
         if(error !=null){
             res.json({"error":error});
@@ -58,14 +57,23 @@ exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
 });
 
 
-exports.StripeUpdatePaymentIntent = functions.https.onRequest(async(req, res) =>{
-    const paymentIntent = await stripe.paymentIntents.update(
-    req.body.id,
-    {
-      transfer_data:{
-        destination: req.body.destination
-      }
-    });
+exports.StripeCreateTransfer = functions.https.onRequest(async(req, res) =>{
+    try {
+            const transfer = await stripe.transfers.create(
+                {
+                    amount: 549,
+                    currency: 'eur',
+                    destination: req.body.destination,
+                    transfer_group: 'order'
+                }
+            );
+            res.json({
+                success: true,
+            });
+    } catch (error) {
+            console.error("Error creating transfer:", error);
+            res.status(500).json({ success: false, error: error.message });
+        }
 });
 
 

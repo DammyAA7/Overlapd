@@ -195,9 +195,8 @@ class _HomeState extends State<Home> {
     try {
       //check if location services are enabled
       await http.post(Uri.parse(
-          'https://us-central1-overlapd-13268.cloudfunctions.net/StripeUpdatePaymentIntent'),
+          'https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateTransfer'),
           body: {
-            'id': paymentIntentId,
             'destination': accountId,
           });
       currentPosition = await getCurrentLocation();
