@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:overlapd/utilities/toast.dart';
@@ -85,14 +86,31 @@ class _LoginState extends State<Login> {
 
     User? user = await _auth.signInWithEmailAndPassword(email, password);
 
-    if (user != null){
-      await _auth.setLoggedIn();
-      showToast(text: "User logged in successfully");
-      Navigator.pushNamed(context, '/home_page');
-    } else{
+    if (user != null) {
+      // Once logged in, check if the user is an employee (picker)
+      await _checkUserRoleAndNavigate(user.uid);
+      showToast(text: 'User succesfully logged in');
+          } else {
       print("Login error!");
+      showToast(text: "Failed to log in. Please check your credentials.");
     }
 
+  }
+
+  Future<void> _checkUserRoleAndNavigate(String userId) async {
+    final pickersCollection = FirebaseFirestore.instance.collection('employees');
+    final snapshot = await pickersCollection.get();
+    final pickerUids = snapshot.docs.map((doc) => doc.id).toList();
+
+    if (pickerUids.contains(userId)) {
+      // User is a picker (employee)
+      Navigator.pushReplacementNamed(context, '/picker_page');
+      await _auth.setLoggedIn();
+    } else {
+      // User is not a picker (customer)
+      Navigator.pushReplacementNamed(context, '/home_page');
+      await _auth.setLoggedIn();
+    }
   }
 
 }

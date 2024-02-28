@@ -31,6 +31,7 @@ class InputBoxController {
 Widget multilineLetterInputBox(String hintText, bool autoCorrect, bool obscureText,
     InputBoxController inputBoxController) {
   return widgetInputBox(
+    maxLines: null,
     hintText: hintText,
     autoCorrect: autoCorrect,
     obscureText: obscureText,
@@ -45,6 +46,7 @@ Widget multilineLetterInputBox(String hintText, bool autoCorrect, bool obscureTe
 Widget supportLetterInputBox(String hintText, bool autoCorrect, bool obscureText,
     InputBoxController inputBoxController) {
   return widgetInputBox(
+    maxLines: 1,
     hintText: hintText,
     autoCorrect: autoCorrect,
     obscureText: obscureText,
@@ -59,6 +61,7 @@ Widget supportLetterInputBox(String hintText, bool autoCorrect, bool obscureText
 Widget letterInputBox(String hintText, bool autoCorrect, bool obscureText,
     InputBoxController inputBoxController) {
   return widgetInputBox(
+    maxLines: 1,
     hintText: hintText,
     autoCorrect: autoCorrect,
     obscureText: obscureText,
@@ -87,6 +90,7 @@ Widget alphanumericInputBox(
     String? initialValue
     ) {
   return widgetInputBox(
+    maxLines: 1,
     hintText: hintText,
     autoCorrect: autoCorrect,
     obscureText: obscureText,
@@ -158,6 +162,7 @@ Widget addressInputBox(
 Widget emailInputBox(String hintText, bool autoCorrect, bool obscureText,
     InputBoxController inputBoxController) {
   return widgetInputBox(
+    maxLines: 1,
     hintText: hintText,
     autoCorrect: autoCorrect,
     obscureText: obscureText,
@@ -180,6 +185,7 @@ Widget emailInputBox(String hintText, bool autoCorrect, bool obscureText,
 Widget passwordInputBoxForLogin(String hintText, bool autoCorrect, bool obscureText,
     InputBoxController inputBoxController) {
   return widgetInputBox(
+    maxLines: 1,
     hintText: hintText,
     autoCorrect: autoCorrect,
     obscureText: obscureText,
@@ -195,6 +201,7 @@ Widget passwordInputBoxForLogin(String hintText, bool autoCorrect, bool obscureT
 Widget passwordInputBox(String hintText, bool autoCorrect, bool obscureText,
     InputBoxController inputBoxController) {
   return widgetInputBox(
+    maxLines: 1,
     hintText: hintText,
     autoCorrect: autoCorrect,
     obscureText: obscureText,
@@ -239,6 +246,7 @@ Widget passwordConfirmationInputBox(
     InputBoxController confirmationController,
     ) {
   return widgetInputBox(
+    maxLines: 1,
     hintText: hintText,
     autoCorrect: autoCorrect,
     obscureText: obscureText,
@@ -271,6 +279,7 @@ Widget widgetInputBox({
   TextInputFormatter? inputFormatter,
   String? initialValue,
   String? Function(String?)? validator,
+  required int? maxLines,
   required InputBoxController inputBoxController,
 }) {
   List<TextInputFormatter> formatters = [];
@@ -287,7 +296,7 @@ Widget widgetInputBox({
   bool hasError = validator != null && validator(inputBoxController.controller.text) != null;
 
   return TextFormField(
-    maxLines: null,
+    maxLines: maxLines == null ? maxLines : 1,
     initialValue: initialValue,
     controller: inputBoxController.controller,
     onChanged: onChanged,
