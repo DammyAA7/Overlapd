@@ -36,21 +36,35 @@ class FirebaseAuthService{
   }
 
   // Set the login status to true when the user logs in
-  Future<void> setLoggedIn() async {
+  Future<void> setLoggedInAsUser() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLoggedIn', true);
+    await prefs.setBool('isLoggedInAsUser', true);
   }
 
-  // Check if the user is logged in
-  Future<bool> isLoggedIn() async {
+  // Set the login status to true when the employee logs in
+  Future<void> setLoggedInAsEmployee() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('isLoggedIn') ?? false;
+    await prefs.setBool('isLoggedInAsEmployee', true);
+  }
+
+
+  // Check if the user is logged in
+  Future<bool> isLoggedInAsUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('isLoggedInAsUser') ?? false;
+  }
+
+  // Check if the employee is logged in
+  Future<bool> isLoggedInAsEmployee() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('isLoggedInAsEmployee') ?? false;
   }
 
   // Clear the login status when the user logs out
   Future<void> setLoggedOut() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLoggedIn', false);
+    await prefs.setBool('isLoggedInAsEmployee', false);
+    await prefs.setBool('isLoggedInAsUser', false);
   }
 
   String getUserId()  {

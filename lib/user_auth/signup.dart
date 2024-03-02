@@ -135,7 +135,7 @@ class _SignUpState extends State<SignUp> {
     User? user = await _auth.signUpWithEmailAndPassword(email, password);
 
     if (user != null){
-      await _auth.setLoggedIn();
+      await _auth.setLoggedInAsUser();
       createUserCredentials(user: user);
       showToast(text: "User created successfully");
       Navigator.pushNamed(context, '/home_page');

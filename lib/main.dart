@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:hive/hive.dart';
-import 'package:overlapd/screens/picker.dart';
+import 'package:overlapd/pickers/picker.dart';
 import 'package:overlapd/stores/groceryRange.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -22,28 +22,44 @@ Future main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   final FirebaseAuthService _auth = FirebaseAuthService();
-  bool isLoggedIn = await _auth.isLoggedIn();
+  bool isLoggedInAsUser = await _auth.isLoggedInAsUser();
+  bool isLoggedInAsEmployee = await _auth.isLoggedInAsEmployee();
   await Hive.initFlutter();
   Stripe.publishableKey = "pk_test_51OWmrwIaruu0MDtu9f0fOLYUdaDsxU6FHsV2TtXLw6CstWMCKPwZhhldZEWSmsStYYTYpfeRfzGVAZ9tfLKODOYt00gDUZP4EI";
   Stripe.instance.applySettings();
   runApp(ChangeNotifierProvider(
       create: (context) => Cart(),
-      child: MyApp(isLoggedIn: isLoggedIn)
+      child: MyApp(isLoggedInAsUser: isLoggedInAsUser, isLoggedInAsEmployee: isLoggedInAsEmployee)
   ));
 }
 
-Future<bool> isUserLoggedIn() async {
+Future<bool> isUserLoggedInAsUser() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getBool('isLoggedIn') ?? false;
+  return prefs.getBool('isLoggedInInAsUser') ?? false;
+}
+
+Future<bool> isUserLoggedInAsEmployee() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getBool('isLoggedInInAsEmployee') ?? false;
 }
 
 class MyApp extends StatelessWidget {
-  final bool isLoggedIn;
-  const MyApp({super.key, required this.isLoggedIn});
+  final bool isLoggedInAsUser;
+  final bool isLoggedInAsEmployee;
+  const MyApp({super.key, required this.isLoggedInAsUser, required this.isLoggedInAsEmployee});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    Widget _getHomeWidget() {
+      if (isLoggedInAsUser) {
+        return const Home();
+      } else if (isLoggedInAsEmployee) {
+        return const Picker();
+      } else {
+        return const Login();
+      }
+    }
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
@@ -64,7 +80,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: isLoggedIn ? const Home() : const Login(),
+      home: _getHomeWidget(),
         routes: {
           '/login_page': (context) => const Login(),
           '/signup_page': (context) => const SignUp(),

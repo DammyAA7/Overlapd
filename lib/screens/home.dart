@@ -185,7 +185,7 @@ class _HomeState extends State<Home> {
       showToast(text: "User logged out successfully");
       Navigator.pushNamed(context, '/login_page');
     } catch (e) {
-      await _auth.setLoggedIn();
+      await _auth.setLoggedInAsUser();
       showToast(text: "An error occurred during sign-out");
       // Handle the exception or show an appropriate message to the user
     }

@@ -105,11 +105,11 @@ class _LoginState extends State<Login> {
     if (pickerUids.contains(userId)) {
       // User is a picker (employee)
       Navigator.pushReplacementNamed(context, '/picker_page');
-      await _auth.setLoggedIn();
+      await _auth.setLoggedInAsEmployee();
     } else {
       // User is not a picker (customer)
       Navigator.pushReplacementNamed(context, '/home_page');
-      await _auth.setLoggedIn();
+      await _auth.setLoggedInAsUser();
     }
   }
 
