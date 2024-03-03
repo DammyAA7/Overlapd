@@ -5,10 +5,8 @@ import '../utilities/widgets.dart';
 import 'home.dart';
 
 class RequestedDeliveryStatus extends StatefulWidget {
-  final String acceptedByUserId;
-  final String placedByUserName;
   static const id = 'requesteddeliverystatus_page';
-  const RequestedDeliveryStatus({super.key, required this.acceptedByUserId, required this.placedByUserName});
+  const RequestedDeliveryStatus({super.key});
 
   @override
   State<RequestedDeliveryStatus> createState() => _RequestedDeliveryStatusState();
@@ -30,10 +28,7 @@ class _RequestedDeliveryStatusState extends State<RequestedDeliveryStatus> {
                 IconButton(
                   onPressed: () {
                     // Navigate to the home page with a fade transition
-                    Navigator.pushReplacement(
-                      context,
-                      pageAnimationlr(const Home()),
-                    );
+                    Navigator.pop(context);
                   },
                   icon: const Icon(Icons.arrow_back_ios_new_rounded),
                 ),
@@ -52,10 +47,7 @@ class _RequestedDeliveryStatusState extends State<RequestedDeliveryStatus> {
               children: [
                 GestureDetector(
                   onTap: (){
-                    Navigator.pushReplacement(
-                      context,
-                      pageAnimationFromBottomToTop(Chat(whatUser: true, receiverUserId: widget.acceptedByUserId, receiverUserName: widget.placedByUserName,)),
-                    );
+                    //Navigator.pushReplacement(context,pageAnimationFromBottomToTop(Chat(whatUser: true, receiverUserId: widget.acceptedByUserId, receiverUserName: widget.placedByUserName,)),);
                   },
                     child: const Icon((Icons.chat))),
                 const SizedBox(width: 15),

@@ -136,7 +136,8 @@ class _AddressListState extends State<AddressList> {
                                                   child: const Text('Yes'),
                                                 ),
                                               ],
-                                            ));
+                                            )
+                                        );
                                       }
                   
                                     },),

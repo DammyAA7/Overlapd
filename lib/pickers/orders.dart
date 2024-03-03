@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:overlapd/pickers/picker.dart';
 
 import '../deliveries/delivery_service.dart';
+import '../screens/requestedDeliveryStatus.dart';
 import '../utilities/widgets.dart';
 
 class Orders extends StatefulWidget {
@@ -73,26 +74,53 @@ class _OrdersState extends State<Orders> {
 
   Widget _buildItem(DocumentSnapshot document) {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+    String docId = document.id; // Get the document ID
     int numberOfItems = data['Items for Delivery'] != null ? (data['Items for Delivery'] as List).length : 0;
-    return data['Grocery Store'] == widget.store ? Container(
-      alignment: Alignment.center,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Container(
-          padding: const EdgeInsets.all(8.0),
-          width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-              color: const Color(0xFF21D19F).withOpacity(0.5),
-              borderRadius: BorderRadius.circular(20)
-          ),
-          child: IntrinsicHeight(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Total: ${data['Item Total']}'),
-                Text('Number of Items: $numberOfItems '),
-
+    return data['Grocery Store'] == widget.store ? InkWell(
+      onTap: (){
+        showDialog(
+            context: context,
+            builder: (BuildContext dialogContext) => AlertDialog(
+              title: const Text('Start shopping for'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop('No'),
+                  child: const Text('No'),
+                ),
+                TextButton(
+                  onPressed: () async{
+                    Navigator.of(dialogContext).pop('Yes');
+                    await FirebaseFirestore.instance.collection('All Deliveries').doc('Open Deliveries')
+                        .collection('Order Info').doc(docId)
+                        .update({'status': 'Shopping in progress'});
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const RequestedDeliveryStatus()),);
+                  },
+                  child: const Text('Yes'),
+                ),
               ],
+            )
+        );
+      },
+      child: Container(
+        alignment: Alignment.center,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            padding: const EdgeInsets.all(8.0),
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+                color: const Color(0xFF21D19F).withOpacity(0.5),
+                borderRadius: BorderRadius.circular(20)
+            ),
+            child: IntrinsicHeight(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Total: ${data['Item Total']}'),
+                  Text('Number of Items: $numberOfItems'),
+                  Text('Status: ${data['status']}'),
+                ],
+              ),
             ),
           ),
         ),

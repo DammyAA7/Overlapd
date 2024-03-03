@@ -48,7 +48,7 @@ class _ChatState extends State<Chat> {
                 Navigator.pop(
                   context,
                   pageAnimationlr(widget.whatUser
-                      ? RequestedDeliveryStatus(placedByUserName: widget.receiverUserName, acceptedByUserId: widget.receiverUserId,)
+                      ? RequestedDeliveryStatus()
                       : AcceptedDeliveryDetails(acceptedByUserName: widget.receiverUserName,
                     placedByUserId: widget.receiverUserId,
                     orderID: widget.orderID,

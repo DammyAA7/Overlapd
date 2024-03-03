@@ -90,10 +90,7 @@ Widget activeDeliveryStatusCard(String acceptedByUser, String orderID, String pl
         String placedByFirstName = snapshot.data?[1];
         return GestureDetector(
           onTap: (){
-            Navigator.push(
-              context,
-              pageAnimationrl(RequestedDeliveryStatus(acceptedByUserId: acceptedByUser, placedByUserName: placedByFirstName)),
-            );
+            //Navigator.push(context, pageAnimationrl(RequestedDeliveryStatus(acceptedByUserId: acceptedByUser, placedByUserName: placedByFirstName)),);
           },
           child: Padding(
             padding: const EdgeInsets.all(8.0),

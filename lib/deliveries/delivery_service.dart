@@ -35,6 +35,7 @@ class DeliveryService extends ChangeNotifier {
       'Items for Delivery': productList,
       'Item Total' : total,
       'Time Stamp': DateTime.now(),
+      'status': 'Order Requested',
       'accepted by' : 'N/A',
       'complete': 'no',
       'cancelled': 'no',
