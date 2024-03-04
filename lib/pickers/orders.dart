@@ -4,6 +4,7 @@ import 'package:overlapd/pickers/picker.dart';
 
 import '../deliveries/delivery_service.dart';
 import '../screens/requestedDeliveryStatus.dart';
+import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/widgets.dart';
 
 class Orders extends StatefulWidget {
@@ -16,6 +17,8 @@ class Orders extends StatefulWidget {
 
 class _OrdersState extends State<Orders> {
   final DeliveryService _service = DeliveryService();
+  final FirebaseAuthService _auth = FirebaseAuthService();
+  late final String _UID = _auth.getUserId();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,41 +68,83 @@ class _OrdersState extends State<Orders> {
 
             return ListView(
               children: snapshot.data!.docs.map((document) {
-                return _buildItem(document);
+                // Check if there are any incomplete orders accepted by the user
+                bool hasIncompleteOrders = snapshot.data!.docs.any((doc) => doc['accepted by'] == _UID && doc['completed'] != true);
+                return _buildItem(document, hasIncompleteOrders);
               }).toList(),
             );
           }
         });
   }
 
-  Widget _buildItem(DocumentSnapshot document) {
+  Widget _buildItem(DocumentSnapshot document, bool hasIncompleteOrders) {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
     String docId = document.id; // Get the document ID
     int numberOfItems = data['Items for Delivery'] != null ? (data['Items for Delivery'] as List).length : 0;
     return data['Grocery Store'] == widget.store ? InkWell(
       onTap: (){
-        showDialog(
-            context: context,
-            builder: (BuildContext dialogContext) => AlertDialog(
-              title: const Text('Start shopping for'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop('No'),
-                  child: const Text('No'),
-                ),
-                TextButton(
-                  onPressed: () async{
-                    Navigator.of(dialogContext).pop('Yes');
-                    await FirebaseFirestore.instance.collection('All Deliveries').doc('Open Deliveries')
-                        .collection('Order Info').doc(docId)
-                        .update({'status': 'Shopping in progress'});
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const RequestedDeliveryStatus()),);
-                  },
-                  child: const Text('Yes'),
-                ),
-              ],
-            )
-        );
+        if (data['accepted by'] == _UID  || !hasIncompleteOrders) {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const RequestedDeliveryStatus()));
+        } else{
+          if(hasIncompleteOrders){
+            showDialog(
+                context: context,
+                builder: (BuildContext dialogContext) => AlertDialog(
+                  title: const Text('Start shopping for'),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.of(dialogContext).pop('No'),
+                      child: const Text('No'),
+                    ),
+                    TextButton(
+                      onPressed: () async{
+                        Navigator.of(dialogContext).pop('Yes');
+                        await FirebaseFirestore.instance.collection('All Deliveries').doc('Open Deliveries')
+                            .collection('Order Info').doc(docId)
+                            .update({'status': 'Shopping in progress'});
+
+                        await FirebaseFirestore.instance.collection('All Deliveries').doc('Open Deliveries')
+                            .collection('Order Info').doc(docId)
+                            .update({'accepted by': _UID});
+
+
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const RequestedDeliveryStatus()));
+                      },
+                      child: const Text('Yes'),
+                    ),
+                  ],
+                )
+            );
+          }
+          showDialog(
+              context: context,
+              builder: (BuildContext dialogContext) => AlertDialog(
+                title: const Text('Start shopping for'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop('No'),
+                    child: const Text('No'),
+                  ),
+                  TextButton(
+                    onPressed: () async{
+                      Navigator.of(dialogContext).pop('Yes');
+                      await FirebaseFirestore.instance.collection('All Deliveries').doc('Open Deliveries')
+                          .collection('Order Info').doc(docId)
+                          .update({'status': 'Shopping in progress'});
+
+                      await FirebaseFirestore.instance.collection('All Deliveries').doc('Open Deliveries')
+                          .collection('Order Info').doc(docId)
+                          .update({'accepted by': _UID});
+
+
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const RequestedDeliveryStatus()));
+                    },
+                    child: const Text('Yes'),
+                  ),
+                ],
+              )
+          );
+        }
       },
       child: Container(
         alignment: Alignment.center,
