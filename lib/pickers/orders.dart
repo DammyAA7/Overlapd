@@ -69,7 +69,7 @@ class _OrdersState extends State<Orders> {
             return ListView(
               children: snapshot.data!.docs.map((document) {
                 // Check if there are any incomplete orders accepted by the user
-                bool hasIncompleteOrders = snapshot.data!.docs.any((doc) => doc['accepted by'] == _UID && doc['completed'] != true);
+                bool hasIncompleteOrders = snapshot.data!.docs.any((doc) => doc['accepted by'] == _UID && doc['complete'] != true);
                 return _buildItem(document, hasIncompleteOrders);
               }).toList(),
             );
@@ -83,10 +83,24 @@ class _OrdersState extends State<Orders> {
     int numberOfItems = data['Items for Delivery'] != null ? (data['Items for Delivery'] as List).length : 0;
     return data['Grocery Store'] == widget.store ? InkWell(
       onTap: (){
-        if (data['accepted by'] == _UID  || !hasIncompleteOrders) {
+        if (data['accepted by'] == _UID) {
           Navigator.push(context, MaterialPageRoute(builder: (context) => const RequestedDeliveryStatus()));
         } else{
           if(hasIncompleteOrders){
+            showDialog(
+              context: context,
+              builder: (BuildContext dialogContext) => AlertDialog(
+                title: const Text('Incomplete Order'),
+                content: const Text('You have an incomplete order. Please complete it before accepting new orders.'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(),
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            );
+          } else{
             showDialog(
                 context: context,
                 builder: (BuildContext dialogContext) => AlertDialog(
@@ -116,34 +130,7 @@ class _OrdersState extends State<Orders> {
                 )
             );
           }
-          showDialog(
-              context: context,
-              builder: (BuildContext dialogContext) => AlertDialog(
-                title: const Text('Start shopping for'),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () => Navigator.of(dialogContext).pop('No'),
-                    child: const Text('No'),
-                  ),
-                  TextButton(
-                    onPressed: () async{
-                      Navigator.of(dialogContext).pop('Yes');
-                      await FirebaseFirestore.instance.collection('All Deliveries').doc('Open Deliveries')
-                          .collection('Order Info').doc(docId)
-                          .update({'status': 'Shopping in progress'});
 
-                      await FirebaseFirestore.instance.collection('All Deliveries').doc('Open Deliveries')
-                          .collection('Order Info').doc(docId)
-                          .update({'accepted by': _UID});
-
-
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const RequestedDeliveryStatus()));
-                    },
-                    child: const Text('Yes'),
-                  ),
-                ],
-              )
-          );
         }
       },
       child: Container(
