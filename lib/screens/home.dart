@@ -4,7 +4,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:overlapd/deliveries/add_delivery_details.dart';
+import 'package:timeline_tile/timeline_tile.dart';
 import 'package:overlapd/deliveries/delivery_service.dart';
 import 'package:overlapd/utilities/toast.dart';
 import '../stores/groceryRange.dart';
@@ -489,8 +489,8 @@ class _HomeState extends State<Home> {
 
             bool hasPendingDelivery = snapshot.data!.docs.any((document) {
               Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-              return data['Placed by'] == _UID && data['complete'] == 'no' &&
-                  data['cancelled'] == 'no';
+              return data['Placed by'] == _UID && !data['complete'] &&
+                  !data['cancelled'];
             });
 
             bool hasAcceptedPendingDelivery = snapshot.data!.docs.any((document) {
@@ -522,10 +522,21 @@ class _HomeState extends State<Home> {
                     return data['Placed by'] == _UID;
                   },
                 );
-                String orderID = activeOrderDocument.id;
-                String acceptedByUser = activeOrderDocument['accepted by'];
-                String placedByUser = activeOrderDocument['Placed by'];
-                return activeDeliveryStatusCard(acceptedByUser, orderID, placedByUser);
+                return Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 22),
+                    child: ListView(
+                        children: [
+                          statusTimelineTile(isFirst: true, isLast: false, isPast: true, eventCard: timelineTileText('Order Requested', 'User accepted your delivery request', 'They are on their way to store')),
+                          statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['accepted by'] != 'N/A', eventCard: timelineTileText('Shopping in porgress', 'Keep in contact with user', 'Confirm they\'ve purchased your desired item')),
+                          statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['complete'], eventCard: timelineTileText('Shopping Complete & Awaiting pick up', 'User on their way to you', 'Confirm the items on the receipt')),
+                          statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['picked up by'] != 'N/A', eventCard: timelineTileText('Groceries Have been picked up', 'User on their way to you', 'Confirm the items on the receipt')),
+                          statusTimelineTile(isFirst: false, isLast: true, isPast: activeOrderDocument['delivered'], eventCard: timelineTileText('Delivered', 'Your items have been delivered succesfully', 'Rate your experience with user')),
+
+                        ]
+                    ),
+                  ),
+                );
               } else{
                 return const Padding(
                   padding: EdgeInsets.all(8.0),
@@ -684,8 +695,8 @@ class _HomeState extends State<Home> {
           // If data is available, build the button based on the current document
           bool hasPendingDelivery = snapshot.data!.docs.any((document) {
             Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-            return data['Placed by'] == _UID && data['complete'] == 'no' &&
-                data['cancelled'] == 'no';
+            return data['Placed by'] == _UID && !data['complete'] &&
+                !data['cancelled'];
           });
 
           bool hasAcceptedDelivery = snapshot.data!.docs.any((document) {
@@ -723,7 +734,7 @@ void _cancelDelivery() async{
         .collection('users')
         .doc(_UID)
         .collection('Placed Delivery')
-        .doc(latestPlacedDelivery).update({'cancelled' : 'yes'});
+        .doc(latestPlacedDelivery).update({'cancelled' : true});
   } else {
     print('No placed deliveries found for user $_UID');
   }

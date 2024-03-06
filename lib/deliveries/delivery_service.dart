@@ -37,8 +37,10 @@ class DeliveryService extends ChangeNotifier {
       'Time Stamp': DateTime.now(),
       'status': 'Order Requested',
       'accepted by' : 'N/A',
-      'complete': 'no',
-      'cancelled': 'no',
+      'picked up by': 'N/A',
+      'delivered': false,
+      'complete': false,
+      'cancelled': false,
       'declined By': '',
       'payment id': paymentID,
       'receipt':'N/A'

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:timeline_tile/timeline_tile.dart';
 
 import '../screens/about.dart';
 import '../screens/payment.dart';
@@ -498,6 +499,79 @@ PageRouteBuilder<dynamic> pageAnimationFromBottomToTop(Widget pageRoute) {
       );
     },
     transitionDuration: const Duration(milliseconds: 500),
+  );
+}
+
+Widget EventCard(Widget child){
+  return Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Container(
+      height: 250,
+      margin: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+            color: Colors.white,
+            width: 1
+        ),
+      ),
+      child: child,
+    ),
+  );
+}
+
+Widget statusTimelineTile({
+  required bool isFirst,
+  required bool isLast,
+  required bool isPast,
+  required eventCard
+}){
+  return SizedBox(
+    height: 180,
+
+    child: TimelineTile(
+      isFirst: isFirst,
+      isLast: isLast,
+      beforeLineStyle: LineStyle(
+          color: isPast ? const Color(0xFF21D19F) : Colors.white
+      ),
+      indicatorStyle: IndicatorStyle(
+          width: 35,
+          color: isPast ? const Color(0xFF21D19F) : Colors.white,
+          iconStyle: IconStyle(
+              iconData: isPast ? Icons.done : Icons.close,
+              color: Colors.white
+          )
+      ),
+      endChild: EventCard(eventCard),
+    ),
+  );
+}
+
+Widget timelineTileText(String header, String first, String second){
+  return  Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(header, style: const TextStyle(
+          fontWeight: FontWeight.bold
+      )
+      ),
+      Text(first,
+          overflow: TextOverflow.visible,
+          maxLines: 2,
+          style: const TextStyle(
+            fontSize: 18,
+          )
+      ),
+      Text(second,
+          overflow: TextOverflow.visible,
+          maxLines: 2,
+          style: const TextStyle(
+              fontSize: 18
+          )
+      )
+    ],
   );
 }
 
