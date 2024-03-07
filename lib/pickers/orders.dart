@@ -84,7 +84,7 @@ class _OrdersState extends State<Orders> {
     return data['Grocery Store'] == widget.store ? InkWell(
       onTap: (){
         if (data['accepted by'] == _UID) {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const RequestedDeliveryStatus()));
+          Navigator.push(context, MaterialPageRoute(builder: (context) => RequestedDeliveryStatus(orderId: docId)));
         } else{
           if(hasIncompleteOrders){
             showDialog(
@@ -122,7 +122,7 @@ class _OrdersState extends State<Orders> {
                             .update({'accepted by': _UID});
 
 
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const RequestedDeliveryStatus()));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => RequestedDeliveryStatus(orderId: docId)));
                       },
                       child: const Text('Yes'),
                     ),

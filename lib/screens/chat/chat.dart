@@ -45,18 +45,6 @@ class _ChatState extends State<Chat> {
             IconButton(
               onPressed: () {
                 // Navigate to the home page with a fade transition
-                Navigator.pop(
-                  context,
-                  pageAnimationlr(widget.whatUser
-                      ? RequestedDeliveryStatus()
-                      : AcceptedDeliveryDetails(acceptedByUserName: widget.receiverUserName,
-                    placedByUserId: widget.receiverUserId,
-                    orderID: widget.orderID,
-                    deliveryAddress: widget.deliveryAddress,
-                    itemList: widget.itemList,
-                    )
-                  ),
-                );
               },
               icon: const Icon(Icons.arrow_back_ios_new_rounded),
             ),

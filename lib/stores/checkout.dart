@@ -379,7 +379,7 @@ class _CheckoutState extends State<Checkout> {
 
   void _checkout(String setAddress, String chosenStore, Map<Product, int> products, String amount, String paymentID) async{
     List<Map<String, dynamic>> productListMap = context.read<Cart>().toMapList();
-    await _service.openDelivery(setAddress, chosenStore, productListMap, amount, paymentID);
+    await _service.openDelivery(setAddress, chosenStore, productListMap, amount, paymentID, rewardCardUrl);
     context.read<Cart>().clearCart();
     Navigator.of(context).pushReplacement(
         pageAnimationFromTopToBottom(const Home()));

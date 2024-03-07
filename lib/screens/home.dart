@@ -489,7 +489,7 @@ class _HomeState extends State<Home> {
 
             bool hasPendingDelivery = snapshot.data!.docs.any((document) {
               Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-              return data['Placed by'] == _UID && !data['complete'] &&
+              return data['Placed by'] == _UID && !data['delivered'] &&
                   !data['cancelled'];
             });
 
@@ -695,7 +695,7 @@ class _HomeState extends State<Home> {
           // If data is available, build the button based on the current document
           bool hasPendingDelivery = snapshot.data!.docs.any((document) {
             Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-            return data['Placed by'] == _UID && !data['complete'] &&
+            return data['Placed by'] == _UID && !data['delivered'] &&
                 !data['cancelled'];
           });
 
