@@ -67,7 +67,7 @@ class _RangeState extends State<Range> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(key),
+                        Flexible(child: Text(key, style: const TextStyle(fontSize: 15))),
                         const Icon(Icons.arrow_forward_ios_outlined)
                       ],
                     ),
