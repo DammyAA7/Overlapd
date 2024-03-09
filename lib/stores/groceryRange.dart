@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:csv/csv_settings_autodetection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:csv/csv.dart';
 import 'package:flutter/services.dart';
@@ -177,8 +178,9 @@ class MapRange{
   }
 
   Future<List<List>> loadTescoCSV(String category, String subCategory, String subSubCategory) async{
+    var d = const FirstOccurrenceSettingsDetector(eols: ['\r\n', '\n']);
     final rawProducts = await rootBundle.loadString("assets/Tesco/$category/$subCategory/$subSubCategory.csv");
-    List<List<dynamic>> listData = const CsvToListConverter().convert(rawProducts);
+    List<List<dynamic>> listData = CsvToListConverter(csvSettingsDetector: d).convert(rawProducts);
     return listData;
   }
 
