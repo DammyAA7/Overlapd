@@ -56,6 +56,22 @@ exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
     });
 });
 
+exports.StripeCapturePaymentIntent = functions.https.onRequest(async(req, res) =>{
+    try {
+                const intent = await stripe.paymentIntents.capture(req.body.id, {
+                  amount_to_capture: req.body.amount_to_capture,
+                });
+
+                res.json({
+                    success: true,
+                });
+        } catch (error) {
+                console.error("Error capturing payment:", error);
+                res.status(500).json({ success: false, error: error.message });
+            }
+});
+
+
 
 exports.StripeCreateTransfer = functions.https.onRequest(async(req, res) =>{
     try {

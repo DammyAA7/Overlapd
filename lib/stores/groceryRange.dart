@@ -299,15 +299,20 @@ class Cart extends ChangeNotifier{
     return formattedTotalAmount;
   }
 
-  String totalAmountPlusFees(bool deliveryType) {
+  List<String> totalAmountPlusFees(bool deliveryType) {
     double totalAmount = 0;
+    double totalCart = 0;
     double deliveryFees = deliveryType ? 6.99 : 5.99;
     cart.forEach((product, quantity) {
       totalAmount += product.price * quantity;
     });
+    totalCart = totalAmount;
     totalAmount += calculateServiceFees() + deliveryFees;
     String formattedTotalAmount = '€${totalAmount.toStringAsFixed(2)}';
-    return formattedTotalAmount;
+    String formattedServiceFee = '€${calculateServiceFees().toStringAsFixed(2)}';
+    String formattedDeliveryFee = '€${deliveryFees.toStringAsFixed(2)}';
+    String formattedTotalCart = '€${totalCart.toStringAsFixed(2)}';
+    return [formattedTotalAmount, formattedServiceFee,  formattedDeliveryFee, formattedTotalCart];
   }
 
   double calculateServiceFees(){

@@ -59,6 +59,21 @@ Widget supportLetterInputBox(String hintText, bool autoCorrect, bool obscureText
   );
 }
 
+Widget numberInputBox(String hintText, bool autoCorrect, bool obscureText,
+    InputBoxController inputBoxController) {
+  return widgetInputBox(
+    maxLines: 1,
+    hintText: hintText,
+    autoCorrect: autoCorrect,
+    obscureText: obscureText,
+    textType: TextInputType.number,
+    onChanged: (value) {
+      // You can perform any additional actions when the text changes here
+    },
+    inputBoxController: inputBoxController,
+  );
+}
+
 Widget letterInputBox(String hintText, bool autoCorrect, bool obscureText,
     InputBoxController inputBoxController) {
   return widgetInputBox(

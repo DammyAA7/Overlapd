@@ -333,7 +333,7 @@ class _CheckoutState extends State<Checkout> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Total:'),
-                          Text(value.totalAmountPlusFees(deliveryTime))
+                          Text(value.totalAmountPlusFees(deliveryTime)[0])
                         ],
                       ),
                       solidButton(context, 'Checkout', () async{
@@ -371,15 +371,16 @@ class _CheckoutState extends State<Checkout> {
       );
       await Stripe.instance.presentPaymentSheet();
       print("Payment Intent ${jsonResponse['id']}");
-      _checkout(fullAddress!, 'Tesco', value.cart, value.totalAmountPlusFees(deliveryTime), jsonResponse['id']);
+      List<String> feeBreakdown = value.totalAmountPlusFees(deliveryTime);
+      _checkout(fullAddress!, 'Tesco', value.cart, feeBreakdown[4], feeBreakdown[1], feeBreakdown[3], jsonResponse['id']);
     } catch(e){
       print(e);
     }
   }
 
-  void _checkout(String setAddress, String chosenStore, Map<Product, int> products, String amount, String paymentID) async{
+  void _checkout(String setAddress, String chosenStore, Map<Product, int> products, String amount, String serviceFee, String deliveryFees, String paymentID) async{
     List<Map<String, dynamic>> productListMap = context.read<Cart>().toMapList();
-    await _service.openDelivery(setAddress, chosenStore, productListMap, amount, paymentID, rewardCardUrl);
+    await _service.openDelivery(setAddress, chosenStore, productListMap, amount, paymentID, rewardCardUrl, serviceFee, deliveryFees);
     context.read<Cart>().clearCart();
     Navigator.of(context).pushReplacement(
         pageAnimationFromTopToBottom(const Home()));

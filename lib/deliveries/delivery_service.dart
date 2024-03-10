@@ -24,7 +24,7 @@ class DeliveryService extends ChangeNotifier {
         .set(details);
 
   }
-  Future<void> openDelivery(String address, String storeName, List productList, String total, String paymentID, String? rewardCardUrl) async {
+  Future<void> openDelivery(String address, String storeName, List productList, String total, String paymentID, String? rewardCardUrl,  String serviceFee, String deliveryFee) async {
     final userId = _auth.getUserId();
     String orderNo;
 
@@ -34,6 +34,8 @@ class DeliveryService extends ChangeNotifier {
       'Placed by': userId,
       'Items for Delivery': productList,
       'Item Total' : total,
+      'Service fee': serviceFee,
+      'delivery fee': deliveryFee,
       'Time Stamp': DateTime.now(),
       'status': 'Order Requested',
       'accepted by' : 'N/A',

@@ -115,12 +115,7 @@ class _OrdersState extends State<Orders> {
                         Navigator.of(dialogContext).pop('Yes');
                         await FirebaseFirestore.instance.collection('All Deliveries').doc('Open Deliveries')
                             .collection('Order Info').doc(docId)
-                            .update({'status': 'Shopping in progress'});
-
-                        await FirebaseFirestore.instance.collection('All Deliveries').doc('Open Deliveries')
-                            .collection('Order Info').doc(docId)
-                            .update({'accepted by': _UID});
-
+                            .update({'status': 'Shopping in progress', 'accepted by': _UID});
 
                         Navigator.push(context, MaterialPageRoute(builder: (context) => RequestedDeliveryStatus(orderId: docId)));
                       },

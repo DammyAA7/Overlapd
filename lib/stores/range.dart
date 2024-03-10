@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:overlapd/deliveries/add_delivery_details.dart';
 import 'package:overlapd/screens/home.dart';
 import 'package:overlapd/stores/shoppingCart.dart';
 import 'package:overlapd/stores/subRange.dart';
