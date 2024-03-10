@@ -20,6 +20,7 @@ class RequestedDeliveryStatus extends StatefulWidget {
 class _RequestedDeliveryStatusState extends State<RequestedDeliveryStatus> {
   String? rewardCardUrl;
   final InputBoxController total = InputBoxController();
+  bool isReceiptAvailable = false;
 
   @override
   void initState() {
@@ -105,30 +106,36 @@ class _RequestedDeliveryStatusState extends State<RequestedDeliveryStatus> {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: solidButton(context, 'Upload Receipt', () => _captureRewardCard(), true),
+              child: solidButton(context, 'Upload Receipt', () => _captureReceipt(), true),
             ),
             Row(
               children: [
-                Expanded(flex: 2, child: numberInputBox('Enter Total', true, false, total)),
-                Expanded(flex: 3, child: solidButton(context, 'Capture Payment', (){
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext dialogContext) => AlertDialog(
-                      title: const Text('Capture Final Amount'),
-                      content: Text('€${total.getText()} paid at checkout?'),
-                      actions: <Widget>[
-                        TextButton(
-                          onPressed: () => captureAmount(),
-                          child: const Text('Yes'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.of(dialogContext).pop(),
-                          child: const Text('No'),
-                        )
-                      ],
-                    ),
-                  );
-                }, true))
+                Expanded(flex: 2, child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: numberInputBox('Enter Total', true, false, total),
+                )),
+                Expanded(flex: 3, child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: solidButton(context, 'Capture Payment', (){
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext dialogContext) => AlertDialog(
+                        title: const Text('Capture Final Amount'),
+                        content: Text('€${total.getText()} paid at checkout?'),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () => captureAmount(),
+                            child: const Text('Yes'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(dialogContext).pop(),
+                            child: const Text('No'),
+                          )
+                        ],
+                      ),
+                    );
+                  }, isReceiptAvailable),
+                ))
               ],
             ),
           ],
@@ -181,7 +188,7 @@ class _RequestedDeliveryStatusState extends State<RequestedDeliveryStatus> {
     }
   }
 
-  void _captureRewardCard() async{
+  void _captureReceipt() async{
     ImagePicker imagePicker = ImagePicker();
     XFile? receipt = await imagePicker.pickImage(source: ImageSource.camera);
     if( receipt== null) return;
@@ -196,7 +203,10 @@ class _RequestedDeliveryStatusState extends State<RequestedDeliveryStatus> {
           .doc('Open Deliveries')
           .collection('Order Info')
           .doc(widget.orderId)
-          .update({'receipt': downloadURL, 'status' : 'Shopping Complete', 'complete' : true});
+          .update({'receipt': downloadURL});
+      setState(() {
+        isReceiptAvailable = true;
+      });
       showToast(text: "Successfully uploaded receipt");
     }catch(e){
       showToast(text: "Error uploading Image");
@@ -232,12 +242,18 @@ class _RequestedDeliveryStatusState extends State<RequestedDeliveryStatus> {
       print((totalAmount * 100).round());
       try{
         int amountToCapture = (totalAmount * 100).round();
-        final response = await http.post(Uri.parse(
+        await http.post(Uri.parse(
             'https://us-central1-overlapd-13268.cloudfunctions.net/StripeCapturePaymentIntent'),
             body: {
               'id': paymentIntentId,
               'amount_to_capture': amountToCapture.toString(),
             });
+        await FirebaseFirestore.instance
+            .collection('All Deliveries')
+            .doc('Open Deliveries')
+            .collection('Order Info')
+            .doc(widget.orderId)
+            .update({'status' : 'Shopping Complete', 'complete' : true});
       } catch(e){
         print(e);
       }
