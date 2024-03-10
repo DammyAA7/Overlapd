@@ -370,9 +370,8 @@ class _CheckoutState extends State<Checkout> {
           )
       );
       await Stripe.instance.presentPaymentSheet();
-      print("Payment Intent ${jsonResponse['id']}");
       List<String> feeBreakdown = value.totalAmountPlusFees(deliveryTime);
-      _checkout(fullAddress!, 'Tesco', value.cart, feeBreakdown[4], feeBreakdown[1], feeBreakdown[3], jsonResponse['id']);
+      _checkout(fullAddress!, 'Tesco', value.cart, feeBreakdown[3], feeBreakdown[1], feeBreakdown[2], jsonResponse['id']);
     } catch(e){
       print(e);
     }

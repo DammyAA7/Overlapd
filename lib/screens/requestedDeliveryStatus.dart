@@ -222,20 +222,22 @@ class _RequestedDeliveryStatusState extends State<RequestedDeliveryStatus> {
 
       double itemTotal = double.parse(total.getText());
 
-      double deliveryFees = data['Delivery Fees']?.toDouble() ??
-          0; // Assuming field name is 'deliveryFees'
+      String deliveryFeesWithEuro = data['delivery fee'];
+      // Removing the euro sign and converting to double
+      double deliveryFees = double.parse(deliveryFeesWithEuro.replaceAll('€', ''));
+
       double serviceFees = double.parse((double.parse(total.getText()) * 0.11).toStringAsFixed(2));
       // Calculate the total amount
       double totalAmount = itemTotal + deliveryFees + serviceFees;
-      print(totalAmount);
+      print((totalAmount * 100).round());
       try{
+        int amountToCapture = (totalAmount * 100).round();
         final response = await http.post(Uri.parse(
             'https://us-central1-overlapd-13268.cloudfunctions.net/StripeCapturePaymentIntent'),
             body: {
               'id': paymentIntentId,
-              'amount_to_capture': int.parse((totalAmount * 100).toString()),
+              'amount_to_capture': amountToCapture.toString(),
             });
-        print('response $response');
       } catch(e){
         print(e);
       }
@@ -243,7 +245,7 @@ class _RequestedDeliveryStatusState extends State<RequestedDeliveryStatus> {
 
     Map<String, dynamic> captureInfo = {
       'Item Total': '€${total.getText()}',
-      'Service Fee': '€${(double.parse(total.getText()) * 0.11).toStringAsFixed(2)}',
+      'Service fee': '€${(double.parse(total.getText()) * 0.11).toStringAsFixed(2)}',
     };
     await FirebaseFirestore.instance
         .collection('All Deliveries')
