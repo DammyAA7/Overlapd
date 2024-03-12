@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
@@ -28,6 +29,7 @@ class Home extends StatefulWidget {
 
 
 class _HomeState extends State<Home> {
+  StreamSubscription<Position>? positionStreamSubscription;
   final FirebaseAuthService _auth = FirebaseAuthService();
   final DeliveryService _service = DeliveryService();
   late final String _UID = _auth.getUserId();
@@ -175,9 +177,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void _requestDelivery() async{
-  }
-
   void _signOut() async {
     try {
       await _auth.setLoggedOut();
@@ -191,15 +190,11 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void acceptDelivery(String orderID, String paymentIntentId, String accountId) async{
+  void acceptDelivery(String orderID, String paymentIntentId) async{
     try {
       //check if location services are enabled
-      await http.post(Uri.parse(
-          'https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateTransfer'),
-          body: {
-            'destination': accountId,
-          });
-      currentPosition = await getCurrentLocation();
+      //currentPosition = await getCurrentLocation();
+      //_startLocationMonitoring(orderID);
       // Retrieve the value of 'Placed by' from 'All Deliveries' collection
       DocumentSnapshot deliverySnapshot = await FirebaseFirestore.instance
           .collection('All Deliveries')
@@ -225,7 +220,7 @@ class _HomeState extends State<Home> {
             .doc('Open Deliveries')
             .collection('Order Info')
             .doc(orderID)
-            .update({'accepted by': _UID});
+            .update({'picked up by': _UID, 'status': 'Pick up assigned'});
 
         _service.acceptDelivery(address, _UID, placedByUserID, orderID);
 
@@ -621,25 +616,18 @@ class _HomeState extends State<Home> {
   Widget _buildItem(DocumentSnapshot document) {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
     String orderNo = document.id;
-    Future<DeliveryDetails> deliveryDetails = getDistanceTime(data['Delivery Address']);
-    Future<String> accountId =  FirebaseFirestore.instance
-        .collection('users')
-        .doc(_UID)
-        .get()
-        .then((doc) => doc.data()?['Stripe Account Id']);
 
     return FutureBuilder(
-      future: Future.wait([deliveryDetails, accountId]),
-      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+      future: getDistanceTime(data['Delivery Address']),
+      builder: (BuildContext context, AsyncSnapshot<DeliveryDetails> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
+          return Text('Error : ${snapshot.error}');
         } else {
           // Assuming snapshot.data now contains the DeliveryDetails object
-          DeliveryDetails deliveryDetails = snapshot.data?[0];
-          String accountId = snapshot.data?[1];
-          return data['Placed by'] != _UID && data['accepted by'] == 'N/A' && !data['declined By']?.contains(_UID) ? Container(
+          DeliveryDetails? details = snapshot.data;
+          return data['Placed by'] != _UID && !data['declined By']?.contains(_UID) && data['complete'] ? Container(
             alignment: Alignment.center,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -655,14 +643,14 @@ class _HomeState extends State<Home> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(data['Grocery Store']),
-                      Text('Distance to Store: ${deliveryDetails.distanceToStore}'),
-                      Text('Distance from Store to Destination: ${deliveryDetails.storeToDestination}'),
-                      Text('Total Journey Time: ${(deliveryDetails.totalJourneyTime / 60).round()} mins'),
+                      //Text('Distance to Store: ${details.distanceToStore}'),
+                      //Text('Distance from Store to Destination: ${details.storeToDestination}'),
+                      //Text('Total Journey Time: ${(details.totalJourneyTime / 60).round()} mins'),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           ElevatedButton(onPressed: () => declineDelivery(orderNo), child: const Text('Decline')),
-                          ElevatedButton(onPressed: () => acceptDelivery(orderNo, data['payment id'], accountId), child: const Text('Accept'))
+                          ElevatedButton(onPressed: () => acceptDelivery(orderNo, data['payment id']), child: const Text('Accept'))
                         ],
                       )
                     ],
@@ -690,7 +678,7 @@ class _HomeState extends State<Home> {
           return Text('Error: ${snapshot.error}');
         } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.docs.isEmpty) {
           // If there is no data or the data is empty, display a message
-          return solidButton(context, 'Request Delivery', _requestDelivery, true);
+          return solidButton(context, 'Request Delivery', ()=>null, true);
         } else {
           // If data is available, build the button based on the current document
           bool hasPendingDelivery = snapshot.data!.docs.any((document) {
@@ -712,7 +700,7 @@ class _HomeState extends State<Home> {
                 context, 'Cancel Delivery Request', _cancelDelivery, true);
           }else{
         return solidButton(
-        context, 'Request Delivery', _requestDelivery, true);
+        context, 'Request Delivery', ()=> null, true);
           }
         }
       }
@@ -760,7 +748,7 @@ void _cancelDelivery() async{
     }
   }
 
-  Future<List?> distance(var destination, String mode, var origin) async{
+  Future distance(var destination, String mode, var origin) async{
     Uri uri = Uri.https(
         "maps.googleapis.com",
         '/maps/api/distancematrix/json',
@@ -800,8 +788,49 @@ void _cancelDelivery() async{
     String tescoAddress = '14 Stocking Ave, Rathfarnham, Dublin';
     currentLocation = await determinePosition();
     List? originToStore = await distance(tescoAddress, chosenMode, currentLocation!);
+    print(originToStore);
     List? storeToDestinationDistance = await distance(tescoAddress, chosenMode, destination);
+    print(storeToDestinationDistance);
     return DeliveryDetails(distanceToStore: originToStore?[0], storeToDestination: storeToDestinationDistance?[0], totalJourneyTime: (originToStore?[1] as int) + (storeToDestinationDistance?[1] as int));
+  }
+
+  void _startLocationMonitoring(String orderID) {
+    const LocationSettings locationSettings = LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 5, // Trigger location updates every 5 meters
+    );
+
+    positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
+          (Position? position) {
+        if (position != null) {
+          // Update the Firestore document with the new location
+          _updateDeliveryLocation(orderID, position);
+        }
+      },
+    );
+
+    positionStreamSubscription?.onError((error) {
+      print('Error tracking location: $error');
+    });
+  }
+
+  Future<void> _updateDeliveryLocation(String orderID, Position position) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('All Deliveries')
+          .doc('Open Deliveries')
+          .collection('Order Info')
+          .doc(orderID)
+          .update({
+        'currentLocation': {
+          'latitude': position.latitude,
+          'longitude': position.longitude,
+        },
+      });
+      print('Location updated to Firestore successfully');
+    } catch (e) {
+      print('Failed to update location: $e');
+    }
   }
 }
 
