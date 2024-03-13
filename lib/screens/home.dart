@@ -643,9 +643,9 @@ class _HomeState extends State<Home> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(data['Grocery Store']),
-                      //Text('Distance to Store: ${details.distanceToStore}'),
-                      //Text('Distance from Store to Destination: ${details.storeToDestination}'),
-                      //Text('Total Journey Time: ${(details.totalJourneyTime / 60).round()} mins'),
+                      Text('Distance to Store: ${details?.distanceToStore}'),
+                      Text('Distance from Store to Destination: ${details?.storeToDestination}'),
+                      Text('Total Journey Time: ${(details!.totalJourneyTime / 60).round()} mins'),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
@@ -748,50 +748,42 @@ void _cancelDelivery() async{
     }
   }
 
-  Future distance(var destination, String mode, var origin) async{
+  Future<List?> calculateDistance({required String origin, required String destination, required String mode}) async {
     Uri uri = Uri.https(
-        "maps.googleapis.com",
-        '/maps/api/distancematrix/json',
-        {
-          "destinations": destination,
-          "origins": origin.runtimeType == Position ? '${origin.latitude},${origin.longitude}' : origin,
-          "mode": mode,
-          "key": "AIzaSyDFcJ0SWLhnTZVktTPn8jB5nJ2hpuSfwNk"
-        });
+      "maps.googleapis.com",
+      '/maps/api/distancematrix/json',
+      {
+        "destinations": destination,
+        "origins": origin,
+        "mode": mode,
+        "key": "AIzaSyDFcJ0SWLhnTZVktTPn8jB5nJ2hpuSfwNk"
+      },
+    );
 
-    String? response = await NetworkUtility.fetchUrl(uri);
+    final response = await NetworkUtility.fetchUrl(uri);
     if (response != null) {
-      final distanceMatrixResponse = DistanceMatrixResponse.fromJson(json.decode(response));
-      return [distanceMatrixResponse.elements?.first.distance?.text,distanceMatrixResponse.elements?.first.duration?.value];
+      final data = json.decode(response);
+      final distanceMatrixResponse = DistanceMatrixResponse.fromJson(data);
+      return [distanceMatrixResponse.elements?.first.distance?.text, distanceMatrixResponse.elements?.first.duration?.value];
     }
     return null;
-
   }
 
-  Future<void> originToStore() async{
-    String tescoAddress = '14 Stocking Ave, Rathfarnham, Dublin';
-    currentLocation = await determinePosition();
-    List? values = await distance(tescoAddress, chosenMode, currentLocation!);
-    distanceToStore = values?[0];
-    totalJourneyTime = 0;
-    totalJourneyTime += values?[1] as int;
+  Future<String> getPositionString() async {
+    Position position = await determinePosition(); // Ensure this method is implemented correctly
+    return '${position.latitude},${position.longitude}';
   }
 
-  void storeToDestinationDistance(String destination) async{
-    String tescoAddress = '14 Stocking Ave, Rathfarnham, Dublin';
-    List? values = await distance(tescoAddress, chosenMode, destination);
-    storeToDestination = values?[0];
-    totalJourneyTime += values?[1] as int;
-  }
+  Future<DeliveryDetails> getDistanceTime(String destination) async {
+    final currentLocation = await getPositionString(); // Assume this is implemented elsewhere.
+    final originToStore = await calculateDistance(origin: currentLocation, destination: '14 Stocking Ave, Rathfarnham, Dublin', mode: chosenMode);
+    final storeToDestination = await calculateDistance(origin: '14 Stocking Ave, Rathfarnham, Dublin', destination: destination, mode: chosenMode);
 
-  Future<DeliveryDetails> getDistanceTime(String destination) async{
-    String tescoAddress = '14 Stocking Ave, Rathfarnham, Dublin';
-    currentLocation = await determinePosition();
-    List? originToStore = await distance(tescoAddress, chosenMode, currentLocation!);
-    print(originToStore);
-    List? storeToDestinationDistance = await distance(tescoAddress, chosenMode, destination);
-    print(storeToDestinationDistance);
-    return DeliveryDetails(distanceToStore: originToStore?[0], storeToDestination: storeToDestinationDistance?[0], totalJourneyTime: (originToStore?[1] as int) + (storeToDestinationDistance?[1] as int));
+    return DeliveryDetails(
+      distanceToStore: originToStore?[0],
+      storeToDestination: storeToDestination?[0],
+      totalJourneyTime: (originToStore?[1] ?? 0) + (storeToDestination?[1] ?? 0),
+    );
   }
 
   void _startLocationMonitoring(String orderID) {
