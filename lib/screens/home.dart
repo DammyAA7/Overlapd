@@ -196,6 +196,10 @@ class _HomeState extends State<Home> {
       //currentPosition = await getCurrentLocation();
       //_startLocationMonitoring(orderID);
       // Retrieve the value of 'Placed by' from 'All Deliveries' collection
+
+      _startLocationMonitoring(orderID);
+
+
       DocumentSnapshot deliverySnapshot = await FirebaseFirestore.instance
           .collection('All Deliveries')
           .doc('Open Deliveries')
@@ -205,14 +209,6 @@ class _HomeState extends State<Home> {
       if (deliverySnapshot.exists) {
         String placedByUserID = deliverySnapshot['Placed by'];
         String address = deliverySnapshot['Delivery Address'];
-
-        // Update 'accepted by' field in the user's 'Placed Delivery' collection
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(placedByUserID)
-            .collection('Placed Delivery')
-            .doc(orderID)
-            .update({'accepted by': _UID});
 
         // Update 'accepted by' field in 'All Deliveries' collection
         await FirebaseFirestore.instance
@@ -479,7 +475,7 @@ class _HomeState extends State<Home> {
             bool hasAcceptedDelivery = snapshot.data!.docs.any((document) {
               Map<String, dynamic> data = document.data() as Map<String,
                   dynamic>;
-              return data['accepted by'] == _UID;
+              return data['picked up by'] == _UID;
             });
 
             bool hasPendingDelivery = snapshot.data!.docs.any((document) {
@@ -498,7 +494,7 @@ class _HomeState extends State<Home> {
                         Map<String, dynamic> data = document.data() as Map<
                             String,
                             dynamic>;
-                        return data['accepted by'] == _UID;
+                        return data['picked up by'] == _UID;
                       },
               );
               String orderID = activeOrderDocument.id;
@@ -689,15 +685,23 @@ class _HomeState extends State<Home> {
 
           bool hasAcceptedDelivery = snapshot.data!.docs.any((document) {
             Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-            return data['accepted by'] == _UID;
+            return data['picked up by'] == _UID;
+          });
+
+          bool acceptedDelivery = snapshot.data!.docs.any((document) {
+            Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+            return data['accepted by'] == 'N/A';
           });
 
           if (hasAcceptedDelivery) {
             return const SizedBox.shrink();
           }
           else if(hasPendingDelivery) {
-            return solidButton(
-                context, 'Cancel Delivery Request', _cancelDelivery, true);
+            if(acceptedDelivery){
+              return solidButton(context, 'Cancel Delivery Request', _cancelDelivery, true);
+            } else{
+              return const SizedBox.shrink();
+            }
           }else{
         return solidButton(
         context, 'Request Delivery', ()=> null, true);
@@ -791,6 +795,8 @@ void _cancelDelivery() async{
       accuracy: LocationAccuracy.high,
       distanceFilter: 5, // Trigger location updates every 5 meters
     );
+
+    positionStreamSubscription?.cancel(); // Cancel any existing subscription
 
     positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
           (Position? position) {
