@@ -141,13 +141,13 @@ class _HomeState extends State<Home> {
     );
   }
 
-  GestureDetector selectStoreTile(
+  Widget selectStoreTile(
       BuildContext context,
       String imageName,
       Map<String, Map<String,Map <String, Future<List<List>>>>> range,
       String storeName
       ) {
-    return GestureDetector(
+    return InkWell(
       onTap: (){
         Navigator.push(
           context,

@@ -49,7 +49,7 @@ class _RangeState extends State<Range> {
       ),
       body: ListView(
         children: widget.groceryRange.keys.map((key) {
-          return GestureDetector(
+          return InkWell(
             onTap: (){
               Navigator.push(
                 context,

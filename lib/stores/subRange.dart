@@ -50,7 +50,7 @@ class _SubRangeState extends State<SubRange> {
       ),
       body: ListView(
         children: widget.subRange.keys.map((key) {
-          return GestureDetector(
+          return InkWell(
             onTap: (){
               Navigator.push(
                   context,
