@@ -475,7 +475,7 @@ class _HomeState extends State<Home> {
             bool hasAcceptedDelivery = snapshot.data!.docs.any((document) {
               Map<String, dynamic> data = document.data() as Map<String,
                   dynamic>;
-              return data['picked up by'] == _UID;
+              return data['picked up by'] == _UID && !data['delivered'] && !data['cancelled'];
             });
 
             bool hasPendingDelivery = snapshot.data!.docs.any((document) {
@@ -499,7 +499,7 @@ class _HomeState extends State<Home> {
               );
               String orderID = activeOrderDocument.id;
               String placedByUser = activeOrderDocument['Placed by'];
-              String acceptedByUser = activeOrderDocument['accepted by'];
+              String acceptedByUser = activeOrderDocument['picked up by'];
               String deliveryAddress = activeOrderDocument['Delivery Address'];
               List itemList = activeOrderDocument['Items for Delivery'];
               return activeDeliveryCard(placedByUser, orderID, acceptedByUser, deliveryAddress, itemList);

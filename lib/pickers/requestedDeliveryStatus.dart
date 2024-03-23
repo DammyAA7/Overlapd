@@ -19,14 +19,17 @@ class RequestedDeliveryStatus extends StatefulWidget {
 
 class _RequestedDeliveryStatusState extends State<RequestedDeliveryStatus> {
   String? rewardCardUrl;
+  double totalPaid = 0.0;
+  double totalShopped = 0.0;
   final InputBoxController total = InputBoxController();
+  List<dynamic> itemsForDelivery = [];
   bool isReceiptAvailable = false;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    fetchRewardCard();
+    fetchOrderDetails();
   }
   @override
   Widget build(BuildContext context) {
@@ -135,8 +138,65 @@ class _RequestedDeliveryStatusState extends State<RequestedDeliveryStatus> {
                       ),
                     );
                   }, isReceiptAvailable),
-                ))
+                )
+                ),
               ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('Total Paid: €$totalPaid'),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('Total Shopped: €${totalShopped.toStringAsFixed(2)}'),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: itemsForDelivery.length,
+                itemBuilder: (context, index) {
+                  var item = itemsForDelivery[index];
+                  return ListTile(
+                    leading: Image.network(item['product']['imageUrl'], width: 50, height: 50),
+                    title: Text(item['product']['title']),
+                    subtitle: Text('Quantity: ${item['quantity']}'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Checkbox(
+                          value: item['found'] ?? false,
+                          onChanged: (bool? value) {
+                            // Ensure only one checkbox is selected at a time
+                            if(value!){
+                              setState(() {
+                                itemsForDelivery[index]['found'] = value;
+                                itemsForDelivery[index]['unavailable'] = !value!;
+                                totalShopped += (item['product']['price'] * item['quantity']);
+                              });
+                            }
+
+                          },
+                        ),
+                        Checkbox(
+                          value: item['unavailable'] ?? false,
+                          onChanged: (bool? value) {
+                            // Ensure only one checkbox is selected at a time
+                            if(value!){
+                              setState(() {
+                                itemsForDelivery[index]['unavailable'] = value;
+                                itemsForDelivery[index]['found'] = !value!;
+                                totalShopped != 0 ? totalShopped -= (item['product']['price'] * item['quantity']) : totalShopped;
+                                // Adjust the totalShopped accordingly if necessary
+                                // This part might require adjustments based on your app's logic
+                              });
+                            }
+
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         )
@@ -165,28 +225,6 @@ class _RequestedDeliveryStatusState extends State<RequestedDeliveryStatus> {
     );
   }
 
-  Future<void> fetchRewardCard() async {
-    // Get the document from Firestore
-    DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
-        .collection('All Deliveries')
-        .doc('Open Deliveries')
-        .collection('Order Info')
-        .doc(widget.orderId)
-        .get();
-
-    Map<String, dynamic>? data = documentSnapshot.data() as Map<String, dynamic>?;
-
-    // Extract the reward card URL from the document, safely handling the case where data is null
-    String? rewardCardUrl = data?['reward card'];
-
-    // Check if the URL is not null
-    if (rewardCardUrl != null) {
-      // Update the state with the fetched reward card URL
-      setState(() {
-        this.rewardCardUrl = rewardCardUrl;
-      });
-    }
-  }
 
   void _captureReceipt() async{
     ImagePicker imagePicker = ImagePicker();
@@ -278,6 +316,25 @@ class _RequestedDeliveryStatusState extends State<RequestedDeliveryStatus> {
     });
     Navigator.of(context).pop();
     Navigator.of(context).pop();
+  }
+
+  Future<void> fetchOrderDetails() async {
+    DocumentSnapshot orderSnapshot = await FirebaseFirestore.instance
+        .collection('All Deliveries')
+        .doc('Open Deliveries')
+        .collection('Order Info')
+        .doc(widget.orderId)
+        .get();
+
+    if (orderSnapshot.exists) {
+      Map<String, dynamic> data = orderSnapshot.data() as Map<String, dynamic>;
+      setState(() {
+        rewardCardUrl = data['reward card'];
+        totalPaid = double.tryParse(data['Item Total'].replaceAll('€', '')) ?? 0.0;
+        itemsForDelivery = data['Items for Delivery'];
+        // Initialize totalShopped with 0.0 or calculate if needed
+      });
+    }
   }
 
 }

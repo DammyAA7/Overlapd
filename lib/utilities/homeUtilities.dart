@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:overlapd/screens/acceptedDeliveryDetails.dart';
 import 'package:overlapd/utilities/widgets.dart';
-import '../screens/requestedDeliveryStatus.dart';
+import '../pickers/requestedDeliveryStatus.dart';
 
 //when the user accepts a delivery, the currents unaccepted delivery requested are replaced with the card below. It gives the user a brief description of the order.
 Widget activeDeliveryCard(String placedByUser, String orderID, String acceptedByUser, String deliveryAddress, List itemList){
@@ -48,7 +48,7 @@ Widget activeDeliveryCard(String placedByUser, String orderID, String acceptedBy
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('Order No: $orderID', style: const TextStyle(fontSize: 20)),
-                              Text('You\'ll be grocery shopping for $firstName', style: const TextStyle(fontSize: 20)),
+                              Text('You\'ll be delivering groceries for $firstName', style: const TextStyle(fontSize: 20)),
                               const Text('You will earn €6.99 from this delivery', style: TextStyle(fontSize: 20))
                             ],
                           ),
