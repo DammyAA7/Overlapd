@@ -5,6 +5,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:overlapd/deliveries/delivery_service.dart';
 import 'package:overlapd/utilities/toast.dart';
@@ -29,6 +30,8 @@ class Home extends StatefulWidget {
 
 
 class _HomeState extends State<Home> {
+  static const LatLng sourceLocation = LatLng(53.27229,-6.32804);
+  //static const LatLng destination = = LatLng(37.21, -122.64);
   StreamSubscription<Position>? positionStreamSubscription;
   final FirebaseAuthService _auth = FirebaseAuthService();
   final DeliveryService _service = DeliveryService();
@@ -513,20 +516,25 @@ class _HomeState extends State<Home> {
                     return data['Placed by'] == _UID;
                   },
                 );
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 22),
-                    child: ListView(
-                        children: [
-                          statusTimelineTile(isFirst: true, isLast: false, isPast: true, eventCard: timelineTileText('Order Requested', 'User accepted your delivery request', 'They are on their way to store')),
-                          statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['accepted by'] != 'N/A', eventCard: timelineTileText('Shopping in porgress', 'Keep in contact with user', 'Confirm they\'ve purchased your desired item')),
-                          statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['complete'], eventCard: timelineTileText('Shopping Complete & Awaiting pick up', 'User on their way to you', 'Confirm the items on the receipt')),
-                          statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['picked up by'] != 'N/A', eventCard: timelineTileText('Groceries Have been picked up', 'User on their way to you', 'Confirm the items on the receipt')),
-                          statusTimelineTile(isFirst: false, isLast: true, isPast: activeOrderDocument['delivered'], eventCard: timelineTileText('Delivered', 'Your items have been delivered succesfully', 'Rate your experience with user')),
+                return Column(
+                  children: [
+                    solidButton(context, 'Track Location of Deliverer', ()=>trackDelivery(), activeOrderDocument['picked up by'] != 'N/A'),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 22),
+                        child: ListView(
+                            children: [
+                              statusTimelineTile(isFirst: true, isLast: false, isPast: true, eventCard: timelineTileText('Order Requested', 'User accepted your delivery request', 'They are on their way to store')),
+                              statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['accepted by'] != 'N/A', eventCard: timelineTileText('Shopping in porgress', 'Keep in contact with user', 'Confirm they\'ve purchased your desired item')),
+                              statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['complete'], eventCard: timelineTileText('Shopping Complete & Awaiting pick up', 'User on their way to you', 'Confirm the items on the receipt')),
+                              statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['picked up by'] != 'N/A', eventCard: timelineTileText('Groceries Have been picked up', 'User on their way to you', 'Confirm the items on the receipt')),
+                              statusTimelineTile(isFirst: false, isLast: true, isPast: activeOrderDocument['delivered'], eventCard: timelineTileText('Delivered', 'Your items have been delivered succesfully', 'Rate your experience with user')),
 
-                        ]
+                            ]
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 );
               } else{
                 return const Padding(
@@ -829,6 +837,35 @@ void _cancelDelivery() async{
     } catch (e) {
       print('Failed to update location: $e');
     }
+  }
+
+  void trackDelivery(){
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Reward Card Unavailable'),
+          content: SizedBox(
+            height: 500, // Set a fixed height for the map container
+            width: double.infinity,
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(target: sourceLocation, zoom: 14),
+              onMapCreated: (GoogleMapController controller) {
+                // You can store controller if needed
+              },
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
