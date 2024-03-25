@@ -43,11 +43,11 @@ dependencies:
   firebase_storage: ^11.5.6
   fluttertoast: ^8.2.4
   shared_preferences: ^2.2.2
-  google_maps_flutter: ^2.5.0
+  google_maps_flutter: 2.6.0
   flutter_config: ^2.0.2
   flutter_polyline_points: ^2.0.0
-  location: ^5.0.3
-  geolocator: ^10.1.0
+  location: 5.0.3
+  geolocator: ^11.0.0
   dropdown_button2: ^2.3.9
   timeline_tile: ^2.0.0
   provider: ^6.1.1

@@ -30,6 +30,7 @@ class Home extends StatefulWidget {
 
 
 class _HomeState extends State<Home> {
+  final Completer<GoogleMapController> _controller = Completer();
   static const LatLng sourceLocation = LatLng(53.27229,-6.32804);
   //static const LatLng destination = = LatLng(37.21, -122.64);
   StreamSubscription<Position>? positionStreamSubscription;
@@ -844,15 +845,12 @@ void _cancelDelivery() async{
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Reward Card Unavailable'),
+          title: const Text('Track Location'),
           content: SizedBox(
-            height: 500, // Set a fixed height for the map container
+            height: MediaQuery.of(context).size.height * 0.9, // Set a fixed height for the map container
             width: double.infinity,
             child: GoogleMap(
               initialCameraPosition: CameraPosition(target: sourceLocation, zoom: 14),
-              onMapCreated: (GoogleMapController controller) {
-                // You can store controller if needed
-              },
             ),
           ),
           actions: <Widget>[
