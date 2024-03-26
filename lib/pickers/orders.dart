@@ -21,57 +21,102 @@ class _OrdersState extends State<Orders> {
   late final String _UID = _auth.getUserId();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        centerTitle: true,
-        leading: IconButton(
-          onPressed: () {
-            // Navigate to the home page with a fade transition
-            Navigator.pushReplacement(
-              context,
-              pageAnimationlr(const Picker()),
-            );
-          },
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          centerTitle: true,
+          leading: IconButton(
+            onPressed: () {
+              // Navigate to the home page with a fade transition
+              Navigator.pushReplacement(
+                context,
+                pageAnimationlr(const Picker()),
+              );
+            },
+            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          ),
+          title:  Text(
+            '${widget.store} Orders',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
         ),
-        title:  Text(
-          '${widget.store} Orders',
-          style: Theme.of(context).textTheme.headlineSmall,
+        body: Expanded(
+          flex: 5,
+          child: Column(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Container(
+                  height: 30,
+                  decoration: BoxDecoration(
+                    borderRadius:  BorderRadius.circular(20),
+                  ),
+                  child: TabBar(
+                      dividerColor: Colors.transparent,
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      indicatorWeight: 4.0,
+                      indicator: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+
+                      labelColor: Colors.white,
+                      tabs: const [
+                        Tab(child: Text('Order requests', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
+                        Tab(child: Text('Ready for pickup', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
+                        Tab(child: Text('Completed', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
+                      ]
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 10,
+                child: TabBarView(
+                  children: [
+                    _buildList('Order Requested', 'Shopping in progress'), // Orders in Request or Shopping in progress
+                    _buildList('Shopping Complete', null), // Orders ready for pickup
+                    _buildList('Pick up assigned', 'Delivery Complete'), // Completed orders
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
-      body: _buildList(),
     );
   }
 
-  Widget _buildList(){
+
+  Widget _buildList(String status1, String? status2) {
     return StreamBuilder(
         stream: _service.getRequestedDeliveries(),
-        builder: (context, snapshot){
+        builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            // If the data is still loading, return a loading indicator
             return const CircularProgressIndicator();
           } else if (snapshot.hasError) {
-            // If there's an error, display an error message
             return Text('Error: ${snapshot.error}');
           } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.docs.isEmpty) {
-            // If there is no data or the data is empty, display a message
             return const Text('No Orders available');
           } else {
+            // Filter orders based on status
+            var filteredOrders = snapshot.data!.docs.where((doc) {
+              return doc['Grocery Store'] == widget.store &&
+                  (doc['status'] == status1 || (status2 != null && doc['status'] == status2));
+            }).toList();
 
-            var storeOrders = snapshot.data!.docs.where((doc) => doc['Grocery Store'] == widget.store).toList();
-
-            if (storeOrders.isEmpty) {
-              // If there are no orders for the store, display a message
-              return const Center(child: Text('No Orders available for this store'));
+            if (filteredOrders.isEmpty) {
+              return const Center(child: Text('No Orders available for this category'));
             }
 
-            return ListView(
-              children: snapshot.data!.docs.map((document) {
-                // Check if there are any incomplete orders accepted by the user
+            return ListView.builder(
+              itemCount: filteredOrders.length,
+              itemBuilder: (context, index) {
+                DocumentSnapshot document = filteredOrders[index];
                 bool hasIncompleteOrders = snapshot.data!.docs.any((doc) => doc['accepted by'] == _UID && doc['complete'] != true);
                 return _buildItem(document, hasIncompleteOrders);
-              }).toList(),
+              },
             );
           }
         });
