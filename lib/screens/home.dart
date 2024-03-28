@@ -78,7 +78,26 @@ class _HomeState extends State<Home> {
               IconButton(
                 icon: const Icon(Icons.logout_outlined), // You can replace this with your preferred icon
                 onPressed: () {
-                  _signOut();
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext dialogContext) => AlertDialog(
+                        title: const Text('Are you sure you want to sign out?'),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () => Navigator.of(dialogContext).pop('No'),
+                            child: const Text('No'),
+                          ),
+                          TextButton(
+                            onPressed: () async{
+                              Navigator.of(dialogContext).pop('Yes');
+                              _signOut();
+                            },
+                            child: const Text('Yes'),
+                          ),
+                        ],
+                      )
+                  );
+
                 },
               ),
 
