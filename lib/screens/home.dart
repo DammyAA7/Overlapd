@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -239,7 +241,7 @@ class _HomeState extends State<Home> {
             .doc('Open Deliveries')
             .collection('Order Info')
             .doc(orderID)
-            .update({'picked up by': _UID, 'status': 'Pick up assigned'});
+            .update({'picked up by': _UID, 'status': 'Pick up assigned', 'arrivedInStore': false});
 
         _service.acceptDelivery(address, _UID, placedByUserID, orderID);
 
@@ -525,7 +527,17 @@ class _HomeState extends State<Home> {
               String acceptedByUser = activeOrderDocument['picked up by'];
               String deliveryAddress = activeOrderDocument['Delivery Address'];
               List itemList = activeOrderDocument['Items for Delivery'];
-              return activeDeliveryCard(placedByUser, orderID, acceptedByUser, deliveryAddress, itemList);
+              return Expanded(
+                child: Column(
+                  children: [
+                    Expanded(child: activeDeliveryCard(placedByUser, orderID, acceptedByUser, deliveryAddress, itemList)),
+                    if (activeOrderDocument['status'] == 'Pick up assigned')
+                      solidButton(context, 'Arrived at Store', () => checkIfArrived(orderID), true),
+                    if (activeOrderDocument['arrivedInStore'] && activeOrderDocument['deliveryHandedOver'])
+                      solidButton(context, 'Delivered', () => checkIfArrived(orderID), true),
+                  ],
+                ),
+              );
             }else if(hasPendingDelivery){
               if(hasAcceptedPendingDelivery){
                 DocumentSnapshot activeOrderDocument = snapshot.data!.docs.firstWhere(
@@ -857,6 +869,31 @@ void _cancelDelivery() async{
     } catch (e) {
       print('Failed to update location: $e');
     }
+  }
+
+  double calculateLatLngDistance(lat1, lon1, lat2, lon2){
+    var p = 0.017453292519943295;
+    var c = cos;
+    var a = 0.5 - c((lat2 - lat1) * p)/2 +
+        c(lat1 * p) * c(lat2 * p) *
+            (1 - c((lon2 - lon1) * p))/2;
+    return 12742000 * asin(sqrt(a));
+  }
+
+  void checkIfArrived(String orderID) async{
+    LatLng storeCoordinates = const LatLng(53.272981854167526, -6.31554308465661);
+    currentPosition = await getCurrentLocation();
+
+    double distanceAway = calculateLatLngDistance(storeCoordinates.latitude, storeCoordinates.longitude, currentPosition?.latitude, currentPosition?.longitude);
+    distanceAway <= 500 ? showToast(text: 'Employee Notified') : showToast(text: 'You have not arrived');
+    await FirebaseFirestore.instance
+        .collection('All Deliveries')
+        .doc('Open Deliveries')
+        .collection('Order Info')
+        .doc(orderID)
+        .update({
+      'arrivedInStore': {true},
+    });
   }
 
   void trackDelivery(){
