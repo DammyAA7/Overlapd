@@ -50,6 +50,7 @@ class _HomeState extends State<Home> {
   String? distanceToStore;
   String? storeToDestination;
   int totalJourneyTime = 0;
+  int? pickerCode;
   @override
   void initState() {
     // TODO: implement initState
@@ -531,6 +532,7 @@ class _HomeState extends State<Home> {
                 child: Column(
                   children: [
                     Expanded(child: activeDeliveryCard(placedByUser, orderID, acceptedByUser, deliveryAddress, itemList)),
+                    pickerCode != null ? Text('Give our employee this code: $pickerCode') : const SizedBox.shrink(),
                     if (activeOrderDocument['status'] == 'Pick up assigned')
                       solidButton(context, 'Arrived at Store', () => checkIfArrived(orderID), true),
                     if (activeOrderDocument['arrivedInStore'] && activeOrderDocument['deliveryHandedOver'])
@@ -883,17 +885,23 @@ void _cancelDelivery() async{
   void checkIfArrived(String orderID) async{
     LatLng storeCoordinates = const LatLng(53.272981854167526, -6.31554308465661);
     currentPosition = await getCurrentLocation();
-
     double distanceAway = calculateLatLngDistance(storeCoordinates.latitude, storeCoordinates.longitude, currentPosition?.latitude, currentPosition?.longitude);
-    distanceAway <= 500 ? showToast(text: 'Employee Notified') : showToast(text: 'You have not arrived');
-    await FirebaseFirestore.instance
-        .collection('All Deliveries')
-        .doc('Open Deliveries')
-        .collection('Order Info')
-        .doc(orderID)
-        .update({
-      'arrivedInStore': {true},
-    });
+    if(distanceAway <= 200){
+      pickerCode = Random().nextInt(90) + 10;
+      showToast(text: 'Employee Notified and random code has code has been generated.');
+      await FirebaseFirestore.instance
+          .collection('All Deliveries')
+          .doc('Open Deliveries')
+          .collection('Order Info')
+          .doc(orderID)
+          .update({
+        'arrivedInStore' : true,
+        'picker code' : pickerCode
+      });
+    } else{
+      showToast(text: 'You have not arrived');
+    }
+
   }
 
   void trackDelivery(){
