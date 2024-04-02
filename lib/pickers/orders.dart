@@ -272,13 +272,15 @@ class _OrdersState extends State<Orders> {
                 onPressed: () async{
                   if(inputController.text == data['picker code'].toString()){
                     showToast(text: 'Code Confirmed');
+                    inputController.clear();
                     await FirebaseFirestore.instance
                         .collection('All Deliveries')
                         .doc('Open Deliveries')
                         .collection('Order Info')
                         .doc(docId)
                         .update({
-                      'deliverer code' : Random().nextInt(90) + 10
+                      'deliverer code' : Random().nextInt(90) + 10,
+                      'status': 'Order Handed Over'
                     });
                     Navigator.of(dialogContext).pop();
 

@@ -532,10 +532,10 @@ class _HomeState extends State<Home> {
                 child: Column(
                   children: [
                     Expanded(child: activeDeliveryCard(placedByUser, orderID, acceptedByUser, deliveryAddress, itemList)),
-                    pickerCode != null ? Text('Give our employee this code: $pickerCode') : const SizedBox.shrink(),
+                    pickerCode != null && activeOrderDocument['status'] != 'Order Handed Over' ? Text('Give our employee this code: $pickerCode') : const SizedBox.shrink(),
                     if (activeOrderDocument['status'] == 'Pick up assigned')
                       solidButton(context, 'Arrived at Store', () => checkIfArrived(orderID), true),
-                    if (activeOrderDocument['arrivedInStore'] && activeOrderDocument['deliveryHandedOver'])
+                    if (activeOrderDocument['arrivedInStore'] && activeOrderDocument['orderHandedOver'])
                       solidButton(context, 'Delivered', () => checkIfArrived(orderID), true),
                   ],
                 ),
@@ -560,7 +560,7 @@ class _HomeState extends State<Home> {
                             children: [
                               statusTimelineTile(isFirst: true, isLast: false, isPast: true, eventCard: timelineTileText('Order Requested', 'User accepted your delivery request', 'They are on their way to store')),
                               statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['accepted by'] != 'N/A', eventCard: timelineTileText('Shopping in porgress', 'Keep in contact with user', 'Confirm they\'ve purchased your desired item')),
-                              statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['complete'], eventCard: timelineTileText('Shopping Complete & Awaiting pick up', 'User on their way to you', 'Confirm the items on the receipt')),
+                              statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['complete'], eventCard: timelineTileText('Shopping Complete & Awaiting pick up', 'User on their way to you', activeOrderDocument['deliverer code'] != null ? 'Give the deliverer this code ${activeOrderDocument['deliverer code']}' : '')),
                               statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['picked up by'] != 'N/A', eventCard: timelineTileText('Groceries Have been picked up', 'User on their way to you', 'Confirm the items on the receipt')),
                               statusTimelineTile(isFirst: false, isLast: true, isPast: activeOrderDocument['delivered'], eventCard: timelineTileText('Delivered', 'Your items have been delivered succesfully', 'Rate your experience with user')),
 

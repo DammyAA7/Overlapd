@@ -40,6 +40,7 @@ class DeliveryService extends ChangeNotifier {
       'status': 'Order Requested',
       'accepted by' : 'N/A',
       'picked up by': 'N/A',
+      'deliverer code': '',
       'delivered': false,
       'complete': false,
       'cancelled': false,
