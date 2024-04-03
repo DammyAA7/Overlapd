@@ -922,10 +922,20 @@ void _cancelDelivery() async{
           content: const Text('Open delivery location in Google Maps.'),
           actions: <Widget>[
             TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
+              onPressed: () => Navigator.of(context).pop(), // Close the dialog
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Attempt to launch the Google Maps URL
+                if (await canLaunch(googleMapsUrl)) {
+                  await launch(googleMapsUrl);
+                } else {
+                  showToast(text: 'Could not open the map.');
+                }
+                Navigator.of(context).pop(); // Close the dialog after attempting to launch the URL
               },
+              child: const Text('Open Map'),
             ),
           ],
         );
