@@ -255,7 +255,6 @@ class _OrdersState extends State<Orders> {
   Widget _buildItemTab3(DocumentSnapshot document, bool hasIncompleteOrders) {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
     String docId = document.id; // Get the document ID
-    int numberOfItems = data['Items for Delivery'] != null ? (data['Items for Delivery'] as List).length : 0;
     return data['Grocery Store'] == widget.store ? InkWell(
       onTap: (){
         showDialog(
@@ -280,7 +279,8 @@ class _OrdersState extends State<Orders> {
                         .doc(docId)
                         .update({
                       'deliverer code' : Random().nextInt(90) + 10,
-                      'status': 'Order Handed Over'
+                      'status': 'Order Handed Over',
+                      'orderHandedOver': true
                     });
                     Navigator.of(dialogContext).pop();
 

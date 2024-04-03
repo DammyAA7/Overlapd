@@ -8,7 +8,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:timeline_tile/timeline_tile.dart';
 import 'package:overlapd/deliveries/delivery_service.dart';
 import 'package:overlapd/utilities/toast.dart';
 import '../stores/groceryRange.dart';
@@ -32,7 +31,7 @@ class Home extends StatefulWidget {
 
 
 class _HomeState extends State<Home> {
-  final Completer<GoogleMapController> _controller = Completer();
+  late final TextEditingController inputController;
   static const LatLng sourceLocation = LatLng(53.27229,-6.32804);
   //static const LatLng destination = = LatLng(37.21, -122.64);
   StreamSubscription<Position>? positionStreamSubscription;
@@ -57,6 +56,13 @@ class _HomeState extends State<Home> {
     super.initState();
     _loadUserData();
     _buildList();
+    inputController = TextEditingController(); // Initialize the TextEditingController
+  }
+
+  @override
+  void dispose() {
+    inputController.dispose(); // Dispose the controller when the widget is disposed
+    super.dispose();
   }
 
   @override
@@ -536,7 +542,7 @@ class _HomeState extends State<Home> {
                     if (activeOrderDocument['status'] == 'Pick up assigned')
                       solidButton(context, 'Arrived at Store', () => checkIfArrived(orderID), true),
                     if (activeOrderDocument['arrivedInStore'] && activeOrderDocument['orderHandedOver'])
-                      solidButton(context, 'Delivered', () => checkIfArrived(orderID), true),
+                      solidButton(context, 'Delivered', () => checkIfDelivered(orderID, activeOrderDocument), true),
                   ],
                 ),
               );
@@ -552,7 +558,7 @@ class _HomeState extends State<Home> {
                 );
                 return Column(
                   children: [
-                    solidButton(context, 'Track Location of Deliverer', ()=>trackDelivery(), activeOrderDocument['picked up by'] != 'N/A'),
+                    solidButton(context, 'Track Location of Deliverer', () => trackDelivery(activeOrderDocument), activeOrderDocument['status'] == 'Order Handed Over'),
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.only(left: 22),
@@ -665,7 +671,7 @@ class _HomeState extends State<Home> {
         } else {
           // Assuming snapshot.data now contains the DeliveryDetails object
           DeliveryDetails? details = snapshot.data;
-          return data['Placed by'] != _UID && !data['declined By']?.contains(_UID) && data['complete'] ? Container(
+          return data['Placed by'] != _UID && !data['declined By']?.contains(_UID) && !data['delivered'] ? Container(
             alignment: Alignment.center,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
@@ -732,7 +738,7 @@ class _HomeState extends State<Home> {
 
           bool acceptedDelivery = snapshot.data!.docs.any((document) {
             Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-            return data['accepted by'] == 'N/A';
+            return data['status'] == 'Order Requested' && data['Placed by'] == _UID;
           });
 
           if (hasAcceptedDelivery) {
@@ -904,19 +910,16 @@ void _cancelDelivery() async{
 
   }
 
-  void trackDelivery(){
+  void trackDelivery(DocumentSnapshot activeOrderDocument){
+    double latitude = activeOrderDocument['currentLocation']['latitude'];
+    double longitude = activeOrderDocument['currentLocation']['longitude'];
+    String googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=$latitude,$longitude";
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Track Location'),
-          content: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.9, // Set a fixed height for the map container
-            width: double.infinity,
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(target: sourceLocation, zoom: 14),
-            ),
-          ),
+          content: const Text('Open delivery location in Google Maps.'),
           actions: <Widget>[
             TextButton(
               child: const Text('OK'),
@@ -927,6 +930,49 @@ void _cancelDelivery() async{
           ],
         );
       },
+    );
+  }
+
+  void checkIfDelivered(String orderID, DocumentSnapshot activeOrderDocument){
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        title: const Text('Confirm the 2 digit code from deliveree'),
+        content: TextField(
+          controller: inputController,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(hintText: "Enter the code here"),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () async{
+              if(inputController.text == activeOrderDocument['deliverer code'].toString()){
+                showToast(text: 'Code Confirmed');
+                inputController.clear();
+                await FirebaseFirestore.instance
+                    .collection('All Deliveries')
+                    .doc('Open Deliveries')
+                    .collection('Order Info')
+                    .doc(orderID)
+                    .update({
+                  'status': 'Delivery Complete',
+                  'delivered': true
+                });
+                // Cancel location tracking
+                positionStreamSubscription?.cancel();
+                positionStreamSubscription = null; // Reset the subscription to null if you plan to reuse it.
+                Navigator.of(dialogContext).pop();
+
+              }
+              else{
+                showToast(text: 'Wrong Code');
+              }
+
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
   }
 }
