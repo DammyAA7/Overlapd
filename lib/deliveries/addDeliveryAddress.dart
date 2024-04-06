@@ -1,3 +1,7 @@
+
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -91,16 +95,38 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
               child: ElevatedButton.icon(
                 onPressed: ()  async{
                   currentLocation = await determinePosition();
-                  AddressComponents? formattedAddress = await getAddressDetailsFromCoordinates(currentLocation!.latitude, currentLocation!.longitude);
-                  setState(() {
-                    setAddress = formattedAddress?.fullAddress;
-                    houseNumber = formattedAddress?.buildingNumber;
-                    streetAddress = formattedAddress?.streetAddress;
-                    locality = formattedAddress?.locality;
-                    county = formattedAddress?.area;
-                    postalCode = formattedAddress?.postcode;
-                    fullStreetAddress = '${houseNumber ?? ''} ${streetAddress ?? ''}';
-                  });
+                  double distanceInMeters = calculateLatLngDistance(currentLocation?.latitude, currentLocation?.longitude);
+                  if (distanceInMeters > 5000) { // 5km radius check
+                    // User is outside the delivery area
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text("Outside Delivery Area"),
+                          content: const Text("Sorry, we do not deliver to your area!"),
+                          actions: <Widget>[
+                            TextButton(
+                              child: const Text('OK'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  } else {
+                    AddressComponents? formattedAddress = await getAddressDetailsFromCoordinates(currentLocation!.latitude, currentLocation!.longitude);
+                    setState(() {
+                      setAddress = formattedAddress?.fullAddress;
+                      houseNumber = formattedAddress?.buildingNumber;
+                      streetAddress = formattedAddress?.streetAddress;
+                      locality = formattedAddress?.locality;
+                      county = formattedAddress?.area;
+                      postalCode = formattedAddress?.postcode;
+                      fullStreetAddress = '${houseNumber ?? ''} ${streetAddress ?? ''}';
+                    });
+                  }
                 },
                 icon: const Icon(Icons.my_location_rounded),
                 label: const Text('Use my Current Location'),
@@ -125,7 +151,7 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
                 child: Text('Search for Address'),
               ) : 
               const Center(
-                child: Text('No results found'),
+                child: Text('No results found, You address may be incorrect or outside our deliverable area'),
               ),
             ),
           ],
@@ -188,26 +214,69 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
           setState(() {
             fullAddress = '${fullStreetAddress!}, ${locality!}, ${postalCode!}, ${county!}';
           });
-          Map<String, dynamic> addressBook = {
-            'Street Address': fullStreetAddress,
-            'Locality': locality,
-            'County': county,
-            'Postal Code': postalCode,
-            'Full Address': fullAddress
-          };
 
-          await setDefaultAddress(_UID, addressBook, defaultAddress);
-          setAddress = null;
-          searchText.clear();
-          predictions = '';
-          streetAddress = '';
-          streetAddress = '';
-          locality = '';
-          county = '';
-          postalCode = '';
-          fullStreetAddress = null;
-        }
-            , fieldsFilled()),
+          final coordinates = await fetchCoordinatesFromAddress(fullAddress!);
+          if (coordinates != null) {
+            double distanceInMeters = calculateLatLngDistance(coordinates['lat'], coordinates['lng']);
+            if(distanceInMeters > 5000){
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Outside Delivery Area"),
+                    content: const Text("Sorry, we do not deliver to your area!"),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('OK'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            } else{
+              Map<String, dynamic> addressBook = {
+                'Street Address': fullStreetAddress,
+                'Locality': locality,
+                'County': county,
+                'Postal Code': postalCode,
+                'Full Address': fullAddress,
+                'Coordinates': {'lat': coordinates['lat'], 'lng': coordinates['lng']},
+                'Formatted Address': coordinates['formatted_address'],
+              };
+
+              await setDefaultAddress(_UID, addressBook, defaultAddress);
+              setAddress = null;
+              searchText.clear();
+              predictions = '';
+              streetAddress = '';
+              locality = '';
+              county = '';
+              postalCode = '';
+              fullStreetAddress = null;
+            }
+          } else {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text("Invalid Address"),
+                  content: Text("No results found for the given address. Please correct the address and try again."),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text('OK'),
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Close the dialog
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          }
+        }, fieldsFilled()),
       ),
     );
   }
@@ -254,7 +323,6 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
     else{
       return locationListTile(placePredictions[index].description!, () {
         setAddress = placePredictions[index].description;
-        //getCoordinates(setAddress!);
         houseNumber = placePredictions[index].terms?.buildingNumber;
         streetAddress = placePredictions[index].terms?.streetAddress;
         locality = placePredictions[index].terms?.locality;
@@ -273,9 +341,10 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
   Future<void> setDefaultAddress(String userId, Map<String, dynamic> newAddress, bool defaultAddress) async {
     final userDoc = FirebaseFirestore.instance.collection('users').doc(userId);
     final docSnapshot = await userDoc.get();
+    List<dynamic> addressBook = [];
 
-    if (docSnapshot.exists && docSnapshot.data()!.containsKey('Address Book')) {
-      List<dynamic> addressBook = List<dynamic>.from(docSnapshot.data()!['Address Book']);
+    if (docSnapshot.exists && docSnapshot.data()!.containsKey('Address Book')  && docSnapshot.data()!['Address Book'].isNotEmpty) {
+      addressBook = List<dynamic>.from(docSnapshot.data()!['Address Book']);
 
       // Normalize new address for comparison
       String newAddressNormalized = (newAddress['Full Address'] as String)
@@ -310,7 +379,7 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
         }).toList();
       }
       // Add new address with its default status
-      newAddress['Default'] = defaultAddress;
+      newAddress['Default'] = defaultAddress || addressBook.isEmpty;
       addressBook.add(newAddress);
 
       // Update the Address Book in Firestore with the modified list
@@ -318,15 +387,42 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
 
     } else {
       // If no Address Book exists or the document doesn't exist, create one with the new address
-      newAddress['Default'] = defaultAddress;
-      await userDoc.set({'Address Book': [newAddress]});
+      newAddress['Default'] = defaultAddress || addressBook.isEmpty;
+      await userDoc.update({'Address Book': [newAddress]});
       showToast(text: 'The address has been added successfully');
     }
     Navigator.pop(context);
     Navigator.pop(context);
   }
 
+  double calculateLatLngDistance(lat, lon){
+    return Geolocator.distanceBetween(lat, lon, 53.2779792, -6.3226545);
+  }
 
+  Future<Map<String, dynamic>?> fetchCoordinatesFromAddress(String address) async {
+    final Uri uri = Uri.https('maps.googleapis.com', '/maps/api/geocode/json', {
+      'address': address,
+      'key': 'AIzaSyDFcJ0SWLhnTZVktTPn8jB5nJ2hpuSfwNk',
+    });
 
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      final result = json.decode(response.body);
+
+      if (result['results'].isEmpty) {
+        return null;
+      }
+
+      final location = result['results'][0]['geometry']['location'];
+      return {
+        'lat': location['lat'],
+        'lng': location['lng'],
+        'formatted_address': result['results'][0]['formatted_address'],
+      };
+    } else {
+      throw Exception('Failed to fetch coordinates');
+    }
+  }
 
 }
