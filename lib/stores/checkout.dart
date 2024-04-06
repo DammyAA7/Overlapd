@@ -31,8 +31,8 @@ class _CheckoutState extends State<Checkout> {
   TextEditingController searchText = TextEditingController();
   final DeliveryService _service = DeliveryService();
   String predictions = '';
-  String? setAddress;
   String? fullAddress;
+  String? addressCoordinates;
   Position? currentLocation;
   bool deliveryTime = true;
   bool shoppingPreference = true;
@@ -371,15 +371,15 @@ class _CheckoutState extends State<Checkout> {
       );
       await Stripe.instance.presentPaymentSheet();
       List<String> feeBreakdown = value.totalAmountPlusFees(deliveryTime);
-      _checkout(fullAddress!, 'Tesco', value.cart, feeBreakdown[3], feeBreakdown[1], feeBreakdown[2], jsonResponse['id']);
+      _checkout('Tesco', value.cart, feeBreakdown[3], feeBreakdown[1], feeBreakdown[2], jsonResponse['id']);
     } catch(e){
       print(e);
     }
   }
 
-  void _checkout(String setAddress, String chosenStore, Map<Product, int> products, String amount, String serviceFee, String deliveryFees, String paymentID) async{
+  void _checkout(String chosenStore, Map<Product, int> products, String amount, String serviceFee, String deliveryFees, String paymentID) async{
     List<Map<String, dynamic>> productListMap = context.read<Cart>().toMapList();
-    await _service.openDelivery(setAddress, chosenStore, productListMap, amount, paymentID, rewardCardUrl, serviceFee, deliveryFees);
+    await _service.openDelivery(fullAddress!, addressCoordinates!, chosenStore, productListMap, amount, paymentID, rewardCardUrl, serviceFee, deliveryFees);
     context.read<Cart>().clearCart();
     Navigator.of(context).pushReplacement(
         pageAnimationFromTopToBottom(const Home()));
@@ -440,6 +440,8 @@ class _CheckoutState extends State<Checkout> {
         // Last selected address exists, use it
         setState(() {
           fullAddress = userData['lastAddressSelected']['Full Address'];
+          addressCoordinates = '${userData['lastAddressSelected']['Coordinates']['lat']}, ${userData['lastAddressSelected']['Coordinates']['lng']}';
+          print("coordinates $addressCoordinates");
         });
       } else if (userData.containsKey('Address Book') && userData['Address Book'].isNotEmpty) {
         // Check for a default address in the address book
@@ -452,6 +454,7 @@ class _CheckoutState extends State<Checkout> {
           // Default address exists, use it
           setState(() {
             fullAddress = defaultAddress['Full Address'];
+            addressCoordinates = '${defaultAddress['Coordinates']['lat']}, ${userData['Address Book']['Coordinates']['lng']}';
           });
         }
       }

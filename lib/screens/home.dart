@@ -10,6 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:overlapd/deliveries/delivery_service.dart';
 import 'package:overlapd/utilities/toast.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import '../stores/groceryRange.dart';
 import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/deliveryDetailsUtilities.dart';
@@ -662,7 +663,7 @@ class _HomeState extends State<Home> {
     String orderNo = document.id;
 
     return FutureBuilder(
-      future: getDistanceTime(data['Delivery Address']),
+      future: getDistanceTime(data['Delivery Address Coordinates']),
       builder: (BuildContext context, AsyncSnapshot<DeliveryDetails> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -838,6 +839,11 @@ void _cancelDelivery() async{
     );
   }
 
+  Future<String> getDelivererTime(String destination, String coordinates) async {
+    final currentPositionToDestination = await calculateDistance(origin: coordinates, destination: destination, mode: chosenMode);
+    return (currentPositionToDestination?[1]/ 60).round().toString();
+  }
+
   void _startLocationMonitoring(String orderID) {
     const LocationSettings locationSettings = LocationSettings(
       accuracy: LocationAccuracy.high,
@@ -911,6 +917,7 @@ void _cancelDelivery() async{
   }
 
   void trackDelivery(DocumentSnapshot activeOrderDocument){
+    String destination = activeOrderDocument['Delivery Address Coordinates'];
     double latitude = activeOrderDocument['currentLocation']['latitude'];
     double longitude = activeOrderDocument['currentLocation']['longitude'];
     String googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=$latitude,$longitude";
@@ -919,7 +926,26 @@ void _cancelDelivery() async{
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Track Location'),
-          content: const Text('Open delivery location in Google Maps.'),
+          content: IntrinsicHeight(
+            child: Column(
+              children: [
+                const Text('Open delivery location in Google Maps.'),
+                FutureBuilder(
+                    future: getDelivererTime(destination, '$latitude, $longitude'),
+                    builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Text('Updating Deliverer ETA...');
+                      } else if (snapshot.hasError) {
+                        return const Text('Error getting ETA');
+                      } else {
+                        String? time = snapshot.data;
+                        return Text('Your deliverer is $time minutes away');
+                      }
+                    })
+
+              ],
+            ),
+          ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(), // Close the dialog
@@ -928,8 +954,8 @@ void _cancelDelivery() async{
             TextButton(
               onPressed: () async {
                 // Attempt to launch the Google Maps URL
-                if (await canLaunch(googleMapsUrl)) {
-                  await launch(googleMapsUrl);
+                if (await canLaunchUrlString(googleMapsUrl)) {
+                  await launchUrlString(googleMapsUrl);
                 } else {
                   showToast(text: 'Could not open the map.');
                 }

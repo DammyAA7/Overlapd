@@ -24,12 +24,13 @@ class DeliveryService extends ChangeNotifier {
         .set(details);
 
   }
-  Future<void> openDelivery(String address, String storeName, List productList, String total, String paymentID, String? rewardCardUrl,  String serviceFee, String deliveryFee) async {
+  Future<void> openDelivery(String address, String coordinates, String storeName, List productList, String total, String paymentID, String? rewardCardUrl,  String serviceFee, String deliveryFee) async {
     final userId = _auth.getUserId();
     String orderNo;
 
     final public = {
       'Delivery Address': address,
+      'Delivery Address Coordinates': coordinates,
       'Grocery Store': storeName,
       'Placed by': userId,
       'Items for Delivery': productList,
