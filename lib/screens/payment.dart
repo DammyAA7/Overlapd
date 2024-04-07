@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/widgets.dart';
 import 'home.dart';
 
@@ -18,6 +19,8 @@ class Payment extends StatefulWidget {
 
 
 class _PaymentState extends State<Payment> {
+  final FirebaseAuthService _auth = FirebaseAuthService();
+  late final String _UID = _auth.getUserId();
   int available = 0;
   int pending = 0;
   @override
@@ -82,10 +85,16 @@ class _PaymentState extends State<Payment> {
   }
 
   void getCurrentStripeBalance() async{
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_UID)
+        .get();
     try{
       final response = await http.post(
           Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeAccountBalance'),
-      );
+          body: {
+            'destination':userSnapshot['Stripe Account Id']
+          });
       final jsonResponse = jsonDecode(response.body);
       setState(() {
         available = jsonResponse['available'][0]['amount'];

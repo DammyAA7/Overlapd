@@ -969,7 +969,11 @@ void _cancelDelivery() async{
     );
   }
 
-  void checkIfDelivered(String orderID, DocumentSnapshot activeOrderDocument){
+  void checkIfDelivered(String orderID, DocumentSnapshot activeOrderDocument) async{
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_UID)
+        .get();
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
@@ -997,6 +1001,18 @@ void _cancelDelivery() async{
                 // Cancel location tracking
                 positionStreamSubscription?.cancel();
                 positionStreamSubscription = null; // Reset the subscription to null if you plan to reuse it.
+                try{
+                  final response = await http.post(Uri.parse(
+                      'https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateTransfer'),
+                      body: {
+                        'destination':userSnapshot['Stripe Account Id']
+                      });
+
+                  final jsonResponse = jsonDecode(response.body);
+                  print(jsonResponse);
+                } catch(e){
+                  print(e);
+                }
                 Navigator.of(dialogContext).pop();
 
               }

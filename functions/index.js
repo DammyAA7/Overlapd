@@ -309,7 +309,7 @@ async function _updateAccountStatus(uid, accountDisabled, payoutEnabled, transfe
 exports.StripeAccountBalance = functions.https.onRequest(async (req, res) => {
     try {
         const balance = await stripe.balance.retrieve({
-          stripeAccount: 'acct_1OYD9AIejXw0Dd0j',
+          stripeAccount: req.body.destination,
         });
         res.json({
             available: balance.available,
