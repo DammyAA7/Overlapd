@@ -182,6 +182,22 @@ exports.StripeCreateAccountLink = functions.https.onRequest(async (req, res) => 
     }
 });
 
+
+exports.StripeCreateLoginLink = functions.https.onRequest(async (req, res) => {
+    try {
+        const loginLink = await stripe.accounts.createLoginLink(req.body.account);
+
+        res.json({
+            url: accountLink.url,
+        });
+    } catch (error) {
+        console.error("Error creating login link session:", error);
+        res.status(500).json({
+            error: "Error creating login link session",
+        });
+    }
+});
+
 exports.StripeWebhookAccount = functions.https.onRequest(async (req, res) => {
       const sig = req.headers['stripe-signature'];
       const payloadData = req.rawBody;

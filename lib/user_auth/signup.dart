@@ -150,6 +150,7 @@ class _SignUpState extends State<SignUp> {
       'First Name': _firstNameController.getText(),
       'Last Name': _lastNameController.getText(),
       'Email Address': _emailController.getText(),
+      'Address Book' : ''
     };
     await docUser.set(json);
   }
