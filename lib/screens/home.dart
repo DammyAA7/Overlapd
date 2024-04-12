@@ -385,32 +385,18 @@ class _HomeState extends State<Home> {
           }
           if(id.isNotEmpty && fieldExist){
             hasAccount = false;
-            return solidButton(context, 'Account Created', () async{
+            return solidButton(context, 'Login', () async{
               try{
-                final accountResponse = await http.post(
-                    Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateConnectAccount'),
-                    body: {
-                      'uid': _UID,
-                      'email': _auth.getUsername()
-                    }
+                final loginResponse = await http.post(
+                    Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateLoginLink'),
+                    body: {'account': 'acct_1P4rdNI2UfgkB8Gh'}
                 );
-                final jsonAccountResponse = jsonDecode(accountResponse.body);
-                await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(_UID)
-                    .set({'Stripe Account Id': jsonAccountResponse['id']}, SetOptions(merge: true));
-                final accountLinkResponse = await http.post(
-                    Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateAccountLink'),
-                    body: {
-                      'account': jsonAccountResponse['id'],
-                    }
-                );
-                final jsonAccountLinkResponse = jsonDecode(accountLinkResponse.body);
-                launchUrl(Uri.parse(jsonAccountLinkResponse['url']), mode: LaunchMode.inAppBrowserView);
+                final jsonLoginResponse = jsonDecode(loginResponse.body);
+                launchUrl(Uri.parse(jsonLoginResponse['url']), mode: LaunchMode.inAppBrowserView);
               } catch(e) {
                 print(e);
               }
-            }, false);
+            }, true);
           }
            else{
             return solidButton(context, 'Create Stripe Account', () async{
