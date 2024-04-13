@@ -389,9 +389,10 @@ class _HomeState extends State<Home> {
               try{
                 final loginResponse = await http.post(
                     Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateLoginLink'),
-                    body: {'account': 'acct_1P4rdNI2UfgkB8Gh'}
+                    body: {'account': id}
                 );
                 final jsonLoginResponse = jsonDecode(loginResponse.body);
+                print(jsonLoginResponse);
                 launchUrl(Uri.parse(jsonLoginResponse['url']), mode: LaunchMode.inAppBrowserView);
               } catch(e) {
                 print(e);

@@ -185,7 +185,7 @@ exports.StripeCreateAccountLink = functions.https.onRequest(async (req, res) => 
 
 exports.StripeCreateLoginLink = functions.https.onRequest(async (req, res) => {
     try {
-        const loginLink = await stripe.accounts.createLoginLink({account: req.body.account});
+        const loginLink = await stripe.accounts.createLoginLink(req.body.account);
 
         res.json({
             url: loginLink.url,
