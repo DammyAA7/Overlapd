@@ -75,7 +75,7 @@ Widget numberInputBox(String hintText, bool autoCorrect, bool obscureText,
 }
 
 Widget letterInputBox(String hintText, bool autoCorrect, bool obscureText,
-    InputBoxController inputBoxController) {
+    InputBoxController? inputBoxController) {
   return widgetInputBox(
     maxLines: 1,
     hintText: hintText,
@@ -296,25 +296,25 @@ Widget widgetInputBox({
   String? initialValue,
   String? Function(String?)? validator,
   required int? maxLines,
-  required InputBoxController inputBoxController,
+  InputBoxController? inputBoxController,
 }) {
   List<TextInputFormatter> formatters = [];
   if (inputFormatter != null) {
     formatters.add(inputFormatter);
   }
 
-  inputBoxController.controller.addListener(() {
+  inputBoxController?.controller.addListener(() {
     if (onChanged != null) {
       onChanged(inputBoxController.controller.text);
     }
   });
 
-  bool hasError = validator != null && validator(inputBoxController.controller.text) != null;
+  bool hasError = validator != null && validator(inputBoxController?.controller.text) != null;
 
   return TextFormField(
     maxLines: maxLines == null ? maxLines : 1,
     initialValue: initialValue,
-    controller: inputBoxController.controller,
+    controller: inputBoxController?.controller,
     onChanged: onChanged,
     obscureText: obscureText,
     autocorrect: autoCorrect,
@@ -351,7 +351,7 @@ Widget widgetInputBox({
           width: 4.5,
         ),
       ),
-      errorText: hasError ? validator!(inputBoxController.controller.text) : null,
+      errorText: hasError ? validator!(inputBoxController?.controller.text) : null,
       errorStyle: const TextStyle(
         fontSize: 18.0, // Adjust as needed
         fontWeight: FontWeight.bold,
