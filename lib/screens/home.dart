@@ -989,14 +989,12 @@ void _cancelDelivery() async{
                 positionStreamSubscription?.cancel();
                 positionStreamSubscription = null; // Reset the subscription to null if you plan to reuse it.
                 try{
-                  final response = await http.post(Uri.parse(
+                  await http.post(Uri.parse(
                       'https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateTransfer'),
                       body: {
-                        'destination':userSnapshot['Stripe Account Id']
+                        'destination':userSnapshot['Stripe Account Id'],
+                        'source_transaction': activeOrderDocument['charge id']
                       });
-
-                  final jsonResponse = jsonDecode(response.body);
-                  print(jsonResponse);
                 } catch(e){
                   print(e);
                 }

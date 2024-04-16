@@ -280,18 +280,22 @@ class _RequestedDeliveryStatusState extends State<RequestedDeliveryStatus> {
       print((totalAmount * 100).round());
       try{
         int amountToCapture = (totalAmount * 100).round();
-        await http.post(Uri.parse(
+        final response = await http.post(Uri.parse(
             'https://us-central1-overlapd-13268.cloudfunctions.net/StripeCapturePaymentIntent'),
             body: {
               'id': paymentIntentId,
               'amount_to_capture': amountToCapture.toString(),
             });
+        final jsonResponse = jsonDecode(response.body);
         await FirebaseFirestore.instance
             .collection('All Deliveries')
             .doc('Open Deliveries')
             .collection('Order Info')
             .doc(widget.orderId)
-            .update({'status' : 'Shopping Complete', 'complete' : true});
+            .update({'status' : 'Shopping Complete',
+                      'complete' : true,
+                      'charge id' : jsonResponse['latest_charge']
+            });
       } catch(e){
         print(e);
       }

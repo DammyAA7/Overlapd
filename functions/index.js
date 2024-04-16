@@ -64,6 +64,7 @@ exports.StripeCapturePaymentIntent = functions.https.onRequest(async(req, res) =
 
                 res.json({
                     success: true,
+                    latest_charge: intent.latest_charge
                 });
         } catch (error) {
                 console.error("Error capturing payment:", error);
@@ -80,7 +81,8 @@ exports.StripeCreateTransfer = functions.https.onRequest(async(req, res) =>{
                     amount: 549,
                     currency: 'eur',
                     destination: req.body.destination,
-                    transfer_group: 'order'
+                    transfer_group: 'order',
+                    source_transaction: req.body.source_transaction
                 }
             );
             res.json({
