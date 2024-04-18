@@ -49,7 +49,7 @@ exports.StripePaymentIntent = functions.https.onRequest(async(req, res) =>{
                 currency: 'eur',
                 ephemeralKey: ephemeralKey.secret,
                 customer: customerId,
-                publishableKey: 'pk_test_51OWmrwIaruu0MDtu9f0fOLYUdaDsxU6FHsV2TtXLw6CstWMCKPwZhhldZEWSmsStYYTYpfeRfzGVAZ9tfLKODOYt00gDUZP4EI',
+                publishableKey: 'pk_test_51OWmrwIaruu0MDtu9f0fOLYUdaDsxU6FHsV2TtXLw6CstWMCKPwZhhldZEWSmsStYY TYpfeRfzGVAZ9tfLKODOYt00gDUZP4EI',
                 status: paymentIntent.status
             });
         }
@@ -294,8 +294,9 @@ exports.StripeWebhookConnect = functions.https.onRequest(async (req, res) => {
               const payoutPaid = event.data.object;
               // Then define and call a function to handle the event payout.paid
               break;
-            case 'payout.updated':
-              const payoutUpdated = event.data.object;
+            case 'transfer.created':
+              const transferCreated = event.data.object;
+              _updateTransactionList(accountID, status)
               // Then define and call a function to handle the event payout.updated
               break;
             // ... handle other event types
@@ -311,6 +312,10 @@ exports.StripeWebhookConnect = functions.https.onRequest(async (req, res) => {
 
 async function _updateStatus(uid, status) {
   await admin.firestore().collection("users").doc(uid).set({'Stripe Identity Status': status}, {merge: true});
+}
+
+async function _updateTransactionList(accountID, status) {
+  await admin.firestore().collection("users").doc(accountID).set({transactionStatuses: admin.firestore.FieldValue.arrayUnion(status)}, { merge: true });
 }
 
 async function _updateAccountStatus(uid, accountDisabled, payoutEnabled, transferActive, cardActive) {
