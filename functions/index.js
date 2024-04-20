@@ -253,6 +253,10 @@ exports.StripeWebhookAccount = functions.https.onRequest(async (req, res) => {
               const paymentIntentSucceeded = event.data.object;
                   // Then define and call a function to handle the event payment_intent.succeeded
               break;
+            case 'transfer.created':
+              const transferCreated = event.data.object;
+              _updateTransactionList(transferCreated);
+              break;
             // ... handle other event types
             default:
               console.log(`Unhandled event type ${event.type}`);
@@ -291,11 +295,13 @@ exports.StripeWebhookConnect = functions.https.onRequest(async (req, res) => {
               break;
             case 'payout.paid':
               const payoutPaid = event.data.object;
+              const account = event.account;
               // Then define and call a function to handle the event payout.paid
+              _updatePayoutList(account, payoutPaid)
               break;
             case 'transfer.created':
               const transferCreated = event.data.object;
-              _updateTransactionList(accountID, status)
+              _updateTransactionList(transferCreated.id, accountID, status)
               // Then define and call a function to handle the event payout.updated
               break;
             // ... handle other event types
@@ -313,8 +319,12 @@ async function _updateStatus(uid, status) {
   await admin.firestore().collection("users").doc(uid).set({'Stripe Identity Status': status}, {merge: true});
 }
 
-async function _updateTransactionList(accountID, status) {
-  await admin.firestore().collection("users").doc(accountID).set({transactionStatuses: admin.firestore.FieldValue.arrayUnion(status)}, { merge: true });
+async function _updateTransactionList(transferId) {
+  await admin.firestore().collection("stripe users").doc(transferId.destination).collection("transfers").doc(transferId.id).set({'amount': transferId.amount / 100}, {merge: true});
+}
+
+async function _updatePayoutList(accountID, payoutID) {
+  await admin.firestore().collection("stripe users").doc(accountID).collection("transfers").doc(payoutID.balance_transaction).set({'amount': payoutID.payoutID / 100}, {merge: true});
 }
 
 async function _updateAccountStatus(uid, accountId, accountDisabled, payoutEnabled, transferActive, cardActive) {
