@@ -279,8 +279,7 @@ exports.StripeWebhookConnect = functions.https.onRequest(async (req, res) => {
         switch (event.type) {
             case 'account.updated':
                   const accountUpdated = event.data.object;
-                  console.log(`${accountUpdated}`);
-                  _updateAccountStatus(uid, accountUpdated.requirements.disabled_reason, accountUpdated.payouts_enabled, accountUpdated.capabilities.transfers, accountUpdated.capabilities.card_payments)
+                  _updateAccountStatus(uid, accountUpdated.id, accountUpdated.requirements.disabled_reason, accountUpdated.payouts_enabled, accountUpdated.capabilities.transfers, accountUpdated.capabilities.card_payments)
                   break;
             case 'balance.available':
               const balanceAvailable = event.data.object;
@@ -318,15 +317,21 @@ async function _updateTransactionList(accountID, status) {
   await admin.firestore().collection("users").doc(accountID).set({transactionStatuses: admin.firestore.FieldValue.arrayUnion(status)}, { merge: true });
 }
 
-async function _updateAccountStatus(uid, accountDisabled, payoutEnabled, transferActive, cardActive) {
-  const updates = {
+async function _updateAccountStatus(uid, accountId, accountDisabled, payoutEnabled, transferActive, cardActive) {
+  const account_UID = {
+    'Stripe Account Id': accountId,
     'Stripe Account Disabled': accountDisabled,
     'Stripe Account Payout Enabled': payoutEnabled,
     'Stripe Account Transfers Active': transferActive,
     'Stripe Account Card Payment Active': cardActive
   };
 
-  await admin.firestore().collection("users").doc(uid).set(updates, {merge: true});
+  const account_stripe = {
+      'uid': uid
+    };
+
+  await admin.firestore().collection("users").doc(uid).set(account_UID, {merge: true});
+  await admin.firestore().collection("stripe users").doc(accountId).set(account_stripe, {merge: true});
 }
 
 exports.StripeAccountBalance = functions.https.onRequest(async (req, res) => {

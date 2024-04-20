@@ -381,7 +381,6 @@ class _HomeState extends State<Home> {
             id = snapshot.data!['Stripe Account Id'];
           } catch(e){
             fieldExist = false;
-            print(e);
           }
           if(id.isNotEmpty && fieldExist){
             hasAccount = false;
@@ -410,11 +409,6 @@ class _HomeState extends State<Home> {
                     }
                 );
                 final jsonAccountResponse = jsonDecode(accountResponse.body);
-                print(jsonAccountResponse);
-                await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(_UID)
-                    .set({'Stripe Account Id': jsonAccountResponse['id']}, SetOptions(merge: true));
                 final accountLinkResponse = await http.post(
                     Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateAccountLink'),
                     body: {
@@ -422,7 +416,6 @@ class _HomeState extends State<Home> {
                     }
                 );
                 final jsonAccountLinkResponse = jsonDecode(accountLinkResponse.body);
-                print(jsonAccountLinkResponse);
                 launchUrl(Uri.parse(jsonAccountLinkResponse['url']), mode: LaunchMode.inAppBrowserView);
               } catch(e) {
                 print(e);
