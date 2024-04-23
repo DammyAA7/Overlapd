@@ -324,7 +324,7 @@ async function _updateTransactionList(transferId) {
 }
 
 async function _updatePayoutList(accountID, payoutID) {
-  await admin.firestore().collection("stripe users").doc(accountID).collection("payouts").doc(payoutID.balance_transaction).set({'amount': payoutID.payoutID / 100}, {merge: true});
+  await admin.firestore().collection("stripe users").doc(accountID).collection("payouts").doc(payoutID.balance_transaction).set({'amount': payoutID.amount / 100}, {merge: true});
 }
 
 async function _updateAccountStatus(uid, accountId, accountDisabled, payoutEnabled, transferActive, cardActive) {
