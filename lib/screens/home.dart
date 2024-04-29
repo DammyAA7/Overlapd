@@ -969,6 +969,11 @@ void _cancelDelivery() async{
               if(inputController.text == activeOrderDocument['deliverer code'].toString()){
                 showToast(text: 'Code Confirmed');
                 inputController.clear();
+
+                // Cancel location tracking
+                positionStreamSubscription?.cancel();
+                positionStreamSubscription = null; // Reset the subscription to null if you plan to reuse it.
+
                 await FirebaseFirestore.instance
                     .collection('All Deliveries')
                     .doc('Open Deliveries')
@@ -978,9 +983,26 @@ void _cancelDelivery() async{
                   'status': 'Delivery Complete',
                   'delivered': true
                 });
-                // Cancel location tracking
-                positionStreamSubscription?.cancel();
-                positionStreamSubscription = null; // Reset the subscription to null if you plan to reuse it.
+
+                // Get the data from the active order document
+                final orderData = activeOrderDocument.data();
+
+                // Create a new document in the target collection
+                await FirebaseFirestore.instance
+                    .collection('All Deliveries')
+                    .doc('Open Deliveries')
+                    .collection(orderID)
+                    .doc(orderID)
+                    .set(orderData as Map<String, dynamic>);
+
+                // Delete the document from the original collection
+                await FirebaseFirestore.instance
+                    .collection('All Deliveries')
+                    .doc('Open Deliveries')
+                    .collection('Order Info')
+                    .doc(orderID)
+                    .delete();
+
                 try{
                   await http.post(Uri.parse(
                       'https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateTransfer'),

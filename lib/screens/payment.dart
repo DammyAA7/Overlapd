@@ -73,54 +73,37 @@ class _PaymentState extends State<Payment> {
                     Text('Pending: €${(pending / 100).toStringAsFixed(2)}'),
                   ],
                 ),
-                Expanded(
-                  child: DefaultTabController(
-                      length: 2,
-                      child: Center(
-                          child:Padding(
-                            padding: const EdgeInsets.all(8.0),
+                const Expanded(
+                  child: Center(
+                      child:Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Expanded(
+                          flex: 2,
+                          child: DefaultTabController(
+                            length: 2,
                             child: Column(
                               children: [
-                                Flexible(
-                                  child: Column(
+                                TabBar(
+                                  indicatorColor: Colors.black,
+                                  labelColor: Colors.black,
+                                  tabs: [
+                                    Tab(child: Text('Transfers')),
+                                    Tab(child: Text('Payouts')),
+                                  ],
+                                ),
+                                Expanded(
+                                  child: TabBarView(
                                     children: [
-                                      Expanded(
-                                        flex: 2,
-                                        child: Container(
-                                          height: 70,
-                                          decoration: BoxDecoration(
-                                            borderRadius:  BorderRadius.circular(20),
-                                          ),
-                                          child: TabBar(
-                                              dividerColor: Colors.transparent,
-                                              indicatorSize: TabBarIndicatorSize.tab,
-                                              indicatorWeight: 4.0,
-                                              indicator: BoxDecoration(
-                                                color: Colors.black54,
-                                                borderRadius: BorderRadius.circular(20),
-                                              ),
-                                  
-                                              labelColor: Colors.white,
-                                              tabs: const [
-                                                Tab(child: Text('Transfers', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold))),
-                                                Tab(child: Text('Payouts', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold))),
-                                              ]
-                                          ),
-                                        ),
-                                      ),
-                                      TabBarView(
-                                        children: [
-                                          Text('1'),
-                                          Text('2')
-                                        ],
-                                      )
+                                      Text('Transfers Content'),
+                                      Text('Payouts Content'),
                                     ],
                                   ),
                                 ),
                               ],
                             ),
-                          )
-                      ),
+                          ),
+                        ),
+                      )
                   ),
                 )
               ],
