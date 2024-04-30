@@ -55,11 +55,9 @@ class _PaymentState extends State<Payment> {
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Container(
-          height: 100,
-          width: MediaQuery.of(context).size.width,
           decoration: BoxDecoration(
             color: const Color(0xFF21D19F).withOpacity(0.2),
-            borderRadius: BorderRadius.circular(20)
+            borderRadius: BorderRadius.circular(20),
           ),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -73,39 +71,35 @@ class _PaymentState extends State<Payment> {
                     Text('Pending: €${(pending / 100).toStringAsFixed(2)}'),
                   ],
                 ),
+                const SizedBox(height: 20),
                 const Expanded(
-                  child: Center(
-                      child:Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Expanded(
-                          flex: 2,
-                          child: DefaultTabController(
-                            length: 2,
-                            child: Column(
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: DefaultTabController(
+                      length: 2,
+                      child: Column(
+                        children: [
+                          TabBar(
+                            indicatorColor: Colors.black,
+                            labelColor: Colors.black,
+                            tabs: [
+                              Tab(child: Text('Transfers')),
+                              Tab(child: Text('Payouts')),
+                            ],
+                          ),
+                          Expanded(
+                            child: TabBarView(
                               children: [
-                                TabBar(
-                                  indicatorColor: Colors.black,
-                                  labelColor: Colors.black,
-                                  tabs: [
-                                    Tab(child: Text('Transfers')),
-                                    Tab(child: Text('Payouts')),
-                                  ],
-                                ),
-                                Expanded(
-                                  child: TabBarView(
-                                    children: [
-                                      Text('Transfers Content'),
-                                      Text('Payouts Content'),
-                                    ],
-                                  ),
-                                ),
+                                Text('Transfers Content'),
+                                Text('Payouts Content'),
                               ],
                             ),
                           ),
-                        ),
-                      )
+                        ],
+                      ),
+                    ),
                   ),
-                )
+                ),
               ],
             ),
           ),
