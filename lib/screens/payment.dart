@@ -23,6 +23,7 @@ class Payment extends StatefulWidget {
 class _PaymentState extends State<Payment> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   late final String _UID = _auth.getUserId();
+  late Future<List<DocumentSnapshot>> transfers;
   int available = 0;
   int pending = 0;
   @override
@@ -30,6 +31,7 @@ class _PaymentState extends State<Payment> {
     super.initState();
     // TODO: implement initState
     getCurrentStripeBalance();
+    transfers = getTransfers();
   }
   @override
   Widget build(BuildContext context) {
@@ -72,14 +74,14 @@ class _PaymentState extends State<Payment> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                const Expanded(
+                Expanded(
                   child: Padding(
                     padding: EdgeInsets.all(8.0),
                     child: DefaultTabController(
                       length: 2,
                       child: Column(
                         children: [
-                          TabBar(
+                          const TabBar(
                             indicatorColor: Colors.black,
                             labelColor: Colors.black,
                             tabs: [
@@ -90,7 +92,27 @@ class _PaymentState extends State<Payment> {
                           Expanded(
                             child: TabBarView(
                               children: [
-                                Text('Transfers Content'),
+                                FutureBuilder<List<DocumentSnapshot>>(
+                                  future: transfers,
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return const Center(child: CircularProgressIndicator());
+                                    } else if (snapshot.hasError) {
+                                      return const Center(child: Text('Error loading data'));
+                                    } else {
+                                      return ListView.builder(
+                                        itemCount: snapshot.data?.length ?? 0,
+                                        itemBuilder: (context, index) {
+                                          final data = snapshot.data![index];
+                                          // Build your UI using data
+                                          return ListTile(
+                                            title: Text(data['amount']),
+                                          );
+                                        },
+                                      );
+                                    }
+                                  },
+                                ),
                                 Text('Payouts Content'),
                               ],
                             ),
@@ -132,6 +154,16 @@ class _PaymentState extends State<Payment> {
     } catch(e) {
       print(e);
     }
+  }
+
+  Future<List<DocumentSnapshot>> getTransfers() async {
+    // Fetch and return data from Firestore for transfers
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('stripe users')
+        .doc('acct_1PAELVINS2WBNnto')
+        .collection('transfers')
+        .get();
+    return querySnapshot.docs;
   }
 
 }
