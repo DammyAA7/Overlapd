@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hive/hive.dart';
@@ -221,6 +223,7 @@ class _CheckoutState extends State<Checkout> {
                     ),
                   ),
                   onTap: () async {
+                    now = DateTime.now();
                     if(!deliveryTime){
                       filterScheduleDeliveryTimes();
                       await showDeliverySlots();
@@ -249,33 +252,38 @@ class _CheckoutState extends State<Checkout> {
                           return StatefulBuilder(
                             builder: (BuildContext context, StateSetter setState){
                               return SizedBox(
-                                height: MediaQuery.of(context).size.height * 0.2,
                                 width: MediaQuery.of(context).size.width,
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Column(
                                     children: [
-                                      Column(
-                                      children: [
-                                        CheckboxListTile(
-                                          title: Text("Picker has full discretion over substitutable items", style: Theme.of(context).textTheme.titleLarge,),
-                                          value: shoppingPreference,
-                                          onChanged: (bool? value) {
-                                            setState(() {
-                                              shoppingPreference = !shoppingPreference;
-                                            });
-                                          },
+                                      IntrinsicHeight(
+                                        child: Column(
+                                        children: [
+                                          Flexible(
+                                            child: CheckboxListTile(
+                                              title: Text("Picker has full discretion over substitutable items", style: Theme.of(context).textTheme.titleLarge,),
+                                              value: shoppingPreference,
+                                              onChanged: (bool? value) {
+                                                setState(() {
+                                                  shoppingPreference = !shoppingPreference;
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                          Flexible(
+                                            child: CheckboxListTile(
+                                              title: Text("Picker will contact you to get your approval", style: Theme.of(context).textTheme.titleLarge,),
+                                              value: !shoppingPreference,
+                                              onChanged: (bool? value) {
+                                                setState(() {
+                                                  shoppingPreference = !shoppingPreference;
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                        ],
                                         ),
-                                        CheckboxListTile(
-                                          title: Text("Picker will contact you to get your approval", style: Theme.of(context).textTheme.titleLarge,),
-                                          value: !shoppingPreference,
-                                          onChanged: (bool? value) {
-                                            setState(() {
-                                              shoppingPreference = !shoppingPreference;
-                                            });
-                                          },
-                                        ),
-                                      ],
                                       ),
                                     ],
                                   ),
@@ -289,7 +297,7 @@ class _CheckoutState extends State<Checkout> {
                   },
                 ),
                 GestureDetector(
-                  onTap: () => rewardCardUrl == null ? _captureRewardCard : _viewOrRetakeRewardCard(),
+                  onTap: () => rewardCardUrl == null ? _captureRewardCard : _viewOrRetakeRewardCard,
                   child: ListTile(
                       contentPadding: EdgeInsets.zero,
                       horizontalTitleGap: 5,
@@ -499,13 +507,14 @@ class _CheckoutState extends State<Checkout> {
 
   void _captureRewardCard() async{
     ImagePicker imagePicker = ImagePicker();
-    XFile? receipt = await imagePicker.pickImage(source: ImageSource.camera);
-    if( receipt== null) return;
+    XFile? reward = await imagePicker.pickImage(source: ImageSource.camera);
+    if(reward == null) return;
     Reference referenceRoot = FirebaseStorage.instance.ref();
     Reference referenceDirImages = referenceRoot.child('Reward_Cards');
     Reference referenceImageToUpload = referenceDirImages.child(_UID);
+
     try{
-      await referenceImageToUpload.putFile(File(receipt.path));
+      await referenceImageToUpload.putFile(File(reward.path));
       String downloadURL = await referenceImageToUpload.getDownloadURL();
       await FirebaseFirestore.instance
           .collection('users')

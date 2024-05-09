@@ -467,42 +467,48 @@ class _HomeState extends State<Home> {
   Widget _buildList(){
     return StreamBuilder(
         stream: _service.getRequestedDeliveries(),
-        builder: (context, snapshot){
+        builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             // If the data is still loading, return a loading indicator
             return const CircularProgressIndicator();
           } else if (snapshot.hasError) {
             // If there's an error, display an error message
             return Text('Error: ${snapshot.error}');
-          } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.docs.isEmpty) {
+          } else if (!snapshot.hasData || snapshot.data == null ||
+              snapshot.data!.docs.isEmpty) {
             // If there is no data or the data is empty, display a message
             return const Text('No deliveries available');
           } else {
-
             bool hasAcceptedDelivery = snapshot.data!.docs.any((document) {
               Map<String, dynamic> data = document.data() as Map<String,
                   dynamic>;
-              return data['picked up by'] == _UID && !data['delivered'] && !data['cancelled'];
+              return data['picked up by'] == _UID && !data['delivered'] &&
+                  !data['cancelled'];
             });
 
             bool hasPendingDelivery = snapshot.data!.docs.any((document) {
-              Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+              Map<String, dynamic> data = document.data() as Map<String,
+                  dynamic>;
               return data['Placed by'] == _UID && !data['delivered'] &&
                   !data['cancelled'];
             });
 
-            bool hasAcceptedPendingDelivery = snapshot.data!.docs.any((document) {
-              Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-              return data['accepted by'] != _UID && data['accepted by'] != 'N/A';
+            bool hasAcceptedPendingDelivery = snapshot.data!.docs.any((
+                document) {
+              Map<String, dynamic> data = document.data() as Map<String,
+                  dynamic>;
+              return data['accepted by'] != _UID &&
+                  data['accepted by'] != 'N/A';
             });
             if (hasAcceptedDelivery) {
-              DocumentSnapshot activeOrderDocument = snapshot.data!.docs.firstWhere(
-                      (document) {
-                        Map<String, dynamic> data = document.data() as Map<
-                            String,
-                            dynamic>;
-                        return data['picked up by'] == _UID;
-                      },
+              DocumentSnapshot activeOrderDocument = snapshot.data!.docs
+                  .firstWhere(
+                    (document) {
+                  Map<String, dynamic> data = document.data() as Map<
+                      String,
+                      dynamic>;
+                  return data['picked up by'] == _UID;
+                },
               );
               String orderID = activeOrderDocument.id;
               String placedByUser = activeOrderDocument['Placed by'];
@@ -512,51 +518,27 @@ class _HomeState extends State<Home> {
               return Expanded(
                 child: Column(
                   children: [
-                    Expanded(child: activeDeliveryCard(placedByUser, orderID, acceptedByUser, deliveryAddress, itemList)),
-                    pickerCode != null && activeOrderDocument['status'] != 'Order Handed Over' ? Text('Give our employee this code: $pickerCode') : const SizedBox.shrink(),
+                    Expanded(child: activeDeliveryCard(
+                        placedByUser, orderID, acceptedByUser, deliveryAddress,
+                        itemList)),
+                    pickerCode != null &&
+                        activeOrderDocument['status'] != 'Order Handed Over'
+                        ? Text('Give our employee this code: $pickerCode')
+                        : const SizedBox.shrink(),
                     if (activeOrderDocument['status'] == 'Pick up assigned')
-                      solidButton(context, 'Arrived at Store', () => checkIfArrived(orderID), true),
-                    if (activeOrderDocument['arrivedInStore'] && activeOrderDocument['orderHandedOver'])
-                      solidButton(context, 'Delivered', () => checkIfDelivered(orderID, activeOrderDocument), true),
+                      solidButton(context, 'Arrived at Store', () =>
+                          checkIfArrived(orderID), true),
+                    if (activeOrderDocument['arrivedInStore'] &&
+                        activeOrderDocument['orderHandedOver'])
+                      solidButton(context, 'Delivered', () =>
+                          checkIfDelivered(orderID, activeOrderDocument), true),
                   ],
                 ),
               );
-            }else if(hasPendingDelivery){
-              if(hasAcceptedPendingDelivery){
-                DocumentSnapshot activeOrderDocument = snapshot.data!.docs.firstWhere(
-                      (document) {
-                    Map<String, dynamic> data = document.data() as Map<
-                        String,
-                        dynamic>;
-                    return data['Placed by'] == _UID;
-                  },
+            } else if (hasPendingDelivery) {
+                return const Center(
+                  child: Text('Deliveries Unavailable'),
                 );
-                return Column(
-                  children: [
-                    solidButton(context, 'Track Location of Deliverer', () => trackDelivery(activeOrderDocument), activeOrderDocument['status'] == 'Order Handed Over'),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 22),
-                        child: ListView(
-                            children: [
-                              statusTimelineTile(isFirst: true, isLast: false, isPast: true, eventCard: timelineTileText('Order Requested', 'User accepted your delivery request', 'They are on their way to store')),
-                              statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['accepted by'] != 'N/A', eventCard: timelineTileText('Shopping in porgress', 'Keep in contact with user', 'Confirm they\'ve purchased your desired item')),
-                              statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['complete'], eventCard: timelineTileText('Shopping Complete & Awaiting pick up', 'User on their way to you', activeOrderDocument['deliverer code'] != null ? 'Give the deliverer this code ${activeOrderDocument['deliverer code']}' : '')),
-                              statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['picked up by'] != 'N/A', eventCard: timelineTileText('Groceries Have been picked up', 'User on their way to you', 'Confirm the items on the receipt')),
-                              statusTimelineTile(isFirst: false, isLast: true, isPast: activeOrderDocument['delivered'], eventCard: timelineTileText('Delivered', 'Your items have been delivered succesfully', 'Rate your experience with user')),
-
-                            ]
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              } else{
-                return const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text('Order Requested\n We will notify you when the order has been accepted'),
-                );
-              }
             } else {
               return Column(
                 children: [
@@ -575,11 +557,12 @@ class _HomeState extends State<Home> {
                       'Select a mode of transport',
                       style: TextStyle(fontSize: 20),
                     ),
-                    items: modeOfTransport.map((mode)
-                    => DropdownMenuItem<String>(
-                      value: mode,
-                      child: Text(mode, style: const TextStyle(fontSize: 20)),
-                    )
+                    items: modeOfTransport.map((mode) =>
+                        DropdownMenuItem<String>(
+                          value: mode,
+                          child: Text(mode, style: const TextStyle(
+                              fontSize: 20)),
+                        )
                     ).toList(),
                     value: chosenMode,
                     validator: (value) {
@@ -588,8 +571,8 @@ class _HomeState extends State<Home> {
                       }
                       return null;
                     },
-                    onChanged: (String? newValue){
-                      if(newValue != null){
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
                         setState(() {
                           chosenMode = newValue;
                         });

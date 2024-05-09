@@ -24,6 +24,7 @@ class _PaymentState extends State<Payment> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   late final String _UID = _auth.getUserId();
   late Future<List<DocumentSnapshot>> transfers;
+  late Future<List<DocumentSnapshot>> payouts;
   int available = 0;
   int pending = 0;
   @override
@@ -32,6 +33,7 @@ class _PaymentState extends State<Payment> {
     // TODO: implement initState
     getCurrentStripeBalance();
     transfers = getTransfers();
+    payouts = getPayouts();
   }
   @override
   Widget build(BuildContext context) {
@@ -101,19 +103,40 @@ class _PaymentState extends State<Payment> {
                                       return const Center(child: Text('Error loading data'));
                                     } else {
                                       return ListView.builder(
-                                        itemCount: snapshot.data?.length ?? 0,
+                                        itemCount: snapshot.data?.length,
                                         itemBuilder: (context, index) {
                                           final data = snapshot.data![index];
                                           // Build your UI using data
                                           return ListTile(
-                                            title: Text('amount'),
+                                            title: Text(data['amount'].toString()),
                                           );
                                         },
                                       );
                                     }
                                   },
                                 ),
-                                Text('Payouts Content'),
+                                FutureBuilder<List<DocumentSnapshot>>(
+                                  future: payouts,
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return const Center(child: CircularProgressIndicator());
+                                    } else if (snapshot.hasError) {
+                                      return const Center(child: Text('Error loading data'));
+                                    } else {
+                                      print(snapshot.data?.length);
+                                      return ListView.builder(
+                                        itemCount: snapshot.data?.length,
+                                        itemBuilder: (context, index) {
+                                          final data = snapshot.data![index];
+                                          // Build your UI using data
+                                          return ListTile(
+                                            title: Text(data['amount'].toString()),
+                                          );
+                                        },
+                                      );
+                                    }
+                                  },
+                                ),
                               ],
                             ),
                           ),
@@ -126,11 +149,6 @@ class _PaymentState extends State<Payment> {
             ),
           ),
         ),
-      ),
-      bottomSheet: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: solidButton(context, 'Add Payment Card', () async{
-        }, true),
       ),
     );
   }
@@ -160,8 +178,20 @@ class _PaymentState extends State<Payment> {
     // Fetch and return data from Firestore for transfers
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('stripe users')
-        .doc('acct_1PAELVINS2WBNnto')
+        .doc('acct_1P7ZUoIh4myd1PCN')
         .collection('transfers')
+        .get();
+
+    //print(querySnapshot.docs.map((doc) => doc.data()).toList());
+    return querySnapshot.docs;
+  }
+
+  Future<List<DocumentSnapshot>> getPayouts() async {
+    // Fetch and return data from Firestore for transfers
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('stripe users')
+        .doc('acct_1P7ZUoIh4myd1PCN')
+        .collection('payouts')
         .get();
     return querySnapshot.docs;
   }
