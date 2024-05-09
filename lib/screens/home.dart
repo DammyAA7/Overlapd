@@ -152,20 +152,14 @@ class _HomeState extends State<Home> {
                           flex: 10,
                           child: TabBarView(
                             children: [
-                              Column(
-                                children: [
-                                  selectStoreTile(context, 'supervalu.png', range.supervaluGroceryRange, 'SuperValu'),
-                                  selectStoreTile(context, 'tesco.png', range.tescoGroceryRange, 'Tesco'),
-                                ],
-                              ),
+                              _buildDeliveryStatus(),
                               _isVerifiedHasAccount()
                             ],
                           ),
                         )
                       ],
                     ),
-                  ),
-                  _requestDeliveryButton()
+                  )
                 ],
               ),
             )
@@ -638,6 +632,83 @@ class _HomeState extends State<Home> {
         });
   }
 
+
+  Widget _buildDeliveryStatus(){
+    return StreamBuilder(
+        stream: _service.getRequestedDeliveries(),
+        builder: (context, snapshot){
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // If the data is still loading, return a loading indicator
+            return const CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            // If there's an error, display an error message
+            return Text('Error: ${snapshot.error}');
+          } else {
+
+            bool hasPendingDelivery = snapshot.data!.docs.any((document) {
+              Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+              return data['Placed by'] == _UID && !data['delivered'] &&
+                  !data['cancelled'];
+            });
+
+            bool hasAcceptedPendingDelivery = snapshot.data!.docs.any((document) {
+              Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+              return data['accepted by'] != _UID && data['accepted by'] != 'N/A';
+            });
+            if(hasPendingDelivery){
+              if(hasAcceptedPendingDelivery){
+                DocumentSnapshot activeOrderDocument = snapshot.data!.docs.firstWhere(
+                      (document) {
+                    Map<String, dynamic> data = document.data() as Map<
+                        String,
+                        dynamic>;
+                    return data['Placed by'] == _UID;
+                  },
+                );
+                return Column(
+                  children: [
+                    solidButton(context, 'Track Location of Deliverer', () => trackDelivery(activeOrderDocument), activeOrderDocument['status'] == 'Order Handed Over'),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 22),
+                        child: ListView(
+                            children: [
+                              statusTimelineTile(isFirst: true, isLast: false, isPast: true, eventCard: timelineTileText('Order Requested', 'User accepted your delivery request', 'They are on their way to store')),
+                              statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['accepted by'] != 'N/A', eventCard: timelineTileText('Shopping in porgress', 'Keep in contact with user', 'Confirm they\'ve purchased your desired item')),
+                              statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['complete'], eventCard: timelineTileText('Shopping Complete & Awaiting pick up', 'User on their way to you', activeOrderDocument['deliverer code'] != null ? 'Give the deliverer this code ${activeOrderDocument['deliverer code']}' : '')),
+                              statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['picked up by'] != 'N/A', eventCard: timelineTileText('Groceries Have been picked up', 'User on their way to you', 'Confirm the items on the receipt')),
+                              statusTimelineTile(isFirst: false, isLast: true, isPast: activeOrderDocument['delivered'], eventCard: timelineTileText('Delivered', 'Your items have been delivered succesfully', 'Rate your experience with user')),
+
+                            ]
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              } else{
+                return Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      const Text('Order Requested\nWe will notify you when the order has been accepted'),
+                      solidButton(context, 'Cancel Delivery', _cancelDelivery, true)
+
+                    ],
+                  ),
+                );
+              }
+            } else {
+               return Column(
+                 children: [
+                   selectStoreTile(context, 'supervalu.png', range.supervaluGroceryRange, 'SuperValu'),
+                   selectStoreTile(context, 'tesco.png', range.tescoGroceryRange, 'Tesco'),
+                 ],
+               );
+            }
+          }
+        });
+  }
+
   Widget _buildItem(DocumentSnapshot document) {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
     String orderNo = document.id;
@@ -689,56 +760,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-
-
-  Widget _requestDeliveryButton(){
-    return StreamBuilder(
-      stream: _service.getRequestedDeliveries(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          // If the data is still loading, return a loading indicator
-          return const CircularProgressIndicator();
-        } else if (snapshot.hasError) {
-          // If there's an error, display an error message
-          return Text('Error: ${snapshot.error}');
-        } else if (!snapshot.hasData || snapshot.data == null || snapshot.data!.docs.isEmpty) {
-          // If there is no data or the data is empty, display a message
-          return solidButton(context, 'Request Delivery', ()=>null, true);
-        } else {
-          // If data is available, build the button based on the current document
-          bool hasPendingDelivery = snapshot.data!.docs.any((document) {
-            Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-            return data['Placed by'] == _UID && !data['delivered'] &&
-                !data['cancelled'];
-          });
-
-          bool hasAcceptedDelivery = snapshot.data!.docs.any((document) {
-            Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-            return data['picked up by'] == _UID;
-          });
-
-          bool acceptedDelivery = snapshot.data!.docs.any((document) {
-            Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-            return data['status'] == 'Order Requested' && data['Placed by'] == _UID;
-          });
-
-          if (hasAcceptedDelivery) {
-            return const SizedBox.shrink();
-          }
-          else if(hasPendingDelivery) {
-            if(acceptedDelivery){
-              return solidButton(context, 'Cancel Delivery Request', _cancelDelivery, true);
-            } else{
-              return const SizedBox.shrink();
-            }
-          }else{
-        return solidButton(
-        context, 'Request Delivery', ()=> null, true);
-          }
-        }
-      }
-    );
-  }
 
 
 void _cancelDelivery() async{

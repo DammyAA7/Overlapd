@@ -39,7 +39,7 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: true,
@@ -166,7 +166,7 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
                   fullStreetAddress = newValue;
                 });
               },),
-
+                
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: addressInputBox('Apt, suite or unit', true, false, aptNumber ?? "", TextInputType.number, (newValue) {
@@ -204,79 +204,78 @@ class _AddDeliveryAddressState extends State<AddDeliveryAddress> {
                 //contentPadding: const EdgeInsets.only(right: 35),
                 //materialTapTargetSize: MaterialTapTargetSize.padded,
               ),
-          ],
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: solidButton(context, "Save Address", () async{
+              setState(() {
+                fullAddress = '${fullStreetAddress!}, ${locality!}, ${postalCode!}, ${county!}';
+              });
+
+              final coordinates = await fetchCoordinatesFromAddress(fullAddress!);
+              if (coordinates != null) {
+                double distanceInMeters = calculateLatLngDistance(coordinates['lat'], coordinates['lng']);
+                if(distanceInMeters > 5000){
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text("Outside Delivery Area"),
+                        content: const Text("Sorry, we do not deliver to your area!"),
+                        actions: <Widget>[
+                          TextButton(
+                            child: const Text('OK'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else{
+                  Map<String, dynamic> addressBook = {
+                    'Street Address': fullStreetAddress,
+                    'Locality': locality,
+                    'County': county,
+                    'Postal Code': postalCode,
+                    'Full Address': fullAddress,
+                    'Coordinates': {'lat': coordinates['lat'], 'lng': coordinates['lng']},
+                    'Formatted Address': coordinates['formatted_address'],
+                  };
+
+                  await setDefaultAddress(_UID, addressBook, defaultAddress);
+                  setAddress = null;
+                  searchText.clear();
+                  predictions = '';
+                  streetAddress = '';
+                  locality = '';
+                  county = '';
+                  postalCode = '';
+                  fullStreetAddress = null;
+                }
+              } else {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text("Invalid Address"),
+                      content: Text("No results found for the given address. Please correct the address and try again."),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('OK'),
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Close the dialog
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
+            }, fieldsFilled()),
+          )],
                 ),
         )
-      ),
-      bottomSheet: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: solidButton(context, "Save Address", () async{
-          setState(() {
-            fullAddress = '${fullStreetAddress!}, ${locality!}, ${postalCode!}, ${county!}';
-          });
-
-          final coordinates = await fetchCoordinatesFromAddress(fullAddress!);
-          if (coordinates != null) {
-            double distanceInMeters = calculateLatLngDistance(coordinates['lat'], coordinates['lng']);
-            if(distanceInMeters > 5000){
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text("Outside Delivery Area"),
-                    content: const Text("Sorry, we do not deliver to your area!"),
-                    actions: <Widget>[
-                      TextButton(
-                        child: const Text('OK'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
-            } else{
-              Map<String, dynamic> addressBook = {
-                'Street Address': fullStreetAddress,
-                'Locality': locality,
-                'County': county,
-                'Postal Code': postalCode,
-                'Full Address': fullAddress,
-                'Coordinates': {'lat': coordinates['lat'], 'lng': coordinates['lng']},
-                'Formatted Address': coordinates['formatted_address'],
-              };
-
-              await setDefaultAddress(_UID, addressBook, defaultAddress);
-              setAddress = null;
-              searchText.clear();
-              predictions = '';
-              streetAddress = '';
-              locality = '';
-              county = '';
-              postalCode = '';
-              fullStreetAddress = null;
-            }
-          } else {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: Text("Invalid Address"),
-                  content: Text("No results found for the given address. Please correct the address and try again."),
-                  actions: <Widget>[
-                    TextButton(
-                      child: Text('OK'),
-                      onPressed: () {
-                        Navigator.of(context).pop(); // Close the dialog
-                      },
-                    ),
-                  ],
-                );
-              },
-            );
-          }
-        }, fieldsFilled()),
       ),
     );
   }

@@ -64,16 +64,16 @@ class _AddressListState extends State<AddressList> {
           return const Text('No Addresses Stored');
         } else {
           final data = snapshot.data!.data() as Map<String, dynamic>;
-          final List<dynamic> addressBook = data['Address Book'];
-          if (data.containsKey('Address Book') && data['Address Book'] is List && addressBook.isNotEmpty) {
+          final List<dynamic>? addressBook = data['Address Book'];
+          if (data.containsKey('Address Book') && data['Address Book'] is List && addressBook!.isNotEmpty) {
             return ListView.builder(
               padding: const EdgeInsets.only(bottom: 70),
               shrinkWrap: true,
               itemCount: addressBook.length,
               itemBuilder: (context, index) {
-                final address = addressBook[index] as Map<String, dynamic>;
+                final address = addressBook[index] as Map<String, dynamic>?;
                 return InkWell(
-                  onTap: () => selectAddress(address),
+                  onTap: () => selectAddress(address!),
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width,
                     child: IntrinsicHeight(
@@ -83,7 +83,7 @@ class _AddressListState extends State<AddressList> {
                           children: [
                             Row(
                               children: [
-                                Expanded(child: Text(address['Full Address'] ?? 'No address', maxLines: 4, overflow: TextOverflow.visible,)),
+                                Expanded(child: Text(address?['Full Address'] ?? 'No address', maxLines: 4, overflow: TextOverflow.visible,)),
                                 Padding(
                                   padding: const EdgeInsets.only(top: 5.0, bottom: 5.0, right: 5.0, left: 2.0),
                                   child: GestureDetector(
@@ -97,7 +97,7 @@ class _AddressListState extends State<AddressList> {
                                   padding: const EdgeInsets.all(5.0),
                                   child: GestureDetector(child: const Icon(Icons.delete_outline),
                                     onTap: (){
-                                      final bool isDefaultAddress = address['Default'] == true;
+                                      final bool isDefaultAddress = address?['Default'] == true;
                                       // Check if the address is the default address
                                       if (isDefaultAddress) {
                                         // Inform the user that the default address cannot be deleted
@@ -127,7 +127,7 @@ class _AddressListState extends State<AddressList> {
                                                     // Fetch user's last selected address for comparison
                                                     final userDoc = await _auth.getAccountInfoGet(_UID);
                                                     final userData = userDoc.data();
-                                                    if (userData != null && userData['lastAddressSelected'] != null && userData['lastAddressSelected']['Full Address'] == address['Full Address']) {
+                                                    if (userData != null && userData['lastAddressSelected'] != null && userData['lastAddressSelected']['Full Address'] == address?['Full Address']) {
                                                       await FirebaseFirestore.instance.collection('users').doc(_UID).update({'lastAddressSelected': FieldValue.delete()});
                                                     }
                                                     Navigator.pop(context, 'Yes');
@@ -144,7 +144,7 @@ class _AddressListState extends State<AddressList> {
                                 ),
                               ],
                             ),
-                            address['Default'] ? Text('Default Address', style: Theme.of(context).textTheme.labelMedium,) : const SizedBox.shrink(),
+                            address?['Default'] ? Text('Default Address', style: Theme.of(context).textTheme.labelMedium,) : const SizedBox.shrink(),
                             const Divider()
                           ],
                         ),

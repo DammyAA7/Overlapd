@@ -6,7 +6,7 @@ import '../utilities/widgets.dart';
 
 
 class EditAddress extends StatefulWidget {
-  final Map<String, dynamic> addressDetails;
+  final Map<String, dynamic>? addressDetails;
 
   const EditAddress({super.key, required this.addressDetails});
   @override
@@ -26,20 +26,20 @@ class _EditAddressState extends State<EditAddress> {
   @override
   void initState() {
     super.initState();
-    streetAddressController = TextEditingController(text: widget.addressDetails['Street Address']);
-    localityController = TextEditingController(text: widget.addressDetails['Locality']);
-    countyController = TextEditingController(text: widget.addressDetails['County']);
-    postalCodeController = TextEditingController(text: widget.addressDetails['Postal Code']);
-    isDefault = widget.addressDetails['Default'] ?? false;
+    streetAddressController = TextEditingController(text: widget.addressDetails?['Street Address']);
+    localityController = TextEditingController(text: widget.addressDetails?['Locality']);
+    countyController = TextEditingController(text: widget.addressDetails?['County']);
+    postalCodeController = TextEditingController(text: widget.addressDetails?['Postal Code']);
+    isDefault = widget.addressDetails?['Default'] ?? false;
   }
 
   void checkForModifications() {
     setState(() {
-      isModified = streetAddressController.text != widget.addressDetails['Street Address'] ||
-          localityController.text != widget.addressDetails['Locality'] ||
-          countyController.text != widget.addressDetails['County'] ||
-          postalCodeController.text != widget.addressDetails['Postal Code'] ||
-          isDefault != (widget.addressDetails['Default'] ?? false);
+      isModified = streetAddressController.text != widget.addressDetails?['Street Address'] ||
+          localityController.text != widget.addressDetails?['Locality'] ||
+          countyController.text != widget.addressDetails?['County'] ||
+          postalCodeController.text != widget.addressDetails?['Postal Code'] ||
+          isDefault != (widget.addressDetails?['Default'] ?? false);
     });
   }
   @override
@@ -94,7 +94,7 @@ class _EditAddressState extends State<EditAddress> {
               CheckboxListTile(
                 value: isDefault,
                 onChanged: (bool? value) {
-                  if(!widget.addressDetails['Default']){
+                  if(!widget.addressDetails?['Default']){
                     setState(() {
                       isDefault = value ?? false;
                       checkForModifications();
@@ -118,7 +118,7 @@ class _EditAddressState extends State<EditAddress> {
             List<dynamic> addressBook = List.from(userDoc.data()?['Address Book'] ?? []);
 
             // Find the index of the address being edited
-            int indexToUpdate = addressBook.indexWhere((address) => address['Full Address'] == widget.addressDetails['Full Address']);
+            int indexToUpdate = addressBook.indexWhere((address) => address['Full Address'] == widget.addressDetails?['Full Address']);
 
             // Check if address exists in the address book
             if (indexToUpdate != -1) {

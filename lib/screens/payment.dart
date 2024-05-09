@@ -106,7 +106,7 @@ class _PaymentState extends State<Payment> {
                                           final data = snapshot.data![index];
                                           // Build your UI using data
                                           return ListTile(
-                                            title: Text(data['amount']),
+                                            title: Text('amount'),
                                           );
                                         },
                                       );
