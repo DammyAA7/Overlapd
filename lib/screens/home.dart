@@ -996,8 +996,15 @@ void _cancelDelivery() async{
                   'delivered': true
                 });
 
+                DocumentSnapshot orderDataSnapshot = await FirebaseFirestore.instance
+                    .collection('All Deliveries')
+                    .doc('Open Deliveries')
+                    .collection('Order Info')
+                    .doc(orderID)
+                    .get();
+
                 // Get the data from the active order document
-                final orderData = activeOrderDocument.data();
+                final orderData = orderDataSnapshot.data();
 
                 // Create a new document in the target collection
                 await FirebaseFirestore.instance
