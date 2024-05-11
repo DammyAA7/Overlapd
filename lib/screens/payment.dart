@@ -176,9 +176,14 @@ class _PaymentState extends State<Payment> {
 
   Future<List<DocumentSnapshot>> getTransfers() async {
     // Fetch and return data from Firestore for transfers
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_UID)
+        .get();
+
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('stripe users')
-        .doc('acct_1P7ZUoIh4myd1PCN')
+        .doc(userSnapshot['Stripe Account Id'])
         .collection('transfers')
         .get();
 
