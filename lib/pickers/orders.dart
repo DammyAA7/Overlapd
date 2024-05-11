@@ -81,8 +81,8 @@ class _OrdersState extends State<Orders> {
                     labelColor: Colors.white,
                     tabs: const [
                       Tab(child: Text('Order requests', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
+                      Tab(child: Text('Shopping Complete', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
                       Tab(child: Text('Ready for pickup', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
-                      Tab(child: Text('Completed', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
                     ]
                 ),
               ),
@@ -94,7 +94,7 @@ class _OrdersState extends State<Orders> {
                   _buildList('Order Requested', 'Shopping in progress'), // Orders in Request or Shopping in progress
                   _buildList('Shopping Complete', null), // Orders ready for pickup
                   _buildList('Pick up assigned', 'Delivery Complete'), // Completed orders
-                ],
+                ]
               ),
             )
           ],

@@ -693,14 +693,16 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildItem(DocumentSnapshot document) {
-    Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+    Map<String, dynamic>? data = document.data() as Map<String, dynamic>;
     String orderNo = document.id;
 
     return FutureBuilder(
       future: getDistanceTime(data['Delivery Address Coordinates']),
-      builder: (BuildContext context, AsyncSnapshot<DeliveryDetails> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<DeliveryDetails?> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.data == null) {
+            return SizedBox.shrink();
         } else if (snapshot.hasError) {
           return Text('Error : ${snapshot.error}');
         } else {
@@ -811,15 +813,21 @@ void _cancelDelivery() async{
     return '${position.latitude},${position.longitude}';
   }
 
-  Future<DeliveryDetails> getDistanceTime(String destination) async {
-    final currentLocation = await getPositionString(); // Assume this is implemented elsewhere.
+  Future<DeliveryDetails?> getDistanceTime(GeoPoint destination) async {
+    final currentLocation = await getPositionString();
     final originToStore = await calculateDistance(origin: currentLocation, destination: '14 Stocking Ave, Rathfarnham, Dublin', mode: chosenMode);
-    final storeToDestination = await calculateDistance(origin: '14 Stocking Ave, Rathfarnham, Dublin', destination: destination, mode: chosenMode);
+    final storeToDestination = await calculateDistance(origin: '14 Stocking Ave, Rathfarnham, Dublin', destination: '${destination.latitude}, ${destination.longitude}', mode: chosenMode);
+
+    if (originToStore == null || storeToDestination == null) {
+      // If distance or route cannot be determined for any segment, return null
+      return null;
+    }
+
 
     return DeliveryDetails(
-      distanceToStore: originToStore?[0],
-      storeToDestination: storeToDestination?[0],
-      totalJourneyTime: (originToStore?[1] ?? 0) + (storeToDestination?[1] ?? 0),
+      distanceToStore: originToStore[0],
+      storeToDestination: storeToDestination[0],
+      totalJourneyTime: (originToStore[1] ?? 0) + (storeToDestination[1] ?? 0),
     );
   }
 
@@ -901,7 +909,7 @@ void _cancelDelivery() async{
   }
 
   void trackDelivery(DocumentSnapshot activeOrderDocument){
-    String destination = activeOrderDocument['Delivery Address Coordinates'];
+    String destination = '${activeOrderDocument['Delivery Address Coordinates'].latitude}, ${activeOrderDocument['Delivery Address Coordinates'].longitude}';
     double latitude = activeOrderDocument['currentLocation']['latitude'];
     double longitude = activeOrderDocument['currentLocation']['longitude'];
     String googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=$latitude,$longitude";
@@ -994,8 +1002,8 @@ void _cancelDelivery() async{
                 // Create a new document in the target collection
                 await FirebaseFirestore.instance
                     .collection('All Deliveries')
-                    .doc('Open Deliveries')
-                    .collection(orderID)
+                    .doc('Completed Deliveries')
+                    .collection('Order Info')
                     .doc(orderID)
                     .set(orderData as Map<String, dynamic>);
 
@@ -1018,6 +1026,7 @@ void _cancelDelivery() async{
                   print(e);
                 }
                 Navigator.of(dialogContext).pop();
+                showToast(text: 'Delivery Complete');
 
               }
               else{
