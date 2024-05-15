@@ -5,6 +5,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:hive/hive.dart';
 import 'package:overlapd/pickers/picker.dart';
 import 'package:overlapd/stores/groceryRange.dart';
+import 'package:overlapd/user_auth/forgottenPassword.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:overlapd/screens/about.dart';
@@ -90,7 +91,8 @@ class MyApp extends StatelessWidget {
           '/about_page' : (context) => const About(),
           '/support_page' : (context) => const Support(),
           '/payment_page' : (context) => const Payment(),
-          '/picker_page' : (context) => const Picker()
+          '/picker_page' : (context) => const Picker(),
+          '/forgotten_password_page' : (context) => const ForgotPassword()
         },
     );
   }

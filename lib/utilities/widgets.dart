@@ -16,6 +16,7 @@ Widget pageText(BuildContext context, String text) {
 }
 class InputBoxController {
   final TextEditingController controller = TextEditingController();
+  VoidCallback? _listener;
   void dispose() {
     controller.dispose();
   }
@@ -26,6 +27,18 @@ class InputBoxController {
 
   void clear() {
     controller.clear();
+  }
+
+  void addListener(VoidCallback listener) {
+    _listener = listener;
+    controller.addListener(_listener!);
+  }
+
+  // Method to remove the listener from the controller
+  void removeListener() {
+    if (_listener != null) {
+      controller.removeListener(_listener!);
+    }
   }
 }
 
