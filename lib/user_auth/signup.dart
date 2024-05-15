@@ -138,7 +138,7 @@ class _SignUpState extends State<SignUp> {
       await _auth.setLoggedInAsUser();
       createUserCredentials(user: user);
       showToast(text: "User created successfully");
-      Navigator.pushNamed(context, '/home_page');
+      Navigator.pushNamed(context, '/verification_page');
     } else{
       print("Sign up error!");
     }

@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class FirebaseAuthService{
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  User? get currentUser => _auth.currentUser;
 
   Future<User?> signUpWithEmailAndPassword(String email, String password) async {
     try{

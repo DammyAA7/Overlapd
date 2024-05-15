@@ -108,8 +108,13 @@ class _LoginState extends State<Login> {
       await _auth.setLoggedInAsEmployee();
     } else {
       // User is not a picker (customer)
-      Navigator.pushReplacementNamed(context, '/home_page');
       await _auth.setLoggedInAsUser();
+      if(_auth.currentUser?.emailVerified == true){
+        Navigator.pushReplacementNamed(context, '/home_page');
+      } else {
+        Navigator.pushReplacementNamed(context, '/verification_page');
+      }
+
     }
   }
 

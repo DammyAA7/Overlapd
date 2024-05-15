@@ -34,7 +34,7 @@ class _HistoryState extends State<History> {
             Align(
               alignment: Alignment.center,
               child: Text(
-                'Settings',
+                'Order History',
                 style: Theme.of(context).textTheme.displayMedium,
               ),
             ),

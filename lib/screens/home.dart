@@ -13,6 +13,7 @@ import 'package:overlapd/utilities/toast.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import '../stores/groceryRange.dart';
 import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
+import '../user_auth/login.dart';
 import '../utilities/deliveryDetailsUtilities.dart';
 import '../utilities/networkUtilities.dart';
 import '../utilities/widgets.dart';
@@ -99,7 +100,10 @@ class _HomeState extends State<Home> {
                           ),
                           TextButton(
                             onPressed: () async{
-                              Navigator.of(dialogContext).pop('Yes');
+                              Navigator.pushReplacement(
+                                dialogContext,
+                                pageAnimationlr(const Login()),
+                              );
                               _signOut();
                             },
                             child: const Text('Yes'),

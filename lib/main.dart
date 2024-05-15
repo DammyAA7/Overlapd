@@ -6,6 +6,7 @@ import 'package:hive/hive.dart';
 import 'package:overlapd/pickers/picker.dart';
 import 'package:overlapd/stores/groceryRange.dart';
 import 'package:overlapd/user_auth/forgottenPassword.dart';
+import 'package:overlapd/user_auth/verification.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:overlapd/screens/about.dart';
@@ -47,14 +48,20 @@ Future<bool> isUserLoggedInAsEmployee() async {
 class MyApp extends StatelessWidget {
   final bool isLoggedInAsUser;
   final bool isLoggedInAsEmployee;
-  const MyApp({super.key, required this.isLoggedInAsUser, required this.isLoggedInAsEmployee});
+  final FirebaseAuthService _auth = FirebaseAuthService();
+  MyApp({super.key, required this.isLoggedInAsUser, required this.isLoggedInAsEmployee});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     Widget _getHomeWidget() {
       if (isLoggedInAsUser) {
-        return const Home();
+        if(_auth.currentUser?.emailVerified == true){
+          return const Home();
+        } else {
+          return const Verification();
+        }
+
       } else if (isLoggedInAsEmployee) {
         return const Picker();
       } else {
@@ -92,7 +99,8 @@ class MyApp extends StatelessWidget {
           '/support_page' : (context) => const Support(),
           '/payment_page' : (context) => const Payment(),
           '/picker_page' : (context) => const Picker(),
-          '/forgotten_password_page' : (context) => const ForgotPassword()
+          '/forgotten_password_page' : (context) => const ForgotPassword(),
+          '/verification_page' : (context) => const Verification()
         },
     );
   }
