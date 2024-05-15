@@ -112,7 +112,7 @@ class _LoginState extends State<Login> {
       if(_auth.currentUser?.emailVerified == true){
         Navigator.pushReplacementNamed(context, '/home_page');
       } else {
-        Navigator.pushReplacementNamed(context, '/verification_page');
+        Navigator.pushReplacementNamed(context, '/email_verification_page');
       }
 
     }

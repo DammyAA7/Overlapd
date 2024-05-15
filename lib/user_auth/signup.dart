@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:overlapd/user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import 'package:overlapd/utilities/widgets.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 
 import '../utilities/toast.dart';
 
@@ -22,6 +23,8 @@ class _SignUpState extends State<SignUp> {
   final InputBoxController _emailController = InputBoxController();
   final InputBoxController _passwordController = InputBoxController();
   final InputBoxController _rePasswordController = InputBoxController();
+  final InputBoxController _phoneNumber = InputBoxController();
+  FocusNode focusNode = FocusNode();
 
   bool _areFieldsValid() {
     String email = _emailController.getText();
@@ -29,6 +32,7 @@ class _SignUpState extends State<SignUp> {
     bool isEmailValid = email.isNotEmpty && _isValidEmail(email);
     bool isPasswordValid = _passwordController.getText().isNotEmpty && _isValidPassword(password);
     return _firstNameController.getText().isNotEmpty &&
+        _phoneNumber.getText().isNotEmpty && _phoneNumber.getText() != '+353' &&
         _lastNameController.getText().isNotEmpty &&
         isEmailValid && isPasswordValid &&
         _passwordController.getText() == _rePasswordController.getText();
@@ -71,6 +75,7 @@ class _SignUpState extends State<SignUp> {
     _emailController.dispose();
     _passwordController.dispose();
     _rePasswordController.dispose();
+    _phoneNumber.dispose();
     super.dispose();
   }
   @override
@@ -83,7 +88,7 @@ class _SignUpState extends State<SignUp> {
           padding: const EdgeInsets.all(15.0),
           child: Center(
             child: SingleChildScrollView(
-              reverse: true,
+              reverse: false,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,6 +101,55 @@ class _SignUpState extends State<SignUp> {
                   letterInputBox('Enter Last Name', true, false, _lastNameController),
                   pageText(context, 'Email Address'),
                   emailInputBox('Enter Email Address', true, false, _emailController),
+                  pageText(context, 'Phone number'),
+                  IntlPhoneField(
+                    focusNode: focusNode,
+                    decoration: InputDecoration(
+                      contentPadding:
+                      const EdgeInsets.only(left: 15, right: 15, top: 20, bottom: 20),
+                      filled: true,
+                      fillColor: const Color(0xFF6EE8C5).withOpacity(0.1),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20.0),
+                        borderSide: BorderSide(
+                          color: const Color(0xFF6EE8C5).withOpacity(0.6),
+                          width: 2.5,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20.0),
+                        borderSide: BorderSide(
+                          style: BorderStyle.solid,
+                          color: const Color(0xFF6EE8C5).withOpacity(0.6),
+                          width: 4.5,
+                        ),
+                      ),
+                      errorStyle: const TextStyle(
+                        fontSize: 18.0, // Adjust as needed
+                        fontWeight: FontWeight.bold,
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                        borderSide: BorderSide(
+                          color: Colors.red.withOpacity(0.6),
+                          width: 3.5,
+                        ),
+                      ),
+                      hintStyle: const TextStyle(
+                          color: Color(0xFF727E7B),
+                          fontFamily: 'Darker Grotesque',
+                          fontSize: 22.0
+                      ),
+                    ),
+                    languageCode: "ie",
+                    onChanged: (phone) {
+                      _phoneNumber.controller.text = phone.completeNumber;
+                      print(_phoneNumber.getText());
+                    },
+                    onCountryChanged: (country) {
+                      print('Country changed to: ' + country.name);
+                    },
+                  ),
                   pageText(context, 'Password'),
                   passwordInputBox('Enter Password', false, true, _passwordController),
                   pageText(context, 'Confirm Password'),
@@ -133,12 +187,11 @@ class _SignUpState extends State<SignUp> {
     String password = _passwordController.getText();
 
     User? user = await _auth.signUpWithEmailAndPassword(email, password);
-
     if (user != null){
       await _auth.setLoggedInAsUser();
       createUserCredentials(user: user);
       showToast(text: "User created successfully");
-      Navigator.pushNamed(context, '/verification_page');
+      Navigator.pushNamed(context, '/email_verification_page');
     } else{
       print("Sign up error!");
     }
@@ -150,7 +203,9 @@ class _SignUpState extends State<SignUp> {
       'First Name': _firstNameController.getText(),
       'Last Name': _lastNameController.getText(),
       'Email Address': _emailController.getText(),
-      'Address Book' : ''
+      'Phone Number': _phoneNumber.getText(),
+      'Address Book' : '',
+      'isPhoneNumberVerified': false
     };
     await docUser.set(json);
   }

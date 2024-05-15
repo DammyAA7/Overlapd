@@ -1,38 +1,50 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:overlapd/screens/home.dart';
+import 'package:overlapd/user_auth/phoneVerification.dart';
 
 import '../utilities/toast.dart';
 import '../utilities/widgets.dart';
 import 'firebase_auth_implementation/firebase_auth_services.dart';
 import 'login.dart';
 
-class Verification extends StatefulWidget {
-  static const id = 'verification_page';
-  const Verification({super.key});
+class EmailVerification extends StatefulWidget {
+  static const id = 'email_verification_page';
+  const EmailVerification({super.key});
 
   @override
-  State<Verification> createState() => _VerificationState();
+  State<EmailVerification> createState() => _EmailVerificationState();
 }
 
-class _VerificationState extends State<Verification> {
+class _EmailVerificationState extends State<EmailVerification> {
   late Timer timer;
   final FirebaseAuthService _auth = FirebaseAuthService();
+  bool isNumberVerified = false;
+  late final String _UID = _auth.getUserId();
   @override
   void initState(){
     super.initState();
+    isPhoneNumberVerified();
     _emailVerificationLink();
     timer = Timer.periodic(const Duration(seconds: 5), (timer) {
       _auth.currentUser?.reload();
       if(_auth.currentUser!.emailVerified == true){
         timer.cancel();
         showToast(text: 'Email Verified');
-        Navigator.pushReplacement(
-          context,
-          pageAnimationlr(const Home()),
-        );
+        if(isNumberVerified){
+          Navigator.pushReplacement(
+            context,
+            pageAnimationlr(const Home()),
+          );
+        } else{
+          Navigator.pushReplacement(
+            context,
+            pageAnimationlr(const PhoneVerification()),
+          );
+        }
       }
     });
   }
@@ -93,5 +105,15 @@ class _VerificationState extends State<Verification> {
     } catch (e){
       showToast(text: 'Error sending verification link. Try again!');
     }
+  }
+
+  void isPhoneNumberVerified() async{
+    DocumentSnapshot userInfo = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_UID)
+        .get();
+    setState(() {
+      isNumberVerified = userInfo['isPhoneNumberVerified'];
+    });
   }
 }

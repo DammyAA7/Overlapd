@@ -6,7 +6,8 @@ import 'package:hive/hive.dart';
 import 'package:overlapd/pickers/picker.dart';
 import 'package:overlapd/stores/groceryRange.dart';
 import 'package:overlapd/user_auth/forgottenPassword.dart';
-import 'package:overlapd/user_auth/verification.dart';
+import 'package:overlapd/user_auth/emailVerification.dart';
+import 'package:overlapd/user_auth/phoneVerification.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:overlapd/screens/about.dart';
@@ -59,7 +60,7 @@ class MyApp extends StatelessWidget {
         if(_auth.currentUser?.emailVerified == true){
           return const Home();
         } else {
-          return const Verification();
+          return const EmailVerification();
         }
 
       } else if (isLoggedInAsEmployee) {
@@ -100,7 +101,8 @@ class MyApp extends StatelessWidget {
           '/payment_page' : (context) => const Payment(),
           '/picker_page' : (context) => const Picker(),
           '/forgotten_password_page' : (context) => const ForgotPassword(),
-          '/verification_page' : (context) => const Verification()
+          '/email_verification_page' : (context) => const EmailVerification(),
+          '/phone_verification_page' : (context) => const PhoneVerification()
         },
     );
   }

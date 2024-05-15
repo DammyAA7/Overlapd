@@ -60,6 +60,7 @@ dependencies:
   url_launcher: ^6.2.3
   csv: ^6.0.0
   background_locator_2: ^2.0.6
+  intl_phone_field: ^3.2.0
 
 dev_dependencies:
   flutter_test:
