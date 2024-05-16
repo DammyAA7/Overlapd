@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:overlapd/user_auth/phoneVerificationCode.dart';
 import 'package:overlapd/utilities/toast.dart';
 import 'package:overlapd/utilities/widgets.dart';
 
@@ -83,47 +84,26 @@ class _LoginState extends State<Login> {
   void _logIn() async{
     String email = _emailController.getText();
     String password = _passwordController.getText();
-
-    User? user = await _auth.signInWithEmailAndPassword(email, password);
-
-    if (user != null) {
-      // Once logged in, check if the user is an employee (picker)
-      await _checkUserRoleAndNavigate(user.uid);
-      showToast(text: 'User succesfully logged in');
-          } else {
-      print("Login error!");
-      showToast(text: "Failed to log in. Please check your credentials.");
-    }
-
-  }
-
-  Future<void> _checkUserRoleAndNavigate(String userId) async {
-    final pickersCollection = FirebaseFirestore.instance.collection('employees');
-    final snapshot = await pickersCollection.get();
-    final pickerUids = snapshot.docs.map((doc) => doc.id).toList();
-    DocumentSnapshot userInfo = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_auth.currentUser?.uid)
-        .get();
-
-    if (pickerUids.contains(userId)) {
-      // User is a picker (employee)
-      Navigator.pushReplacementNamed(context, '/picker_page');
-      await _auth.setLoggedInAsEmployee();
-    } else {
-      // User is not a picker (customer)
-      await _auth.setLoggedInAsUser();
-      if(_auth.currentUser?.emailVerified == true && userInfo['Phone Number'].toString().isNotEmpty && userInfo['isPhoneNumberVerified']){
-        print(_auth.currentUser?.phoneNumber);
-        print(_auth.currentUser?.multiFactor.getEnrolledFactors().toString());
-        Navigator.pushReplacementNamed(context, '/home_page');
-      } else if(_auth.currentUser?.emailVerified == true && userInfo['Phone Number'].toString().isEmpty) {
-        Navigator.pushReplacementNamed(context, '/phone_verification_page');
-      } else{
-
-      }
-
+    try{
+      await _auth.signInWithEmailAndPassword(email, password);
+    } on FirebaseAuthMultiFactorException catch (e){
+      print('execute');
+      final resolver = e.resolver;
+      final session = e.resolver.session;
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        multiFactorSession: session,
+        verificationCompleted: (_) {},
+        verificationFailed: (_) {},
+        codeSent: (verificationId, resendToken) async {
+          // See `firebase_auth` example app for a method of retrieving user's sms code:
+          // https://github.com/firebase/flutterfire/blob/master/packages/firebase_auth/firebase_auth/example/lib/auth.dart#L591
+          Navigator.pushReplacement(
+            context,
+            pageAnimationlr(VerificationCode(verificationId: verificationId)),
+          );
+        },
+        codeAutoRetrievalTimeout: (_) {},
+      );
     }
   }
-
 }

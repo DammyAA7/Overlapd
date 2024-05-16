@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:overlapd/user_auth/phoneVerificationCode.dart';
 import 'package:overlapd/utilities/toast.dart';
 
 import '../utilities/widgets.dart';
@@ -110,7 +111,7 @@ class _PhoneVerificationState extends State<PhoneVerification> {
                   }
                 },
               ),
-              solidButton(context, 'Send code', () => storeNumber, _phoneNumber.getText().isNotEmpty)
+              solidButton(context, 'Send code', () => storeNumber(), _phoneNumber.getText().isNotEmpty)
             ],
           ),
         ),
@@ -119,10 +120,35 @@ class _PhoneVerificationState extends State<PhoneVerification> {
   }
 
   void storeNumber() async{
-    FirebaseFirestore.instance
+    await FirebaseFirestore.instance
         .collection('users')
         .doc(_UID)
         .update({'Phone Number': _phoneNumber.getText()});
 
+    getSMSVerification();
+  }
+
+  void getSMSVerification() async{
+    DocumentSnapshot userInfo = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_UID)
+        .get();
+    final session = await FirebaseAuth.instance.currentUser!.multiFactor.getSession();
+    final auth = FirebaseAuth.instance;
+    await auth.verifyPhoneNumber(
+      multiFactorSession: session,
+      phoneNumber: userInfo['Phone Number'],
+      verificationCompleted: (_) {},
+      verificationFailed: (_) {},
+      codeSent: (verificationId, resendToken){
+        // See `firebase_auth` example app for a method of retrieving user's sms code:
+        // https://github.com/firebase/flutterfire/blob/master/packages/firebase_auth/firebase_auth/example/lib/auth.dart#L591
+        Navigator.pushReplacement(
+          context,
+          pageAnimationlr(VerificationCode(verificationId: verificationId,)),
+        );
+      },
+      codeAutoRetrievalTimeout: (_) {},
+    );
   }
 }

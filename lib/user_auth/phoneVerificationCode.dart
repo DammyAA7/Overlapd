@@ -10,7 +10,8 @@ import 'login.dart';
 
 class VerificationCode extends StatefulWidget {
   static const id = 'phone_verification_code_page';
-  const VerificationCode({super.key});
+  final String verificationId;
+  const VerificationCode({super.key, required this.verificationId});
 
   @override
   State<VerificationCode> createState() => _VerificationCodeState();
@@ -19,21 +20,23 @@ class VerificationCode extends StatefulWidget {
 class _VerificationCodeState extends State<VerificationCode> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   late final String _UID = _auth.getUserId();
+  bool incorrectCode = true;
+  var code;
 
   final defaultPinTheme = PinTheme(
     width: 56,
     height: 56,
-    textStyle: const TextStyle(fontSize: 20, color: Color.fromRGBO(30, 60, 87, 1), fontWeight: FontWeight.w600),
+    textStyle: const TextStyle(fontSize: 20, color: Color.fromRGBO(30, 60, 87, 1), fontWeight: FontWeight.w700),
     decoration: BoxDecoration(
-      border: Border.all(color: const Color.fromRGBO(234, 239, 243, 1)),
+      border: Border.all(color: const Color(0xFF6EE8C5).withOpacity(0.8)),
       borderRadius: BorderRadius.circular(20),
+
     ),
   );
 
   @override
   void initState(){
     super.initState();
-    getSMSVerification();
   }
 
   @override
@@ -77,22 +80,53 @@ class _VerificationCodeState extends State<VerificationCode> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Text('Setup 2FA with phone number'),
-              Pinput(
-                defaultPinTheme: defaultPinTheme,
-                focusedPinTheme: defaultPinTheme.copyDecorationWith(
-                  border: Border.all(color: const Color.fromRGBO(114, 178, 238, 1)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                submittedPinTheme: defaultPinTheme.copyWith(
-                    decoration: defaultPinTheme.decoration?.copyWith(
-                      color: const Color.fromRGBO(234, 239, 243, 1),
-                    )),
-                validator: (s) {
-                  return s == '2222' ? null : 'Pin is incorrect';
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Pinput(
+                  length: 6,
+                  defaultPinTheme: defaultPinTheme,
+                  focusedPinTheme: defaultPinTheme.copyDecorationWith(
+                    border: Border.all(color: const Color(0xFF6EE8C5).withOpacity(0.8), width: 3),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  submittedPinTheme: defaultPinTheme.copyWith(
+                      decoration: defaultPinTheme.decoration?.copyWith(
+                        color: const Color(0xFF6EE8C5).withOpacity(0.3),
+                      )),
+                  validator: (s) {
+                    return s == widget.verificationId ? null : 'Pin is incorrect';
+                    },
+                  pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
+                  showCursor: true,
+                  onCompleted: (pin) async {
+                    final credential = PhoneAuthProvider.credential(
+                      verificationId: widget.verificationId,
+                      smsCode: pin,
+                    );
+
+                    try {
+                      await FirebaseAuth.instance.currentUser!.multiFactor.enroll(
+                        PhoneMultiFactorGenerator.getAssertion(
+                          credential,
+                        ),
+                      );
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(_UID)
+                          .update({'isPhoneNumberVerified': true});
+                      _checkUserRoleAndNavigate(_UID);
+                      Navigator.pushReplacement(
+                        context,
+                        pageAnimationlr(const Home()),
+                      );
+                    } on FirebaseAuthException catch (e) {
+                      print(e.message);
+                    }
+                    setState(() {
+                      code = pin;
+                    });
                   },
-                pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
-                showCursor: true,
-                onCompleted: (pin) => print(pin),
+                ),
               )
             ],
           ),
@@ -101,93 +135,32 @@ class _VerificationCodeState extends State<VerificationCode> {
     );
   }
 
-  void getSMSVerification() async{
+  Future<void> _checkUserRoleAndNavigate(String userId) async {
+    final pickersCollection = FirebaseFirestore.instance.collection('employees');
+    final snapshot = await pickersCollection.get();
+    final pickerUids = snapshot.docs.map((doc) => doc.id).toList();
     DocumentSnapshot userInfo = await FirebaseFirestore.instance
         .collection('users')
-        .doc(_UID)
+        .doc(_auth.currentUser?.uid)
         .get();
-    final session = await FirebaseAuth.instance.currentUser!.multiFactor.getSession();
-    final auth = FirebaseAuth.instance;
-    await auth.verifyPhoneNumber(
-      multiFactorSession: session,
-      phoneNumber: userInfo['Phone Number'],
-      verificationCompleted: (_) {
-        FirebaseFirestore.instance
-            .collection('users')
-            .doc(_UID)
-            .update({'isPhoneNumberVerified': true});
-        Navigator.pushReplacement(
-          context,
-          pageAnimationlr(const Home()),
-        );
-      },
-      verificationFailed: (_) {},
-      codeSent: (String verificationId, int? resendToken) async {
-        // See `firebase_auth` example app for a method of retrieving user's sms code:
-        // https://github.com/firebase/flutterfire/blob/master/packages/firebase_auth/firebase_auth/example/lib/auth.dart#L591
-        final smsCode = await getSmsCodeFromUser(context);
 
-        if (smsCode != null) {
-          // Create a PhoneAuthCredential with the code
-          final credential = PhoneAuthProvider.credential(
-            verificationId: verificationId,
-            smsCode: smsCode,
-          );
+    if (pickerUids.contains(userId)) {
+      // User is a picker (employee)
+      Navigator.pushReplacementNamed(context, '/picker_page');
+      await _auth.setLoggedInAsEmployee();
+    } else {
+      // User is not a picker (customer)
+      await _auth.setLoggedInAsUser();
+      if(_auth.currentUser?.emailVerified == true && userInfo['Phone Number'].toString().isNotEmpty && userInfo['isPhoneNumberVerified']){
+        print(_auth.currentUser?.phoneNumber);
+        print(_auth.currentUser?.multiFactor.getEnrolledFactors().toString());
+        Navigator.pushReplacementNamed(context, '/home_page');
+      } else if(_auth.currentUser?.emailVerified == true && userInfo['Phone Number'].toString().isEmpty) {
+        Navigator.pushReplacementNamed(context, '/phone_verification_page');
+      } else{
 
-          try {
-            await FirebaseAuth.instance.currentUser!.multiFactor.enroll(
-              PhoneMultiFactorGenerator.getAssertion(
-                credential,
-              ),
-            );
-          } on FirebaseAuthException catch (e) {
-            print(e.message);
-          }
-        }
-      },
-      codeAutoRetrievalTimeout: (_) {},
-    );
-  }
+      }
 
-  Future<String?> getSmsCodeFromUser(BuildContext context) async {
-    String? smsCode;
-
-    // Update the UI - wait for the user to enter the SMS code
-    await showDialog<String>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('SMS code:'),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Sign in'),
-            ),
-            OutlinedButton(
-              onPressed: () {
-                smsCode = null;
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-          ],
-          content: Container(
-            padding: const EdgeInsets.all(20),
-            child: TextField(
-              onChanged: (value) {
-                smsCode = value;
-              },
-              textAlign: TextAlign.center,
-              autofocus: true,
-            ),
-          ),
-        );
-      },
-    );
-
-    return smsCode;
+    }
   }
 }
