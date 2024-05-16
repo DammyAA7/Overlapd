@@ -8,6 +8,7 @@ import 'package:overlapd/stores/groceryRange.dart';
 import 'package:overlapd/user_auth/forgottenPassword.dart';
 import 'package:overlapd/user_auth/emailVerification.dart';
 import 'package:overlapd/user_auth/phoneVerification.dart';
+import 'package:overlapd/user_auth/phoneVerificationCode.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:overlapd/screens/about.dart';
@@ -102,7 +103,8 @@ class MyApp extends StatelessWidget {
           '/picker_page' : (context) => const Picker(),
           '/forgotten_password_page' : (context) => const ForgotPassword(),
           '/email_verification_page' : (context) => const EmailVerification(),
-          '/phone_verification_page' : (context) => const PhoneVerification()
+          '/phone_verification_page' : (context) => const PhoneVerification(),
+          '/phone_verification_code_page' : (context) => const VerificationCode()
         },
     );
   }

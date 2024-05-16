@@ -1,8 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:overlapd/utilities/toast.dart';
 
+import '../utilities/widgets.dart';
 import 'firebase_auth_implementation/firebase_auth_services.dart';
+import 'login.dart';
 
 class PhoneVerification extends StatefulWidget {
   static const id = 'phone_verification_page';
@@ -15,18 +19,38 @@ class PhoneVerification extends StatefulWidget {
 class _PhoneVerificationState extends State<PhoneVerification> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   late final String _UID = _auth.getUserId();
-  String? phoneNumber;
-  User? user;
+  final InputBoxController _phoneNumber = InputBoxController();
+  FocusNode focusNode = FocusNode();
 
-  @override
-  void initState(){
-    super.initState();
-    getSMSVerification();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title:  Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            IconButton(
+              onPressed: () async{
+                // Navigate to the home page with a fade transition
+                try{
+                  await _auth.setLoggedOut();
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.pushReplacement(
+                    context,
+                    pageAnimationlr(const Login()),
+                  );
+                } catch (e){
+                  print(e);
+                }
+              },
+              icon: const Icon(Icons.arrow_back_ios_new_rounded),
+            ),
+          ],
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Center(
@@ -34,7 +58,59 @@ class _PhoneVerificationState extends State<PhoneVerification> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text('Verification sent'),
+              const Text('Setup 2FA with phone number'),
+              pageText(context, 'Phone number'),
+              IntlPhoneField(
+                focusNode: focusNode,
+                decoration: InputDecoration(
+                  contentPadding:
+                  const EdgeInsets.only(left: 15, right: 15, top: 20, bottom: 20),
+                  filled: true,
+                  fillColor: const Color(0xFF6EE8C5).withOpacity(0.1),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                    borderSide: BorderSide(
+                      color: const Color(0xFF6EE8C5).withOpacity(0.6),
+                      width: 2.5,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                    borderSide: BorderSide(
+                      style: BorderStyle.solid,
+                      color: const Color(0xFF6EE8C5).withOpacity(0.6),
+                      width: 4.5,
+                    ),
+                  ),
+                  errorStyle: const TextStyle(
+                    fontSize: 18.0, // Adjust as needed
+                    fontWeight: FontWeight.bold,
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                    borderSide: BorderSide(
+                      color: Colors.red.withOpacity(0.6),
+                      width: 3.5,
+                    ),
+                  ),
+                  hintStyle: const TextStyle(
+                      color: Color(0xFF727E7B),
+                      fontFamily: 'Darker Grotesque',
+                      fontSize: 22.0
+                  ),
+                ),
+                languageCode: "ie",
+                onChanged: (phone) {
+                  _phoneNumber.controller.text = phone.completeNumber;
+
+                },
+                onCountryChanged: (country) {
+                  if(country.name != 'Ireland'){
+                    showToast(text: 'Country not supported. Only available in Ireland');
+                  }
+                },
+              ),
+              solidButton(context, 'Send code', () => storeNumber, _phoneNumber.getText().isNotEmpty)
             ],
           ),
         ),
@@ -42,89 +118,11 @@ class _PhoneVerificationState extends State<PhoneVerification> {
     );
   }
 
-  Future<String?> getSmsCodeFromUser(BuildContext context) async {
-    String? smsCode;
-
-    // Update the UI - wait for the user to enter the SMS code
-    await showDialog<String>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('SMS code:'),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Sign in'),
-            ),
-            OutlinedButton(
-              onPressed: () {
-                smsCode = null;
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-          ],
-          content: Container(
-            padding: const EdgeInsets.all(20),
-            child: TextField(
-              onChanged: (value) {
-                smsCode = value;
-              },
-              textAlign: TextAlign.center,
-              autofocus: true,
-            ),
-          ),
-        );
-      },
-    );
-
-    return smsCode;
-  }
-
-  void getSMSVerification() async{
-    DocumentSnapshot userInfo = await FirebaseFirestore.instance
+  void storeNumber() async{
+    FirebaseFirestore.instance
         .collection('users')
         .doc(_UID)
-        .get();
-    final session = await user?.multiFactor.getSession();
-    final auth = FirebaseAuth.instance;
-    await auth.verifyPhoneNumber(
-      multiFactorSession: session,
-      phoneNumber: userInfo['Phone Number'],
-      verificationCompleted: (_) {
-        FirebaseFirestore.instance
-            .collection('users')
-            .doc(_UID)
-            .update({'isPhoneNumberVerified': true});
-      },
-      verificationFailed: (_) {},
-      codeSent: (String verificationId, int? resendToken) async {
-        // See `firebase_auth` example app for a method of retrieving user's sms code:
-        // https://github.com/firebase/flutterfire/blob/master/packages/firebase_auth/firebase_auth/example/lib/auth.dart#L591
-        final smsCode = await getSmsCodeFromUser(context);
+        .update({'Phone Number': _phoneNumber.getText()});
 
-        if (smsCode != null) {
-          // Create a PhoneAuthCredential with the code
-          final credential = PhoneAuthProvider.credential(
-            verificationId: verificationId,
-            smsCode: smsCode,
-          );
-
-          try {
-            await user?.multiFactor.enroll(
-              PhoneMultiFactorGenerator.getAssertion(
-                credential,
-              ),
-            );
-          } on FirebaseAuthException catch (e) {
-            print(e.message);
-          }
-        }
-      },
-      codeAutoRetrievalTimeout: (_) {},
-    );
   }
 }

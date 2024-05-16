@@ -101,6 +101,10 @@ class _LoginState extends State<Login> {
     final pickersCollection = FirebaseFirestore.instance.collection('employees');
     final snapshot = await pickersCollection.get();
     final pickerUids = snapshot.docs.map((doc) => doc.id).toList();
+    DocumentSnapshot userInfo = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_auth.currentUser?.uid)
+        .get();
 
     if (pickerUids.contains(userId)) {
       // User is a picker (employee)
@@ -109,10 +113,14 @@ class _LoginState extends State<Login> {
     } else {
       // User is not a picker (customer)
       await _auth.setLoggedInAsUser();
-      if(_auth.currentUser?.emailVerified == true){
+      if(_auth.currentUser?.emailVerified == true && userInfo['Phone Number'].toString().isNotEmpty && userInfo['isPhoneNumberVerified']){
+        print(_auth.currentUser?.phoneNumber);
+        print(_auth.currentUser?.multiFactor.getEnrolledFactors().toString());
         Navigator.pushReplacementNamed(context, '/home_page');
-      } else {
-        Navigator.pushReplacementNamed(context, '/email_verification_page');
+      } else if(_auth.currentUser?.emailVerified == true && userInfo['Phone Number'].toString().isEmpty) {
+        Navigator.pushReplacementNamed(context, '/phone_verification_page');
+      } else{
+
       }
 
     }
