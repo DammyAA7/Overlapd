@@ -32,6 +32,7 @@ class _PaymentState extends State<Payment> {
     super.initState();
     // TODO: implement initState
     getCurrentStripeBalance();
+    hasStripeAccount();
     transfers = getTransfers();
     payouts = getPayouts();
   }
@@ -193,12 +194,38 @@ class _PaymentState extends State<Payment> {
 
   Future<List<DocumentSnapshot>> getPayouts() async {
     // Fetch and return data from Firestore for transfers
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_UID)
+        .get();
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('stripe users')
-        .doc('acct_1P7ZUoIh4myd1PCN')
+        .doc(userSnapshot['Stripe Account Id'])
         .collection('payouts')
         .get();
     return querySnapshot.docs;
+  }
+
+  void hasStripeAccount() async{
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_UID)
+        .get();
+
+    if (userSnapshot.exists) {
+      // Check if the field exists
+      if ((userSnapshot.data() as Map<String,dynamic>).containsKey('Stripe Account Id')) {
+        // Field exists
+        print('Field exists');
+      } else {
+        // Field doesn't exist
+        print('Field does not exist');
+      }
+    } else {
+      // Document does not exist
+      print('Document does not exist');
+    }
+
   }
 
 }
