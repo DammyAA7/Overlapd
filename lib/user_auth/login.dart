@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:overlapd/user_auth/phoneVerificationCode.dart';
-import 'package:overlapd/utilities/toast.dart';
+
 import 'package:overlapd/utilities/widgets.dart';
 
 import 'firebase_auth_implementation/firebase_auth_services.dart';
@@ -84,26 +84,32 @@ class _LoginState extends State<Login> {
   void _logIn() async{
     String email = _emailController.getText();
     String password = _passwordController.getText();
-    try{
-      await _auth.signInWithEmailAndPassword(email, password);
-    } on FirebaseAuthMultiFactorException catch (e){
-      print('execute');
-      final resolver = e.resolver;
-      final session = e.resolver.session;
-      await FirebaseAuth.instance.verifyPhoneNumber(
-        multiFactorSession: session,
-        verificationCompleted: (_) {},
-        verificationFailed: (_) {},
-        codeSent: (verificationId, resendToken) async {
-          // See `firebase_auth` example app for a method of retrieving user's sms code:
-          // https://github.com/firebase/flutterfire/blob/master/packages/firebase_auth/firebase_auth/example/lib/auth.dart#L591
-          Navigator.pushReplacement(
-            context,
-            pageAnimationlr(VerificationCode(verificationId: verificationId)),
-          );
-        },
-        codeAutoRetrievalTimeout: (_) {},
-      );
+    await _auth.signInWithEmailAndPassword(email, password, context);
+    final pickersCollection = FirebaseFirestore.instance.collection('employees');
+    final snapshot = await pickersCollection.get();
+    final pickerUids = snapshot.docs.map((doc) => doc.id).toList();
+
+    if (pickerUids.contains(_auth.currentUser?.uid)) {
+      // User is a picker (employee)
+      Navigator.pushReplacementNamed(context, '/picker_page');
+      await _auth.setLoggedInAsEmployee();
+    } else {
+      // User is not a picker (customer)
+      if(_auth.currentUser?.emailVerified == false ){
+        print(_auth.currentUser?.phoneNumber);
+        Navigator.pushReplacementNamed(context, '/email_verification_page');
+      } else if(_auth.currentUser?.emailVerified == true) {
+        reauthenticateUser();
+        Navigator.pushReplacementNamed(context, '/phone_verification_page');
+      }
     }
+  }
+
+  void reauthenticateUser() async {
+    String email = _emailController.getText();
+    String password = _passwordController.getText();
+    final user = FirebaseAuth.instance.currentUser;
+    final credential = EmailAuthProvider.credential(email: email, password: password);
+    await user!.reauthenticateWithCredential(credential);
   }
 }

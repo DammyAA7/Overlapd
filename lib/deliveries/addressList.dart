@@ -17,6 +17,7 @@ class AddressList extends StatefulWidget {
 class _AddressListState extends State<AddressList> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   late final String _UID = _auth.getUserId();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,12 +27,11 @@ class _AddressListState extends State<AddressList> {
         centerTitle: true,
         leading: IconButton(
           onPressed: () {
-            // Navigate to the home page with a fade transition
-            Navigator.pop(context,);
+            Navigator.pop(context);
           },
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
         ),
-        title:  Text(
+        title: Text(
           'Addresses',
           style: Theme.of(context).textTheme.headlineSmall,
         ),
@@ -64,71 +64,86 @@ class _AddressListState extends State<AddressList> {
           return const Text('No Addresses Stored');
         } else {
           final data = snapshot.data!.data() as Map<String, dynamic>;
-          final List<dynamic>? addressBook = data['Address Book'];
-          if (data.containsKey('Address Book') && data['Address Book'] is List && addressBook!.isNotEmpty) {
-            return ListView.builder(
-              padding: const EdgeInsets.only(bottom: 70),
-              shrinkWrap: true,
-              itemCount: addressBook.length,
-              itemBuilder: (context, index) {
-                final address = addressBook[index] as Map<String, dynamic>?;
-                return InkWell(
-                  onTap: () => selectAddress(address!),
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: IntrinsicHeight(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(child: Text(address?['Full Address'] ?? 'No address', maxLines: 4, overflow: TextOverflow.visible,)),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 5.0, bottom: 5.0, right: 5.0, left: 2.0),
-                                  child: GestureDetector(
-                                    child: const Icon(Icons.edit),
-                                    onTap: (){
-                                      Navigator.push(context, pageAnimationrl(EditAddress(addressDetails: address)));
-                                    },
+          if (data.containsKey('Address Book') && data['Address Book'] is List) {
+            final List<dynamic> addressBook = data['Address Book'];
+            if (addressBook.isNotEmpty) {
+              return ListView.builder(
+                padding: const EdgeInsets.only(bottom: 70),
+                shrinkWrap: true,
+                itemCount: addressBook.length,
+                itemBuilder: (context, index) {
+                  final address = addressBook[index] as Map<String, dynamic>?;
+                  return InkWell(
+                    onTap: () => selectAddress(address!),
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      child: IntrinsicHeight(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      address?['Full Address'] ?? 'No address',
+                                      maxLines: 4,
+                                      overflow: TextOverflow.visible,
+                                    ),
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(5.0),
-                                  child: GestureDetector(child: const Icon(Icons.delete_outline),
-                                    onTap: (){
-                                      final bool isDefaultAddress = address?['Default'] == true;
-                                      // Check if the address is the default address
-                                      if (isDefaultAddress) {
-                                        // Inform the user that the default address cannot be deleted
-                                        showToast(text:'Default address cannot be deleted.');
-                  
-                                      } else{
-                                        showDialog(
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 5.0, bottom: 5.0, right: 5.0, left: 2.0),
+                                    child: GestureDetector(
+                                      child: const Icon(Icons.edit),
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          pageAnimationrl(EditAddress(addressDetails: address)),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(5.0),
+                                    child: GestureDetector(
+                                      child: const Icon(Icons.delete_outline),
+                                      onTap: () {
+                                        final bool isDefaultAddress = address?['Default'] == true;
+                                        if (isDefaultAddress) {
+                                          showToast(text: 'Default address cannot be deleted.');
+                                        } else {
+                                          showDialog(
                                             context: context,
                                             builder: (BuildContext context) => AlertDialog(
-                                              title: const Text('Are you sure you want to delete this address'),
+                                              title: const Text(
+                                                  'Are you sure you want to delete this address'),
                                               actions: <Widget>[
                                                 TextButton(
                                                   onPressed: () => Navigator.pop(context, 'No'),
                                                   child: const Text('No'),
                                                 ),
                                                 TextButton(
-                                                  onPressed: () async{
-                                                    List<dynamic> updatedAddressBook = List.from(addressBook)
-                                                      ..removeAt(index);
-                  
-                                                    // Update the document in Firestore
+                                                  onPressed: () async {
+                                                    List<dynamic> updatedAddressBook =
+                                                    List.from(addressBook)..removeAt(index);
+
                                                     await FirebaseFirestore.instance
                                                         .collection('users')
                                                         .doc(_UID)
                                                         .update({'Address Book': updatedAddressBook});
 
-                                                    // Fetch user's last selected address for comparison
                                                     final userDoc = await _auth.getAccountInfoGet(_UID);
                                                     final userData = userDoc.data();
-                                                    if (userData != null && userData['lastAddressSelected'] != null && userData['lastAddressSelected']['Full Address'] == address?['Full Address']) {
-                                                      await FirebaseFirestore.instance.collection('users').doc(_UID).update({'lastAddressSelected': FieldValue.delete()});
+                                                    if (userData != null &&
+                                                        userData['lastAddressSelected'] != null &&
+                                                        userData['lastAddressSelected']
+                                                        ['Full Address'] ==
+                                                            address?['Full Address']) {
+                                                      await FirebaseFirestore.instance
+                                                          .collection('users')
+                                                          .doc(_UID)
+                                                          .update({'lastAddressSelected': FieldValue.delete()});
                                                     }
                                                     Navigator.pop(context, 'Yes');
                                                     showToast(text: 'Address deleted successfully');
@@ -136,26 +151,32 @@ class _AddressListState extends State<AddressList> {
                                                   child: const Text('Yes'),
                                                 ),
                                               ],
-                                            )
-                                        );
-                                      }
-                  
-                                    },),
-                                ),
-                              ],
-                            ),
-                            address?['Default'] ? Text('Default Address', style: Theme.of(context).textTheme.labelMedium,) : const SizedBox.shrink(),
-                            const Divider()
-                          ],
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              address?['Default']
+                                  ? Text(
+                                'Default Address',
+                                style: Theme.of(context).textTheme.labelMedium,
+                              )
+                                  : const SizedBox.shrink(),
+                              const Divider(),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  
-                    // Add more fields as necessary
-                  ),
-                );
-              },
-            );
+                  );
+                },
+              );
+            } else {
+              return const Text('No Addresses Stored');
+            }
           } else {
             return const Text('No Addresses Stored');
           }
@@ -165,12 +186,9 @@ class _AddressListState extends State<AddressList> {
   }
 
   void selectAddress(Map<String, dynamic> selectedAddress) async {
-    // Update lastAddressSelected in Firestore
     await FirebaseFirestore.instance.collection('users').doc(_UID).update({
       'lastAddressSelected': selectedAddress,
     });
     Navigator.pop(context);
-
-    // Optionally, navigate back or refresh the UI as needed.
   }
 }

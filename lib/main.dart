@@ -104,7 +104,7 @@ class MyApp extends StatelessWidget {
           '/forgotten_password_page' : (context) => const ForgotPassword(),
           '/email_verification_page' : (context) => const EmailVerification(),
           '/phone_verification_page' : (context) => const PhoneVerification(),
-          '/phone_verification_code_page' : (context) => const VerificationCode(verificationId: '',)
+          '/phone_verification_code_page' : (context) => const VerificationCode(verificationId: '', verificationType: '')
         },
     );
   }

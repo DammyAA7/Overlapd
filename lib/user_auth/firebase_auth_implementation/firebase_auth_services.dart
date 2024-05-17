@@ -1,7 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:overlapd/utilities/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../utilities/widgets.dart';
+import '../phoneVerificationCode.dart';
 
 class FirebaseAuthService{
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -21,10 +25,31 @@ class FirebaseAuthService{
     return null;
   }
 
-  Future<User?> signInWithEmailAndPassword(String email, String password) async {
+  Future<User?> signInWithEmailAndPassword(String email, String password, BuildContext context) async {
     try{
       UserCredential credential = await _auth.signInWithEmailAndPassword(email: email, password: password);
       return credential.user;
+    } on FirebaseAuthMultiFactorException catch (e){
+      final firstHint = e.resolver.hints.first;
+      var r = e.resolver;
+      if (firstHint is! PhoneMultiFactorInfo) {
+        return null;
+      }
+      await FirebaseAuth.instance.verifyPhoneNumber(
+        multiFactorSession: e.resolver.session,
+        multiFactorInfo: firstHint,
+        verificationCompleted: (_) {},
+        verificationFailed: (_) {},
+          codeSent: (verificationId, resendToken) async {
+            // See `firebase_auth` example app for a method of retrieving user's sms code:
+            // https://github.com/firebase/flutterfire/blob/master/packages/firebase_auth/firebase_auth/example/lib/auth.dart#L591
+            Navigator.pushReplacement(
+              context,
+              pageAnimationlr(VerificationCode(verificationId: verificationId, verificationType: 'Resolve', resolver: r)),
+            );
+          },
+        codeAutoRetrievalTimeout: (_) {},
+      );
     } on FirebaseAuthException catch(e) {
       print(e.code);
       if(e.code == 'user-not-found' || e.code == 'wrong-password'){
@@ -32,6 +57,8 @@ class FirebaseAuthService{
       } else {
         showToast(text: 'An error occurred: ${e.code}');
       }
+    } catch(e){
+      showToast(text: 'An error occurred: $e');
     }
     return null;
   }

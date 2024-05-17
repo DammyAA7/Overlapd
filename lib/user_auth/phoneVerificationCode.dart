@@ -11,7 +11,9 @@ import 'login.dart';
 class VerificationCode extends StatefulWidget {
   static const id = 'phone_verification_code_page';
   final String verificationId;
-  const VerificationCode({super.key, required this.verificationId});
+  final String verificationType;
+  final resolver;
+  const VerificationCode({super.key, required this.verificationId, required this.verificationType, this.resolver});
 
   @override
   State<VerificationCode> createState() => _VerificationCodeState();
@@ -99,32 +101,40 @@ class _VerificationCodeState extends State<VerificationCode> {
                   pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
                   showCursor: true,
                   onCompleted: (pin) async {
+                    setState(() {
+                      code = pin;
+                    });
                     final credential = PhoneAuthProvider.credential(
                       verificationId: widget.verificationId,
                       smsCode: pin,
                     );
-
-                    try {
-                      await FirebaseAuth.instance.currentUser!.multiFactor.enroll(
-                        PhoneMultiFactorGenerator.getAssertion(
-                          credential,
-                        ),
-                      );
-                      await FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(_UID)
-                          .update({'isPhoneNumberVerified': true});
-                      _checkUserRoleAndNavigate(_UID);
-                      Navigator.pushReplacement(
-                        context,
-                        pageAnimationlr(const Home()),
-                      );
-                    } on FirebaseAuthException catch (e) {
-                      print(e.message);
+                    if(widget.verificationType == 'Enroll'){
+                      try {
+                        await FirebaseAuth.instance.currentUser!.multiFactor.enroll(
+                          PhoneMultiFactorGenerator.getAssertion(
+                            credential,
+                          ),
+                        );
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(_UID)
+                            .update({'isPhoneNumberVerified': true});
+                        _checkUserRoleAndNavigate();
+                      } on FirebaseAuthException catch (e) {
+                        print(e.message);
+                      }
+                    } else if(widget.verificationType == 'Resolve'){
+                      try {
+                        await widget.resolver.resolveSignIn(
+                          PhoneMultiFactorGenerator.getAssertion(
+                            credential,
+                          ),
+                        );
+                        _checkUserRoleAndNavigate();
+                      } on FirebaseAuthException catch (e) {
+                        print(e.message);
+                      }
                     }
-                    setState(() {
-                      code = pin;
-                    });
                   },
                 ),
               )
@@ -135,32 +145,8 @@ class _VerificationCodeState extends State<VerificationCode> {
     );
   }
 
-  Future<void> _checkUserRoleAndNavigate(String userId) async {
-    final pickersCollection = FirebaseFirestore.instance.collection('employees');
-    final snapshot = await pickersCollection.get();
-    final pickerUids = snapshot.docs.map((doc) => doc.id).toList();
-    DocumentSnapshot userInfo = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_auth.currentUser?.uid)
-        .get();
-
-    if (pickerUids.contains(userId)) {
-      // User is a picker (employee)
-      Navigator.pushReplacementNamed(context, '/picker_page');
-      await _auth.setLoggedInAsEmployee();
-    } else {
-      // User is not a picker (customer)
+  void _checkUserRoleAndNavigate() async{
       await _auth.setLoggedInAsUser();
-      if(_auth.currentUser?.emailVerified == true && userInfo['Phone Number'].toString().isNotEmpty && userInfo['isPhoneNumberVerified']){
-        print(_auth.currentUser?.phoneNumber);
-        print(_auth.currentUser?.multiFactor.getEnrolledFactors().toString());
-        Navigator.pushReplacementNamed(context, '/home_page');
-      } else if(_auth.currentUser?.emailVerified == true && userInfo['Phone Number'].toString().isEmpty) {
-        Navigator.pushReplacementNamed(context, '/phone_verification_page');
-      } else{
-
-      }
-
-    }
+      Navigator.pushReplacementNamed(context, '/home_page');
   }
 }

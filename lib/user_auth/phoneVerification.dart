@@ -145,7 +145,7 @@ class _PhoneVerificationState extends State<PhoneVerification> {
         // https://github.com/firebase/flutterfire/blob/master/packages/firebase_auth/firebase_auth/example/lib/auth.dart#L591
         Navigator.pushReplacement(
           context,
-          pageAnimationlr(VerificationCode(verificationId: verificationId,)),
+          pageAnimationlr(VerificationCode(verificationId: verificationId, verificationType: 'Enroll',)),
         );
       },
       codeAutoRetrievalTimeout: (_) {},
