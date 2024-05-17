@@ -34,7 +34,7 @@ class _CheckoutState extends State<Checkout> {
   final DeliveryService _service = DeliveryService();
   String predictions = '';
   String? fullAddress;
-  String? addressCoordinates;
+  GeoPoint? addressCoordinates;
   Position? currentLocation;
   bool deliveryTime = true;
   bool shoppingPreference = true;
@@ -448,8 +448,7 @@ class _CheckoutState extends State<Checkout> {
         // Last selected address exists, use it
         setState(() {
           fullAddress = userData['lastAddressSelected']['Full Address'];
-          addressCoordinates = '${userData['lastAddressSelected']['Coordinates']['lat']}, ${userData['lastAddressSelected']['Coordinates']['lng']}';
-          print("coordinates $addressCoordinates");
+          addressCoordinates = GeoPoint((userData['lastAddressSelected']['Coordinates']['lat']), userData['lastAddressSelected']['Coordinates']['lng']);
         });
       } else if (userData.containsKey('Address Book') && userData['Address Book'].isNotEmpty) {
         // Check for a default address in the address book
@@ -462,7 +461,7 @@ class _CheckoutState extends State<Checkout> {
           // Default address exists, use it
           setState(() {
             fullAddress = defaultAddress['Full Address'];
-            addressCoordinates = '${defaultAddress['Coordinates']['lat']}, ${userData['Address Book']['Coordinates']['lng']}';
+            addressCoordinates = GeoPoint((userData['lastAddressSelected']['Coordinates']['lat']), userData['lastAddressSelected']['Coordinates']['lng']);
           });
         }
       }
