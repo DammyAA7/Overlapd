@@ -1,11 +1,10 @@
-
-
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/widgets.dart';
 import 'home.dart';
@@ -25,14 +24,17 @@ class _PaymentState extends State<Payment> {
   late final String _UID = _auth.getUserId();
   late Future<List<DocumentSnapshot>> transfers;
   late Future<List<DocumentSnapshot>> payouts;
+  String? id;
   int available = 0;
   int pending = 0;
+  bool hasStripeAccount = false;
+
   @override
   void initState() {
     super.initState();
     // TODO: implement initState
     getCurrentStripeBalance();
-    hasStripeAccount();
+    checkStripeAccount();
     transfers = getTransfers();
     payouts = getPayouts();
   }
@@ -56,6 +58,25 @@ class _PaymentState extends State<Payment> {
           'Payment Methods',
           style: Theme.of(context).textTheme.headlineSmall,
         ),
+        actions: [
+          hasStripeAccount ?IconButton(
+            icon: Icon(Icons.login_outlined),
+            onPressed: () async{
+              // Handle button press, e.g., show a help dialog
+              try{
+                final loginResponse = await http.post(
+                    Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateLoginLink'),
+                    body: {'account': id}
+                );
+                final jsonLoginResponse = jsonDecode(loginResponse.body);
+                print(jsonLoginResponse);
+                launchUrl(Uri.parse(jsonLoginResponse['url']), mode: LaunchMode.inAppBrowserView);
+              } catch(e) {
+                print(e);
+              }
+            },
+          ) : const SizedBox.shrink(),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -77,7 +98,8 @@ class _PaymentState extends State<Payment> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                Expanded(
+                hasStripeAccount
+                    ? Expanded(
                   child: Padding(
                     padding: EdgeInsets.all(8.0),
                     child: DefaultTabController(
@@ -102,7 +124,9 @@ class _PaymentState extends State<Payment> {
                                       return const Center(child: CircularProgressIndicator());
                                     } else if (snapshot.hasError) {
                                       return const Center(child: Text('Error loading data'));
-                                    } else {
+                                    } else if(snapshot.data?.length == 0){
+                                      return const Center(child: Text('No transfer have been made'));
+                                    }else {
                                       return ListView.builder(
                                         itemCount: snapshot.data?.length,
                                         itemBuilder: (context, index) {
@@ -123,8 +147,9 @@ class _PaymentState extends State<Payment> {
                                       return const Center(child: CircularProgressIndicator());
                                     } else if (snapshot.hasError) {
                                       return const Center(child: Text('Error loading data'));
-                                    } else {
-                                      print(snapshot.data?.length);
+                                    } else if(snapshot.data?.length == 0){
+                                      return const Center(child: Text('No payouts have been made'));
+                                    }else {
                                       return ListView.builder(
                                         itemCount: snapshot.data?.length,
                                         itemBuilder: (context, index) {
@@ -145,6 +170,39 @@ class _PaymentState extends State<Payment> {
                       ),
                     ),
                   ),
+                )
+                    : Column(
+                  children: [
+                    const Text('No transactions'),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () async{
+                        // Handle button press
+                        try{
+                          final accountResponse = await http.post(
+                              Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateConnectAccount'),
+                              body: {
+                                'uid': _UID,
+                                'email': _auth.getUsername()
+                              }
+                          );
+                          final jsonAccountResponse = jsonDecode(accountResponse.body);
+                          final accountLinkResponse = await http.post(
+                              Uri.parse('https://us-central1-overlapd-13268.cloudfunctions.net/StripeCreateAccountLink'),
+                              body: {
+                                'account': jsonAccountResponse['id'],
+                              }
+                          );
+                          final jsonAccountLinkResponse = jsonDecode(accountLinkResponse.body);
+                          launchUrl(Uri.parse(jsonAccountLinkResponse['url']), mode: LaunchMode.inAppBrowserView);
+                          setState(() {});
+                        } catch(e) {
+                          print(e);
+                        }
+                      },
+                      child: const Text('Create Stripe Account'),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -206,24 +264,32 @@ class _PaymentState extends State<Payment> {
     return querySnapshot.docs;
   }
 
-  void hasStripeAccount() async{
+  Future<void> checkStripeAccount() async {
+    bool hasAccount = await hasStripeAccountMethod();
+    setState(() {
+      hasStripeAccount = hasAccount;
+      if (hasStripeAccount) {
+        transfers = getTransfers();
+        payouts = getPayouts();
+      }
+    });
+  }
+
+  Future<bool> hasStripeAccountMethod() async{
     DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
         .collection('users')
         .doc(_UID)
         .get();
 
-    if (userSnapshot.exists) {
-      // Check if the field exists
-      if ((userSnapshot.data() as Map<String,dynamic>).containsKey('Stripe Account Id')) {
-        // Field exists
-        print('Field exists');
-      } else {
-        // Field doesn't exist
-        print('Field does not exist');
-      }
+    if ((userSnapshot.data() as Map<String,dynamic>).containsKey('Stripe Account Id')) {
+      // Field exists
+      setState(() {
+        id = userSnapshot['Stripe Account Id'];
+      });
+      return true;
     } else {
-      // Document does not exist
-      print('Document does not exist');
+      // Field doesn't exist
+      return false;
     }
 
   }
