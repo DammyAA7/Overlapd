@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:overlapd/screens/home.dart';
+import 'package:overlapd/utilities/toast.dart';
 import '../utilities/widgets.dart';
 import 'firebase_auth_implementation/firebase_auth_services.dart';
 import 'package:pinput/pinput.dart';
@@ -95,11 +96,15 @@ class _VerificationCodeState extends State<VerificationCode> {
                       decoration: defaultPinTheme.decoration?.copyWith(
                         color: const Color(0xFF6EE8C5).withOpacity(0.3),
                       )),
-                  validator: (s) {
-                    return s == widget.verificationId ? null : 'Pin is incorrect';
-                    },
                   pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
                   showCursor: true,
+                  onChanged: (s){
+                    if(s.length < 6){
+                      setState(() {
+                        incorrectCode = true;
+                      });
+                    }
+                  },
                   onCompleted: (pin) async {
                     setState(() {
                       code = pin;
@@ -115,6 +120,9 @@ class _VerificationCodeState extends State<VerificationCode> {
                             credential,
                           ),
                         );
+                        setState(() {
+                          incorrectCode = true;
+                        });
                         await FirebaseFirestore.instance
                             .collection('users')
                             .doc(_UID)
@@ -122,6 +130,9 @@ class _VerificationCodeState extends State<VerificationCode> {
                         _checkUserRoleAndNavigate();
                       } on FirebaseAuthException catch (e) {
                         print(e.message);
+                        setState(() {
+                          incorrectCode = false;
+                        });
                       }
                     } else if(widget.verificationType == 'Resolve'){
                       try {
@@ -130,14 +141,21 @@ class _VerificationCodeState extends State<VerificationCode> {
                             credential,
                           ),
                         );
+                        setState(() {
+                          incorrectCode = true;
+                        });
                         _checkUserRoleAndNavigate();
                       } on FirebaseAuthException catch (e) {
                         print(e.message);
+                        setState(() {
+                          incorrectCode = false;
+                        });
                       }
                     }
                   },
                 ),
-              )
+              ),
+              incorrectCode ? const SizedBox.shrink() : const Text('Pin is incorrect')
             ],
           ),
         ),
