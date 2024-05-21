@@ -7,7 +7,8 @@ import 'package:overlapd/utilities/customNumberField.dart';
 import '../utilities/widgets.dart';
 
 class EnterPhoneNumber extends StatefulWidget {
-  const EnterPhoneNumber({super.key});
+  final String type;
+  const EnterPhoneNumber({super.key, required this.type});
 
   @override
   State<EnterPhoneNumber> createState() => _EnterPhoneNumberState();
@@ -59,7 +60,7 @@ class _EnterPhoneNumberState extends State<EnterPhoneNumber> {
               padding: const EdgeInsets.all(8.0),
               child: PhoneNumberField(context),
             ),
-        Padding(
+        widget.type == 'Sign up' ? Padding(
           padding: const EdgeInsets.all(8.0),
           child: RichText(
             text: TextSpan(
@@ -109,6 +110,18 @@ class _EnterPhoneNumberState extends State<EnterPhoneNumber> {
               ],
             ),
           ),
+        ) : Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: GestureDetector(
+            child: Text(
+              'Don\'t have access to your phone number?',
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                  fontSize: 15
+              ),
+            ),
+          ),
         ),
             Padding(
               padding: const EdgeInsets.only(top: 40.0, right: 8.0, left: 8.0),
@@ -116,7 +129,7 @@ class _EnterPhoneNumberState extends State<EnterPhoneNumber> {
                   context,
                   'Get OTP',
                       () {
-                        Navigator.of(context).push(pageAnimationrl(const EnterOTP()));
+                        Navigator.of(context).push(pageAnimationrl(const EnterOTP(mobileNumber: '_345')));
                       },
                   double.infinity,
                   Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.normal),

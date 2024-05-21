@@ -102,7 +102,7 @@ class _OnboardingState extends State<Onboarding> {
                         'Log in',
                         () {
                           Navigator.of(context).pushReplacement(pageAnimationrl(
-                              const EnterPhoneNumber()
+                              const EnterPhoneNumber(type: 'Log in',)
                           ));
                         },
                         MediaQuery.of(context).size.width * 0.45,
@@ -114,7 +114,7 @@ class _OnboardingState extends State<Onboarding> {
                       'Sign up',
                        () {
                          Navigator.of(context).pushReplacement(pageAnimationrl(
-                             const EnterPhoneNumber()
+                             const EnterPhoneNumber(type: 'Sign up')
                          ));
                        },
                       MediaQuery.of(context).size.width * 0.45,

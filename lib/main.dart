@@ -91,7 +91,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: _getHomeWidget(), //const Splash()
+      home: const Splash(), //_getHomeWidget()
         routes: {
           '/login_page': (context) => const Login(),
           '/signup_page': (context) => const SignUp(),

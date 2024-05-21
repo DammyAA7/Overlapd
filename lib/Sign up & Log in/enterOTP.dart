@@ -6,7 +6,8 @@ import 'package:pinput/pinput.dart';
 import '../utilities/customButton.dart';
 
 class EnterOTP extends StatefulWidget {
-  const EnterOTP({super.key});
+  final String mobileNumber;
+  const EnterOTP({super.key, required this.mobileNumber});
 
   @override
   State<EnterOTP> createState() => _EnterOTPState();
