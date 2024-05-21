@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:hive/hive.dart';
+import 'package:overlapd/Splash%20&%20Onboarding/splash.dart';
 import 'package:overlapd/pickers/picker.dart';
 import 'package:overlapd/stores/groceryRange.dart';
 import 'package:overlapd/user_auth/forgottenPassword.dart';
@@ -90,7 +91,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: _getHomeWidget(),
+      home: _getHomeWidget(), //const Splash()
         routes: {
           '/login_page': (context) => const Login(),
           '/signup_page': (context) => const SignUp(),
