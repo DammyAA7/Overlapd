@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:overlapd/screens/home.dart';
-import 'package:overlapd/stores/shoppingCart.dart';
-import 'package:overlapd/stores/subRange.dart';
+import 'package:overlapd/services/storeService/shoppingCart.dart';
+import 'package:overlapd/services/storeService/subRange.dart';
 
-import '../utilities/widgets.dart';
+import '../../utilities/widgets.dart';
 
 class Range extends StatefulWidget {
   final Map<String, Map<String,Map <String, Future<List<List>>>>> groceryRange;

@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:overlapd/pickers/orders.dart';
 
-import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
+import '../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/toast.dart';
 import '../utilities/widgets.dart';
 

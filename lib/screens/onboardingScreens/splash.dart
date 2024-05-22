@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:overlapd/Splash%20&%20Onboarding/onboarding.dart';
+import 'package:overlapd/screens/onboardingScreens/onboarding.dart';
 
 class Splash extends StatefulWidget {
   const Splash({super.key});

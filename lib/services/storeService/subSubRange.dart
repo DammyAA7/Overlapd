@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:overlapd/stores/productListPage.dart';
-import 'package:overlapd/stores/shoppingCart.dart';
-import 'package:overlapd/stores/range.dart';
+import 'package:overlapd/services/storeService/productListPage.dart';
+import 'package:overlapd/services/storeService/shoppingCart.dart';
+import 'package:overlapd/services/storeService/range.dart';
 
-import '../utilities/widgets.dart';
+import '../../utilities/widgets.dart';
 import 'groceryRange.dart';
 
 class SubSubRange extends StatefulWidget {

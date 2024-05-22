@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:overlapd/screens/chat/message.dart';
 
-import '../../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
+import '../../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 
 class ChatService extends ChangeNotifier{
   final FirebaseAuthService _auth = FirebaseAuthService();

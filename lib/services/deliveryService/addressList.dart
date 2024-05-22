@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:overlapd/deliveries/addDeliveryAddress.dart';
-import 'package:overlapd/deliveries/editAddress.dart';
+import 'package:overlapd/services/deliveryService/addDeliveryAddress.dart';
+import 'package:overlapd/services/deliveryService/editAddress.dart';
 import 'package:overlapd/utilities/toast.dart';
 
-import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
-import '../utilities/widgets.dart';
+import '../userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
+import '../../utilities/widgets.dart';
 
 class AddressList extends StatefulWidget {
   const AddressList({super.key});

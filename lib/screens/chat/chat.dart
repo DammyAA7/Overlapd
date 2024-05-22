@@ -4,7 +4,7 @@ import 'package:overlapd/screens/acceptedDeliveryDetails.dart';
 import 'package:overlapd/screens/chat/chat_service.dart';
 import 'package:overlapd/pickers/requestedDeliveryStatus.dart';
 
-import '../../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
+import '../../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 import '../../utilities/widgets.dart';
 
 class Chat extends StatefulWidget {

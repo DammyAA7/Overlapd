@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:overlapd/user_auth/phoneVerificationCode.dart';
+import 'package:overlapd/services/userAuthService/phoneVerificationCode.dart';
 import 'package:overlapd/utilities/toast.dart';
 
-import '../utilities/widgets.dart';
+import '../../utilities/widgets.dart';
 import 'firebase_auth_implementation/firebase_auth_services.dart';
 import 'login.dart';
 

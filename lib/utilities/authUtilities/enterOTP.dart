@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
 
-import '../utilities/customButton.dart';
+import '../customButton.dart';
 
 class EnterOTP extends StatefulWidget {
   final String mobileNumber;

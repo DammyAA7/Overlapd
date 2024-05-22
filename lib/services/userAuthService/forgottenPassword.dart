@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:overlapd/user_auth/login.dart';
+import 'package:overlapd/services/userAuthService/login.dart';
 import 'package:overlapd/utilities/toast.dart';
 
-import '../utilities/widgets.dart';
+import '../../utilities/widgets.dart';
 
 class ForgotPassword extends StatefulWidget {
   static const id = 'forgotten_password_page';

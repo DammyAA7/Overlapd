@@ -361,4 +361,3 @@ exports.StripeAccountBalance = functions.https.onRequest(async (req, res) => {
     }
 });
 
-

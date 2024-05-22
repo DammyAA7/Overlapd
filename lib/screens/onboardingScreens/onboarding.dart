@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:overlapd/Sign%20up%20&%20Log%20in/enterPhoneNumber.dart';
+import 'package:overlapd/utilities/authUtilities/enterPhoneNumber.dart';
 import 'package:overlapd/utilities/customButton.dart';
 import 'package:overlapd/utilities/widgets.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
