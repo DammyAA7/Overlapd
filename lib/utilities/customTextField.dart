@@ -8,6 +8,7 @@ Widget CustomTextBox(
     TextStyle titleStyle,
     TextEditingController controller,
     TextInputType keyboardType,
+    Color borderColor,
     [TextInputFormatter? inputFormatter]
     ) {
   return Column(
@@ -22,8 +23,8 @@ Widget CustomTextBox(
       ),
       Container(
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey, width: 2), // Border color
-          borderRadius: BorderRadius.circular(8.0), // Border radius
+          border: Border.all(color: borderColor, width: 2), // Border color
+          borderRadius: BorderRadius.circular(10.0), // Border radius
         ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),

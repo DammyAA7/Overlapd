@@ -123,6 +123,7 @@ class FirebaseAuthService{
         uid).get();
   }
 
+
   Future<void> signInWithPhoneNumber(String phoneNumber, BuildContext context) async {
     await _auth.verifyPhoneNumber(
       phoneNumber: '+353${phoneNumber.replaceAll(' ', '')}',

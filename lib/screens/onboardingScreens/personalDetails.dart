@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:overlapd/utilities/customTextField.dart';
 
 import '../../logic/personalDetails.dart';
+import '../../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 import '../../utilities/customButton.dart';
 
 class PersonalDetails extends StatefulWidget {
@@ -16,18 +17,30 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   TextEditingController firstName = TextEditingController();
   TextEditingController lastName = TextEditingController();
   TextEditingController emailAddress = TextEditingController();
-  bool incorrectFormat = true;
+  bool incorrectFormat = true, isLNEmpty = true, isFNEmpty = true, isEAEmpty = true;
+  final FirebaseAuthService _auth = FirebaseAuthService();
+
   @override
   void initState() {
 
     super.initState();
     emailAddress.addListener(_onEmailChanged);
+    firstName.addListener(_onChanged);
+    lastName.addListener(_onChanged);
   }
 
   void _onEmailChanged() {
     // Check if the email is valid
     setState(() {
       incorrectFormat = isValidEmail(emailAddress.text);
+      isEAEmpty = emailAddress.text.isEmpty;
+    });
+  }
+  void _onChanged() {
+    // Check if the email is valid
+    setState(() {
+      isLNEmpty = lastName.text.isEmpty;
+      isFNEmpty = firstName.text.isEmpty;
     });
   }
 
@@ -60,11 +73,12 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                       'First Name',
                       'John',
                       Theme.of(context).textTheme.labelLarge!.copyWith(
-                        color: Colors.grey,
+                        color: textColor(isFNEmpty),
                         fontWeight: FontWeight.normal,
                       ),
                       firstName,
                       TextInputType.text,
+                      borderColor(isFNEmpty),
                       FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z'-]")),
                   ),
                 ),
@@ -75,11 +89,12 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                       'Last Name',
                       'Guiness',
                       Theme.of(context).textTheme.labelLarge!.copyWith(
-                        color: Colors.grey,
+                        color: textColor(isLNEmpty),
                         fontWeight: FontWeight.normal,
                       ),
                       lastName,
                       TextInputType.text,
+                      borderColor(isLNEmpty),
                       FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z'-]")),
                   ),
                 ),
@@ -90,11 +105,12 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                       'Email address',
                       'john.guiness@email.com',
                       Theme.of(context).textTheme.labelLarge!.copyWith(
-                        color: Colors.grey,
+                        color: textColor(isEAEmpty),
                         fontWeight: FontWeight.normal,
                       ),
                       emailAddress,
                       TextInputType.emailAddress,
+                      borderColor(isEAEmpty)
                   ),
                 ),
                 AnimatedSwitcher(
@@ -119,12 +135,12 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                       context,
                       'Continue',
                           () async{
-                        if(true){
+                        if(!isFNEmpty && !isLNEmpty && !isEAEmpty && incorrectFormat){
                         }
                       },
                       double.infinity,
-                      Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.normal),
-                      Colors.black),
+                      Theme.of(context).textTheme.labelLarge!.copyWith(color: textButtonColor(!isFNEmpty && !isLNEmpty && !isEAEmpty && incorrectFormat), fontWeight: FontWeight.normal),
+                      buttonColor(!isFNEmpty && !isLNEmpty && !isEAEmpty && incorrectFormat)),
                 ),
             
               ],
