@@ -2,12 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:overlapd/stores/groceryRange.dart';
-import 'package:overlapd/stores/shoppingCart.dart';
+import 'package:overlapd/services/storeService/groceryRange.dart';
+import 'package:overlapd/services/storeService/shoppingCart.dart';
 import 'package:overlapd/utilities/toast.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../utilities/widgets.dart';
+import '../../utilities/widgets.dart';
 
 
 

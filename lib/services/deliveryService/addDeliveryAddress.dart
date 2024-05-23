@@ -6,10 +6,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:overlapd/utilities/toast.dart';
-import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
-import '../utilities/networkUtilities.dart';
-import '../utilities/deliveryDetailsUtilities.dart';
-import '../utilities/widgets.dart';
+import '../userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
+import '../../utilities/networkUtilities.dart';
+import '../../utilities/deliveryDetailsUtilities.dart';
+import '../../utilities/widgets.dart';
 
 class AddDeliveryAddress extends StatefulWidget {
   const AddDeliveryAddress({super.key});

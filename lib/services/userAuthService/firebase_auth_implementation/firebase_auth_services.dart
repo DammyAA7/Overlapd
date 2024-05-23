@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:overlapd/utilities/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../utilities/widgets.dart';
+import '../../../utilities/widgets.dart';
 import '../phoneVerificationCode.dart';
 
 class FirebaseAuthService{

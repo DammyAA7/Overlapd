@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:overlapd/pickers/picker.dart';
 import 'package:overlapd/utilities/toast.dart';
 
-import '../deliveries/delivery_service.dart';
+import '../services/deliveryService/delivery_service.dart';
 import 'requestedDeliveryStatus.dart';
-import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
+import '../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/widgets.dart';
 
 class Orders extends StatefulWidget {

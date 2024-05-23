@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:overlapd/stores/checkout.dart';
+import 'package:overlapd/services/storeService/checkout.dart';
 import 'package:provider/provider.dart';
-import '../utilities/widgets.dart';
+import '../../utilities/widgets.dart';
 import 'groceryRange.dart';
 
 class ShoppingCart extends StatefulWidget {

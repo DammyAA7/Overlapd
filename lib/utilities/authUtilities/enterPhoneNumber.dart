@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:overlapd/Sign%20up%20&%20Log%20in/enterOTP.dart';
-import 'package:overlapd/Splash%20&%20Onboarding/onboarding.dart';
+import 'package:overlapd/utilities/authUtilities/enterOTP.dart';
+import 'package:overlapd/screens/onboardingScreens/onboarding.dart';
 import 'package:overlapd/utilities/customButton.dart';
 import 'package:overlapd/utilities/customNumberField.dart';
 
-import '../utilities/widgets.dart';
+import '../widgets.dart';
 
 class EnterPhoneNumber extends StatefulWidget {
   final String type;

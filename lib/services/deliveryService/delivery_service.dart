@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../stores/groceryRange.dart';
-import '../user_auth/firebase_auth_implementation/firebase_auth_services.dart';
+import '../storeService/groceryRange.dart';
+import '../userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 
 class DeliveryService extends ChangeNotifier {
   final FirebaseAuthService _auth = FirebaseAuthService();
