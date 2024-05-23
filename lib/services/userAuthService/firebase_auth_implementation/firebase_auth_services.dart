@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:overlapd/utilities/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../utilities/authUtilities/enterOTP.dart';
 import '../../../utilities/widgets.dart';
 import '../phoneVerificationCode.dart';
 
@@ -118,6 +119,23 @@ class FirebaseAuthService{
   Future<DocumentSnapshot<Map<String, dynamic>>> getAccountInfoGet(String uid) {
     return FirebaseFirestore.instance.collection('users').doc(
         uid).get();
+  }
+
+  Future<void> signInWithPhoneNumber(String phoneNumber, BuildContext context) async {
+    await _auth.verifyPhoneNumber(
+      phoneNumber: '+353${phoneNumber.replaceAll(' ', '')}',
+      verificationCompleted: (_){},
+      verificationFailed: (FirebaseAuthException e) {
+        //showToast(text: 'Verification failed. Please try again.');
+      },
+      codeSent: (String verificationId, int? resendToken) {
+        Navigator.of(context).push(pageAnimationrl(EnterOTP(
+            mobileNumber: phoneNumber,
+            verificationId: verificationId,
+        )));
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {},
+    );
   }
 
 

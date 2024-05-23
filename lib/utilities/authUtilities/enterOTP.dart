@@ -1,19 +1,21 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:overlapd/logic/enterOTP.dart';
 import 'package:pinput/pinput.dart';
 
 import '../customButton.dart';
 
 class EnterOTP extends StatefulWidget {
   final String mobileNumber;
-  const EnterOTP({super.key, required this.mobileNumber});
+  final String verificationId;
+  const EnterOTP({super.key, required this.mobileNumber, required this.verificationId});
 
   @override
   State<EnterOTP> createState() => _EnterOTPState();
 }
 
 class _EnterOTPState extends State<EnterOTP> {
+  late String verifyMobileNumber;
   final defaultPinTheme = PinTheme(
     width: 56,
     height: 56,
@@ -25,6 +27,7 @@ class _EnterOTPState extends State<EnterOTP> {
     ),
   );
   bool incorrectCode = true;
+  bool buttonEnabled = false;
   var code;
 
   int _start = 60;
@@ -35,6 +38,7 @@ class _EnterOTPState extends State<EnterOTP> {
   void initState() {
     super.initState();
     startTimer();
+    verifyMobileNumber = '+353${widget.mobileNumber.replaceAll(' ', '')}';
   }
 
   void startTimer() {
@@ -102,7 +106,7 @@ class _EnterOTPState extends State<EnterOTP> {
               Padding(
                 padding: const EdgeInsets.only(top: 12.0, left: 8.0, right: 8.0),
                 child: Text(
-                  '+353 123 456 7890',
+                  '+353 ${widget.mobileNumber}',
                   style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.grey, fontWeight: FontWeight.w300),
                 ),
               ),
@@ -135,15 +139,14 @@ class _EnterOTPState extends State<EnterOTP> {
                     if(s.length < 6){
                       setState(() {
                         incorrectCode = true;
+                        buttonEnabled = false;
                       });
                     }
                   },
-                  onCompleted: (pin) async {
+                  onCompleted: (pin) {
                     setState(() {
+                      buttonEnabled = true;
                       code = pin;
-                      if(pin != '123456'){
-                        incorrectCode = false;
-                      }
                     });
 
                   },
@@ -161,11 +164,17 @@ class _EnterOTPState extends State<EnterOTP> {
                 child: Button(
                     context,
                     'Continue',
-                        () {
+                        () async{
+                          if(buttonEnabled){
+                            bool value = await verifyOTP(context, widget.verificationId, code);
+                            setState(() {
+                              incorrectCode = value;
+                            });
+                          }
                     },
                     double.infinity,
-                    Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.normal),
-                    Colors.black),
+                    Theme.of(context).textTheme.labelLarge!.copyWith(color: textButtonColor(buttonEnabled), fontWeight: FontWeight.normal),
+                    buttonColor(buttonEnabled)),
               ),
               if (_showResendButton)
                 Padding(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-Widget PhoneNumberField(BuildContext context){
+Widget PhoneNumberField(BuildContext context, TextEditingController controller){
   return Container(
     decoration: BoxDecoration(
       border: Border.all(color: Colors.grey),
@@ -26,6 +26,7 @@ Widget PhoneNumberField(BuildContext context){
             ),
             Expanded(
               child: TextField(
+                controller: controller,
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   hintText: '9 digit phone number',

@@ -4,6 +4,8 @@ import 'package:overlapd/screens/onboardingScreens/onboarding.dart';
 import 'package:overlapd/utilities/customButton.dart';
 import 'package:overlapd/utilities/customNumberField.dart';
 
+import '../../logic/enterPhoneNumber.dart';
+import '../../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 import '../widgets.dart';
 
 class EnterPhoneNumber extends StatefulWidget {
@@ -15,6 +17,20 @@ class EnterPhoneNumber extends StatefulWidget {
 }
 
 class _EnterPhoneNumberState extends State<EnterPhoneNumber> {
+  TextEditingController mobileNumber = TextEditingController();
+  final FirebaseAuthService _auth = FirebaseAuthService();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    mobileNumber.addListener(_onPhoneChanged);
+  }
+
+  void _onPhoneChanged() {
+    // Check if the mobile number is valid
+    setState(() {});
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,7 +74,7 @@ class _EnterPhoneNumberState extends State<EnterPhoneNumber> {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: PhoneNumberField(context),
+              child: PhoneNumberField(context, mobileNumber),
             ),
         widget.type == 'Sign up' ? Padding(
           padding: const EdgeInsets.all(8.0),
@@ -129,11 +145,13 @@ class _EnterPhoneNumberState extends State<EnterPhoneNumber> {
                   context,
                   'Get OTP',
                       () {
-                        Navigator.of(context).push(pageAnimationrl(const EnterOTP(mobileNumber: '_345')));
+                    if(isPhoneNumberValid(mobileNumber.text)){
+                      _auth.signInWithPhoneNumber(mobileNumber.text, context);
+                    }
                       },
                   double.infinity,
-                  Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.normal),
-                  Colors.black),
+                  Theme.of(context).textTheme.labelLarge!.copyWith(color: textButtonColor(isPhoneNumberValid(mobileNumber.text)), fontWeight: FontWeight.normal),
+                  buttonColor(isPhoneNumberValid(mobileNumber.text))),
             )
           ],
         ),
