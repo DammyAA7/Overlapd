@@ -22,7 +22,6 @@ class _EnterPhoneNumberState extends State<EnterPhoneNumber> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     mobileNumber.addListener(_onPhoneChanged);
   }

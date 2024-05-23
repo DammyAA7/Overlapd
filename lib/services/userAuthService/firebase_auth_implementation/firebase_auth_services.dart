@@ -11,6 +11,8 @@ import '../phoneVerificationCode.dart';
 class FirebaseAuthService{
   final FirebaseAuth _auth = FirebaseAuth.instance;
   User? get currentUser => _auth.currentUser;
+  String? _verificationId;
+  int? _resendToken;
 
   Future<User?> signUpWithEmailAndPassword(String email, String password) async {
     try{
@@ -129,9 +131,12 @@ class FirebaseAuthService{
         //showToast(text: 'Verification failed. Please try again.');
       },
       codeSent: (String verificationId, int? resendToken) {
+        _verificationId = verificationId;
+        _resendToken = resendToken;
         Navigator.of(context).push(pageAnimationrl(EnterOTP(
             mobileNumber: phoneNumber,
             verificationId: verificationId,
+            authService: this,
         )));
       },
       codeAutoRetrievalTimeout: (String verificationId) {},
@@ -139,4 +144,21 @@ class FirebaseAuthService{
   }
 
 
+  Future<void> resendOTP(String phoneNumber, BuildContext context) async {
+    await _auth.verifyPhoneNumber(
+      phoneNumber: '+353${phoneNumber.replaceAll(' ', '')}',
+      verificationCompleted: (_) {},
+      verificationFailed: (FirebaseAuthException e) {
+        showToast(text: 'Verification failed. Please try again.');
+      },
+      codeSent: (String verificationId, int? resendToken) {
+        _verificationId = verificationId;
+        _resendToken = resendToken;
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {
+        _verificationId = verificationId;
+      },
+      forceResendingToken: _resendToken,
+    );
+  }
 }
