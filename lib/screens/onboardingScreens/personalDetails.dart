@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:overlapd/screens/testScreen.dart';
 import 'package:overlapd/utilities/customTextField.dart';
+import 'package:overlapd/utilities/widgets.dart';
 
 import '../../logic/personalDetails.dart';
 import '../../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
@@ -136,6 +138,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                       'Continue',
                           () async{
                         if(!isFNEmpty && !isLNEmpty && !isEAEmpty && incorrectFormat){
+                          Navigator.of(context).pushReplacement(pageAnimationlr(const TestScreen()));
                         }
                       },
                       double.infinity,
