@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:overlapd/screens/onboardingScreens/accountRecovery.dart';
 import 'package:overlapd/screens/onboardingScreens/onboarding.dart';
 import 'package:overlapd/utilities/customButton.dart';
 import 'package:overlapd/utilities/customNumberField.dart';
@@ -72,7 +73,7 @@ class _EnterPhoneNumberState extends State<EnterPhoneNumber> {
             ),
             Padding(
               padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 16.0, bottom: 8.0),
-              child: PhoneNumberField(context, mobileNumber),
+              child: PhoneNumberField(context, mobileNumber, Colors.black),
             ),
         widget.type == 'Sign up' ? Padding(
           padding: const EdgeInsets.all(8.0),
@@ -127,6 +128,9 @@ class _EnterPhoneNumberState extends State<EnterPhoneNumber> {
         ) : Padding(
           padding: const EdgeInsets.all(8.0),
           child: GestureDetector(
+            onTap: (){
+              Navigator.of(context).push(pageAnimationrl(const AccountRecovery()));
+            },
             child: Text(
               'Don\'t have access to your phone number?',
               style: Theme.of(context).textTheme.bodyMedium!.copyWith(

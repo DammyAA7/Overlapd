@@ -182,4 +182,24 @@ class FirebaseAuthService{
       forceResendingToken: _resendToken,
     );
   }
+
+  Future<bool> accountExists(String email, String phoneNumber) async {
+    try {
+      // Check if the email exists in Firebase Auth
+      List<String> signInMethods = await _auth.fetchSignInMethodsForEmail(email);
+      if (signInMethods.isNotEmpty) {
+        // Email exists, now verify the phone number
+        DocumentSnapshot<Map<String, dynamic>> userDoc = await FirebaseFirestore.instance.collection('users').doc(email).get();
+        if (userDoc.exists) {
+          String? registeredPhoneNumber = userDoc.data()?['phoneNumber'];
+          return registeredPhoneNumber == phoneNumber;
+        }
+      }
+    } catch (e) {
+      print('Error checking account existence: $e');
+    }
+    return false;
+  }
+
+
 }
