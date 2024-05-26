@@ -30,6 +30,18 @@ class _EnterPhoneNumberState extends State<EnterPhoneNumber> {
     // Check if the mobile number is valid
     setState(() {});
   }
+
+  Widget getConditionalWidget() {
+    switch (widget.type) {
+      case 'Sign up':
+        return termsAndConditions(context);
+      case 'Log in':
+        return cantAccessAccount(context);
+      default:
+        return shrinkedBox();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -75,72 +87,7 @@ class _EnterPhoneNumberState extends State<EnterPhoneNumber> {
               padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 16.0, bottom: 8.0),
               child: PhoneNumberField(context, mobileNumber, Colors.black),
             ),
-        widget.type == 'Sign up' ? Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: RichText(
-            text: TextSpan(
-              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey,
-                  fontSize: 15
-              ),
-              children: [
-                const TextSpan(
-                  text: 'By proceeding, I accept the',
-                ),
-                WidgetSpan(
-                  child: GestureDetector(
-                    onTap: () {},
-                    child: Text(
-                      ' terms of service',
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                          fontSize: 15
-                      ),
-                    ),
-                  ),
-                ),
-                TextSpan(
-                  text: ' and ',
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey,
-                      fontSize: 15
-                  ),
-                ),
-                WidgetSpan(
-                  child: GestureDetector(
-                    onTap: () {},
-                    child: Text(
-                      'privacy policy',
-                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                          fontSize: 15
-                        ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ) : Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: GestureDetector(
-            onTap: (){
-              Navigator.of(context).push(pageAnimationrl(const AccountRecovery()));
-            },
-            child: Text(
-              'Don\'t have access to your phone number?',
-              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                  fontSize: 15
-              ),
-            ),
-          ),
-        ),
+            getConditionalWidget(),
             Padding(
               padding: const EdgeInsets.only(top: 40.0, right: 8.0, left: 8.0),
               child: Button(
@@ -148,7 +95,7 @@ class _EnterPhoneNumberState extends State<EnterPhoneNumber> {
                   'Get OTP',
                       () {
                     if(isPhoneNumberValid(mobileNumber.text)){
-                      _auth.signInWithPhoneNumber(mobileNumber.text, context);
+                      _auth.signInWithPhoneNumber(mobileNumber.text, context, widget.type);
                     }
                       },
                   double.infinity,
@@ -160,4 +107,5 @@ class _EnterPhoneNumberState extends State<EnterPhoneNumber> {
       )
     );
   }
+
 }

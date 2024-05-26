@@ -10,7 +10,8 @@ class EnterOTP extends StatefulWidget {
   final String mobileNumber;
   final String verificationId;
   final FirebaseAuthService authService;
-  const EnterOTP({super.key, required this.mobileNumber, required this.verificationId, required this.authService});
+  final String type;
+  const EnterOTP({super.key, required this.mobileNumber, required this.verificationId, required this.authService, required this.type});
 
   @override
   State<EnterOTP> createState() => _EnterOTPState();
@@ -167,7 +168,7 @@ class _EnterOTPState extends State<EnterOTP> {
                     'Continue',
                         () async{
                           if(buttonEnabled){
-                            bool value = await verifyOTP(context, widget.verificationId, code);
+                            bool value = await verifyOTP(context, widget.verificationId, code, widget.type);
                             setState(() {
                               incorrectCode = value;
                             });

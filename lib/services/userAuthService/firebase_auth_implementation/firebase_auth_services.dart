@@ -144,7 +144,7 @@ class FirebaseAuthService{
   }
 
 
-  Future<void> signInWithPhoneNumber(String phoneNumber, BuildContext context) async {
+  Future<void> signInWithPhoneNumber(String phoneNumber, BuildContext context, String type) async {
     await _auth.verifyPhoneNumber(
       phoneNumber: '+353${phoneNumber.replaceAll(' ', '')}',
       verificationCompleted: (_){},
@@ -158,6 +158,7 @@ class FirebaseAuthService{
             mobileNumber: phoneNumber,
             verificationId: verificationId,
             authService: this,
+            type: type,
         )));
       },
       codeAutoRetrievalTimeout: (String verificationId) {},

@@ -33,7 +33,7 @@ class _ConfirmMobileNumberState extends State<ConfirmMobileNumber> {
         await _auth.unlinkPhoneNumber();
         print('Phone number unlinked successfully');
       }
-      Navigator.pushReplacement(context, pageAnimationlr(const EnterPhoneNumber(type: 'Sign up')));
+      Navigator.pushReplacement(context, pageAnimationlr(const EnterPhoneNumber(type: 'Account Recovery')));
       // Navigate to another screen or show success message
     } else {
       setState(() {
