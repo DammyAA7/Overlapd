@@ -103,6 +103,26 @@ class FirebaseAuthService{
     return (user?.uid)!;
   }
 
+  Future<String?> getUserMobileNumber() async {
+    User? user = _auth.currentUser;
+
+    if (user != null) {
+      String? phoneNumber = user.phoneNumber;
+
+      if (phoneNumber == null) {
+        // Fetch from Firestore
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection(
+            'users').doc(user.uid).get();
+        if (userDoc.exists) {
+          phoneNumber = userDoc.get('Phone Number');
+        }
+      }
+
+      return phoneNumber;
+    }
+    return null;
+  }
+
   String getUsername() {
     User? user = _auth.currentUser;
     return (user?.email)!;
@@ -144,6 +164,13 @@ class FirebaseAuthService{
     );
   }
 
+  Future<void> unlinkPhoneNumber() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      await user.unlink(PhoneAuthProvider.PROVIDER_ID);
+    }
+  }
+
   Future<void> sendSignInLinkToEmail(String email) async {
     ActionCodeSettings actionCodeSettings = ActionCodeSettings(
       url: 'https://overlapd.page.link/7Yoh?email=$email', // This URL must be whitelisted in the Firebase Console
@@ -183,23 +210,27 @@ class FirebaseAuthService{
     );
   }
 
-  Future<bool> accountExists(String email, String phoneNumber) async {
+  Future<bool> checkIfUserExists(String email) async {
     try {
-      // Check if the email exists in Firebase Auth
-      List<String> signInMethods = await _auth.fetchSignInMethodsForEmail(email);
-      if (signInMethods.isNotEmpty) {
-        // Email exists, now verify the phone number
-        DocumentSnapshot<Map<String, dynamic>> userDoc = await FirebaseFirestore.instance.collection('users').doc(email).get();
-        if (userDoc.exists) {
-          String? registeredPhoneNumber = userDoc.data()?['phoneNumber'];
-          return registeredPhoneNumber == phoneNumber;
-        }
+      await _auth.createUserWithEmailAndPassword(email: email, password: 'dummyPassword123!');
+      // If no exception, the email is not registered
+      // Note: The user should be deleted immediately to avoid leaving a real user in the database
+      User? user = _auth.currentUser;
+      if (user != null) {
+        await user.delete();
+      }
+      return false;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        // The email already exists
+        return true;
+      } else {
+        showToast(text: 'An error occurred: ${e.code}');
       }
     } catch (e) {
-      print('Error checking account existence: $e');
+      showToast(text: 'An unexpected error occurred: $e');
     }
     return false;
   }
-
 
 }

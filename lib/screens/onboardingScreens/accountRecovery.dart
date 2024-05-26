@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:overlapd/screens/onboardingScreens/verificationSent.dart';
 
 import '../../logic/personalDetails.dart';
+import '../../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 import '../../utilities/customButton.dart';
-import '../../utilities/customNumberField.dart';
 import '../../utilities/customTextField.dart';
+import '../../utilities/widgets.dart';
 
 class AccountRecovery extends StatefulWidget {
   const AccountRecovery({super.key});
@@ -14,26 +16,14 @@ class AccountRecovery extends StatefulWidget {
 
 class _AccountRecoveryState extends State<AccountRecovery> {
   TextEditingController emailAddress = TextEditingController();
-  bool correctFormat = false, isEAEmpty = true, isMNEmpty = true;
-  TextEditingController mobileNumber = TextEditingController();
+  bool correctFormat = false, isEAEmpty = true, userExists = true;
+  final FirebaseAuthService _auth = FirebaseAuthService();
 
   @override
   void initState() {
 
     super.initState();
     emailAddress.addListener(_onEmailChanged);
-    mobileNumber.addListener(_onPhoneChanged);
-  }
-
-  void _onPhoneChanged() {
-    // Check if the mobile number is valid
-    setState(() {
-      if(mobileNumber.text.length == 11){
-        isMNEmpty = false;
-      } else{
-        isMNEmpty = true;
-      }
-    });
   }
 
   void _onEmailChanged() {
@@ -41,6 +31,7 @@ class _AccountRecoveryState extends State<AccountRecovery> {
     setState(() {
       correctFormat = isValidEmail(emailAddress.text);
       isEAEmpty = emailAddress.text.isEmpty;
+      userExists = true;
     });
   }
   @override
@@ -105,19 +96,21 @@ class _AccountRecoveryState extends State<AccountRecovery> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 12.0, left: 8.0, right: 8.0),
-              child: Text(
-                'Enter mobile number associated with account',
-                style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                  color: textColor(isMNEmpty),
-                  fontWeight: FontWeight.normal,
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              child: userExists
+                  ? const SizedBox.shrink()
+                  : Padding(
+                key: ValueKey<bool>(!isEAEmpty || correctFormat),
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Email address does not exist in database',
+                  style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.red),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 16.0, bottom: 8.0),
-              child: PhoneNumberField(context, mobileNumber, borderColor(isMNEmpty)),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 30.0, right: 8.0, left: 8.0, bottom: 8.0),
@@ -125,13 +118,24 @@ class _AccountRecoveryState extends State<AccountRecovery> {
                   context,
                   'Continue',
                       () async{
-                    if(!isMNEmpty && !isEAEmpty && correctFormat){
-        
+                    if(!isEAEmpty && correctFormat){
+                      bool exists = await _auth.checkIfUserExists(emailAddress.text);
+                      if(!exists){
+                        setState(() {
+                          userExists = false;
+                        });
+                      } else{
+                        await _auth.sendSignInLinkToEmail(emailAddress.text);
+                        Navigator.push(
+                          context,
+                          pageAnimationrl(VerificationSent(emailAddress: emailAddress.text)),
+                        );
+                      }
                     }
                   },
                   double.infinity,
                   Theme.of(context).textTheme.labelLarge!.copyWith(color: textButtonColor(!isEAEmpty && correctFormat), fontWeight: FontWeight.normal),
-                  buttonColor(!isMNEmpty && !isEAEmpty && correctFormat)),
+                  buttonColor(!isEAEmpty && correctFormat)),
             ),
           ],
         ),
