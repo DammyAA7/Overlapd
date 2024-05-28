@@ -30,6 +30,8 @@ Future main() async{
   bool isLoggedInAsUser = await _auth.isLoggedInAsUser();
   bool isLoggedInAsEmployee = await _auth.isLoggedInAsEmployee();
   await Hive.initFlutter();
+  await Hive.openBox('userInformation');
+  await Hive.openBox('userAddress');
   Stripe.publishableKey = "pk_test_51OWmrwIaruu0MDtu9f0fOLYUdaDsxU6FHsV2TtXLw6CstWMCKPwZhhldZEWSmsStYYTYpfeRfzGVAZ9tfLKODOYt00gDUZP4EI";
   Stripe.instance.applySettings();
   runApp(ChangeNotifierProvider(

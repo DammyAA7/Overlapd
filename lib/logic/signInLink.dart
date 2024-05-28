@@ -80,3 +80,4 @@ Future<bool> handleEmailLinkSignIn(Uri deepLink, String email) async {
   }
   return false; // Indicate failure
 }
+

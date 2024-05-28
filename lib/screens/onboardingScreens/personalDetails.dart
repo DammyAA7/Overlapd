@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive/hive.dart';
 import 'package:overlapd/screens/testScreen.dart';
 import 'package:overlapd/utilities/customTextField.dart';
 import 'package:overlapd/utilities/widgets.dart';
-
 import '../../logic/personalDetails.dart';
 import '../../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 import '../../utilities/customButton.dart';
@@ -45,6 +45,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       isFNEmpty = firstName.text.isEmpty;
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -138,6 +139,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                       'Continue',
                           () async{
                         if(!isFNEmpty && !isLNEmpty && !isEAEmpty && incorrectFormat){
+                          createUserCredentials(_auth.currentUser, firstName.text, lastName.text, emailAddress.text);
                           Navigator.of(context).pushReplacement(pageAnimationlr(const TestScreen()));
                         }
                       },
