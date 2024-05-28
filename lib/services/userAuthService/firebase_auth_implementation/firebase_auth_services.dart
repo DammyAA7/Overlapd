@@ -4,12 +4,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:overlapd/utilities/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../utilities/authUtilities/enterOTP.dart';
 import '../../../utilities/widgets.dart';
 import '../phoneVerificationCode.dart';
 
 class FirebaseAuthService{
   final FirebaseAuth _auth = FirebaseAuth.instance;
   User? get currentUser => _auth.currentUser;
+  String? _verificationId;
+  int? _resendToken;
 
   Future<User?> signUpWithEmailAndPassword(String email, String password) async {
     try{
@@ -100,6 +103,26 @@ class FirebaseAuthService{
     return (user?.uid)!;
   }
 
+  Future<String?> getUserMobileNumber() async {
+    User? user = _auth.currentUser;
+
+    if (user != null) {
+      String? phoneNumber = user.phoneNumber;
+
+      if (phoneNumber == null) {
+        // Fetch from Firestore
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection(
+            'users').doc(user.uid).get();
+        if (userDoc.exists) {
+          phoneNumber = userDoc.get('Phone Number');
+        }
+      }
+
+      return phoneNumber;
+    }
+    return null;
+  }
+
   String getUsername() {
     User? user = _auth.currentUser;
     return (user?.email)!;
@@ -120,5 +143,95 @@ class FirebaseAuthService{
         uid).get();
   }
 
+
+  Future<void> signInWithPhoneNumber(String phoneNumber, BuildContext context, String type) async {
+    await _auth.verifyPhoneNumber(
+      phoneNumber: '+353${phoneNumber.replaceAll(' ', '')}',
+      verificationCompleted: (_){},
+      verificationFailed: (FirebaseAuthException e) {
+        //showToast(text: 'Verification failed. Please try again.');
+      },
+      codeSent: (String verificationId, int? resendToken) {
+        _verificationId = verificationId;
+        _resendToken = resendToken;
+        Navigator.of(context).push(pageAnimationrl(EnterOTP(
+            mobileNumber: phoneNumber,
+            verificationId: verificationId,
+            authService: this,
+            type: type,
+        )));
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {},
+    );
+  }
+
+  Future<void> unlinkPhoneNumber() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      await user.unlink(PhoneAuthProvider.PROVIDER_ID);
+    }
+  }
+
+  Future<void> sendSignInLinkToEmail(String email) async {
+    ActionCodeSettings actionCodeSettings = ActionCodeSettings(
+      url: 'https://overlapd.page.link/7Yoh?email=$email', // This URL must be whitelisted in the Firebase Console
+      handleCodeInApp: true,
+      iOSBundleId: 'com.example.overlapd',
+      androidPackageName: 'com.example.overlapd',
+      androidInstallApp: true,
+      //androidMinimumVersion: '12',
+    );//com.example.overlapd
+
+    try {
+      await FirebaseAuth.instance.sendSignInLinkToEmail(
+        email: email,
+        actionCodeSettings: actionCodeSettings,
+      );
+      print('Sign-in email sent to $email');
+    } catch (e) {
+      print('Error sending sign-in email: $e');
+    }
+  }
+
+  Future<void> resendOTP(String phoneNumber, BuildContext context) async {
+    await _auth.verifyPhoneNumber(
+      phoneNumber: '+353${phoneNumber.replaceAll(' ', '')}',
+      verificationCompleted: (_) {},
+      verificationFailed: (FirebaseAuthException e) {
+        showToast(text: 'Verification failed. Please try again.');
+      },
+      codeSent: (String verificationId, int? resendToken) {
+        _verificationId = verificationId;
+        _resendToken = resendToken;
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {
+        _verificationId = verificationId;
+      },
+      forceResendingToken: _resendToken,
+    );
+  }
+
+  Future<bool> checkIfUserExists(String email) async {
+    try {
+      await _auth.createUserWithEmailAndPassword(email: email, password: 'dummyPassword123!');
+      // If no exception, the email is not registered
+      // Note: The user should be deleted immediately to avoid leaving a real user in the database
+      User? user = _auth.currentUser;
+      if (user != null) {
+        await user.delete();
+      }
+      return false;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        // The email already exists
+        return true;
+      } else {
+        showToast(text: 'An error occurred: ${e.code}');
+      }
+    } catch (e) {
+      showToast(text: 'An unexpected error occurred: $e');
+    }
+    return false;
+  }
 
 }

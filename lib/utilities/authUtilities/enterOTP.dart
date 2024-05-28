@@ -1,19 +1,24 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:overlapd/logic/enterOTP.dart';
 import 'package:pinput/pinput.dart';
 
+import '../../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 import '../customButton.dart';
 
 class EnterOTP extends StatefulWidget {
   final String mobileNumber;
-  const EnterOTP({super.key, required this.mobileNumber});
+  final String verificationId;
+  final FirebaseAuthService authService;
+  final String type;
+  const EnterOTP({super.key, required this.mobileNumber, required this.verificationId, required this.authService, required this.type});
 
   @override
   State<EnterOTP> createState() => _EnterOTPState();
 }
 
 class _EnterOTPState extends State<EnterOTP> {
+  late String verifyMobileNumber;
   final defaultPinTheme = PinTheme(
     width: 56,
     height: 56,
@@ -25,6 +30,7 @@ class _EnterOTPState extends State<EnterOTP> {
     ),
   );
   bool incorrectCode = true;
+  bool buttonEnabled = false;
   var code;
 
   int _start = 60;
@@ -35,6 +41,7 @@ class _EnterOTPState extends State<EnterOTP> {
   void initState() {
     super.initState();
     startTimer();
+    verifyMobileNumber = '+353${widget.mobileNumber.replaceAll(' ', '')}';
   }
 
   void startTimer() {
@@ -100,20 +107,10 @@ class _EnterOTPState extends State<EnterOTP> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 12.0, left: 8.0, right: 8.0),
+                padding: const EdgeInsets.only(top: 20.0, left: 8.0, right: 8.0),
                 child: Text(
-                  '+353 123 456 7890',
+                  '+353 ${widget.mobileNumber}',
                   style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.grey, fontWeight: FontWeight.w300),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  '$_formattedTime',
-                  style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold,
-                  ),
                 ),
               ),
               Padding(
@@ -135,25 +132,33 @@ class _EnterOTPState extends State<EnterOTP> {
                     if(s.length < 6){
                       setState(() {
                         incorrectCode = true;
+                        buttonEnabled = false;
                       });
                     }
                   },
-                  onCompleted: (pin) async {
+                  onCompleted: (pin) {
                     setState(() {
+                      buttonEnabled = true;
                       code = pin;
-                      if(pin != '123456'){
-                        incorrectCode = false;
-                      }
                     });
 
                   },
                 ),
               ),
-              incorrectCode ? const SizedBox.shrink() : Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+                child: incorrectCode
+                    ? const SizedBox.shrink()
+                    : Padding(
+                  key: ValueKey<bool>(incorrectCode),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
                     'The OTP is incorrect! Please try again',
-                  style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.red),
+                    style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.red),
+                  ),
                 ),
               ),
               Padding(
@@ -161,21 +166,45 @@ class _EnterOTPState extends State<EnterOTP> {
                 child: Button(
                     context,
                     'Continue',
-                        () {
+                        () async{
+                          if(buttonEnabled){
+                            bool value = await verifyOTP(context, widget.verificationId, code, widget.type);
+                            setState(() {
+                              incorrectCode = value;
+                            });
+                          }
                     },
                     double.infinity,
-                    Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.normal),
-                    Colors.black),
+                    Theme.of(context).textTheme.labelLarge!.copyWith(color: textButtonColor(buttonEnabled), fontWeight: FontWeight.normal),
+                    buttonColor(buttonEnabled)),
               ),
-              if (_showResendButton)
-                Padding(
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+                child: !_showResendButton
+                    ? Padding(
+                  key: ValueKey<bool>(_showResendButton),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'Resend code in $_formattedTime',
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey,
+                      fontSize: 15,
+                    ),
+                  ),
+                )
+                    : Padding(
+                  key: ValueKey<bool>(_showResendButton),
                   padding: const EdgeInsets.all(8.0),
                   child: RichText(
                     text: TextSpan(
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey,
-                          fontSize: 15
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey,
+                        fontSize: 15,
                       ),
                       children: [
                         const TextSpan(
@@ -184,14 +213,15 @@ class _EnterOTPState extends State<EnterOTP> {
                         WidgetSpan(
                           child: GestureDetector(
                             onTap: () {
+                              widget.authService.resendOTP(widget.mobileNumber, context); // Use auth service to resend OTP
                               startTimer();
                             },
                             child: Text(
                               ' Resend',
                               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
-                                  fontSize: 15
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
+                                fontSize: 15,
                               ),
                             ),
                           ),
@@ -200,6 +230,7 @@ class _EnterOTPState extends State<EnterOTP> {
                     ),
                   ),
                 ),
+              ),
             ],
           ),
         )

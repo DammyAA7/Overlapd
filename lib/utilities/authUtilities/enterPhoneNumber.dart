@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:overlapd/utilities/authUtilities/enterOTP.dart';
+import 'package:overlapd/screens/onboardingScreens/accountRecovery.dart';
 import 'package:overlapd/screens/onboardingScreens/onboarding.dart';
 import 'package:overlapd/utilities/customButton.dart';
 import 'package:overlapd/utilities/customNumberField.dart';
 
+import '../../logic/enterPhoneNumber.dart';
+import '../../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 import '../widgets.dart';
 
 class EnterPhoneNumber extends StatefulWidget {
@@ -15,6 +17,31 @@ class EnterPhoneNumber extends StatefulWidget {
 }
 
 class _EnterPhoneNumberState extends State<EnterPhoneNumber> {
+  TextEditingController mobileNumber = TextEditingController();
+  final FirebaseAuthService _auth = FirebaseAuthService();
+
+  @override
+  void initState() {
+    super.initState();
+    mobileNumber.addListener(_onPhoneChanged);
+  }
+
+  void _onPhoneChanged() {
+    // Check if the mobile number is valid
+    setState(() {});
+  }
+
+  Widget getConditionalWidget() {
+    switch (widget.type) {
+      case 'Sign up':
+        return termsAndConditions(context);
+      case 'Log in':
+        return cantAccessAccount(context);
+      default:
+        return shrinkedBox();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,87 +84,28 @@ class _EnterPhoneNumberState extends State<EnterPhoneNumber> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: PhoneNumberField(context),
+              padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 16.0, bottom: 8.0),
+              child: PhoneNumberField(context, mobileNumber, Colors.black),
             ),
-        widget.type == 'Sign up' ? Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: RichText(
-            text: TextSpan(
-              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey,
-                  fontSize: 15
-              ),
-              children: [
-                const TextSpan(
-                  text: 'By proceeding, I accept the',
-                ),
-                WidgetSpan(
-                  child: GestureDetector(
-                    onTap: () {},
-                    child: Text(
-                      ' terms of service',
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                          fontSize: 15
-                      ),
-                    ),
-                  ),
-                ),
-                TextSpan(
-                  text: ' and ',
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey,
-                      fontSize: 15
-                  ),
-                ),
-                WidgetSpan(
-                  child: GestureDetector(
-                    onTap: () {},
-                    child: Text(
-                      'privacy policy',
-                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                          fontSize: 15
-                        ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ) : Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: GestureDetector(
-            child: Text(
-              'Don\'t have access to your phone number?',
-              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                  fontSize: 15
-              ),
-            ),
-          ),
-        ),
+            getConditionalWidget(),
             Padding(
               padding: const EdgeInsets.only(top: 40.0, right: 8.0, left: 8.0),
               child: Button(
                   context,
                   'Get OTP',
                       () {
-                        Navigator.of(context).push(pageAnimationrl(const EnterOTP(mobileNumber: '_345')));
+                    if(isPhoneNumberValid(mobileNumber.text)){
+                      _auth.signInWithPhoneNumber(mobileNumber.text, context, widget.type);
+                    }
                       },
                   double.infinity,
-                  Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.normal),
-                  Colors.black),
+                  Theme.of(context).textTheme.labelLarge!.copyWith(color: textButtonColor(isPhoneNumberValid(mobileNumber.text)), fontWeight: FontWeight.normal),
+                  buttonColor(isPhoneNumberValid(mobileNumber.text))),
             )
           ],
         ),
       )
     );
   }
+
 }
