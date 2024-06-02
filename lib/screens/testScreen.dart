@@ -8,6 +8,7 @@ import 'package:overlapd/utilities/customButton.dart';
 import '../logic/personalDetails.dart';
 import '../models/userModel.dart';
 import '../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
+import '../utilities/widgets.dart';
 
 class TestScreen extends StatefulWidget {
   const TestScreen({super.key});
@@ -63,6 +64,7 @@ class _TestScreenState extends State<TestScreen> {
             'attach',
                 () async{
                   await _auth.sendSignInLinkToEmail('dammyade07@gmail.com');
+                  //_auth.setLoggedOut();
                   if (_userModel != null) {
                     print('First Name: ${_userModel!.firstName}');
                     print('Last Name: ${_userModel!.lastName}');
@@ -78,6 +80,18 @@ class _TestScreenState extends State<TestScreen> {
         )
       ),
     );
+  }
+  Future<void> handleDynamicLinks(String email) async {
+    FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) async {
+      Uri deepLink = dynamicLinkData.link;
+      bool success = await handleEmailLinkCredentials(deepLink, email);
+      if (success) {
+        setState(() {}); // Call navigation function
+      }
+    }).onError((error) {
+      // Handle errors (e.g., show a message to the user)
+      print('Error handling dynamic link: $error');
+    });
   }
 
 }

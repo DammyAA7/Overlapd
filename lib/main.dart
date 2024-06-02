@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:hive/hive.dart';
+import 'package:overlapd/screens/onboardingScreens/onboarding.dart';
 import 'package:overlapd/screens/onboardingScreens/splash.dart';
 import 'package:overlapd/pickers/picker.dart';
 import 'package:overlapd/services/storeService/groceryRange.dart';
@@ -28,6 +29,8 @@ Future main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   final FirebaseAuthService _auth = FirebaseAuthService();
+  bool isLoggedInAsUser = await _auth.isLoggedInAsUser();
+  bool isLoggedInAsEmployee = await _auth.isLoggedInAsEmployee();
   await Hive.initFlutter();
   Hive.registerAdapter(UserModelAdapter());
   await Hive.openBox<UserModel>('userBox');
@@ -35,7 +38,7 @@ Future main() async{
   Stripe.instance.applySettings();
   runApp(ChangeNotifierProvider(
       create: (context) => Cart(),
-      child: MyApp()
+      child: MyApp(isLoggedInAsUser: isLoggedInAsUser, isLoggedInAsEmployee: isLoggedInAsEmployee)
   ));
 }
 
@@ -50,12 +53,24 @@ Future<bool> isUserLoggedInAsEmployee() async {
 }
 
 class MyApp extends StatelessWidget {
+  final bool isLoggedInAsUser;
+  final bool isLoggedInAsEmployee;
   final FirebaseAuthService _auth = FirebaseAuthService();
-  MyApp({super.key});
+  MyApp({super.key, required this.isLoggedInAsUser, required this.isLoggedInAsEmployee});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    Widget _getHomeWidget() {
+      if (isLoggedInAsUser) {
+        return const Splash();
+
+      } else if (isLoggedInAsEmployee) {
+        return const Picker();
+      } else {
+        return const Onboarding();
+      }
+    }
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
@@ -76,7 +91,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const Splash(), //_getHomeWidget()
+      home: _getHomeWidget(),
         routes: {
           '/login_page': (context) => const Login(),
           '/signup_page': (context) => const SignUp(),

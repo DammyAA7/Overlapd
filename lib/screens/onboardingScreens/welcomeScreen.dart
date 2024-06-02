@@ -4,8 +4,6 @@ import 'package:hive/hive.dart';
 import 'package:overlapd/screens/onboardingScreens/personalDetails.dart';
 import 'package:overlapd/screens/testScreen.dart';
 import 'package:overlapd/services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
-
-import '../../logic/welcomeScreen.dart';
 import '../../models/userModel.dart';
 
 class WelcomeScreen extends StatefulWidget {
