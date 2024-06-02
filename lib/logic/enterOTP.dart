@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:overlapd/screens/onboardingScreens/welcomeScreen.dart';
@@ -14,8 +15,20 @@ Future<bool> verifyOTP(BuildContext context, String verificationId, String pin, 
 
     if (type == 'Log in' || type == 'Sign up') {
       await auth.signInWithCredential(credential);
+      if (type == 'Sign up') {
+        await FirebaseFirestore.instance
+            .collection('registeredPhoneNumbers')
+            .doc(auth.currentUser?.phoneNumber)
+            .set({'infoFilled': false});
+      }
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('registeredPhoneNumbers')
+          .doc(auth.currentUser?.phoneNumber)
+          .get();
+      final infoFilled = docSnapshot.data()?['infoFilled'];
+      final welcomeScreenType = infoFilled == false ? 'Sign up' : 'Log in';
       Navigator.of(context).push(pageAnimationrl(
-          const WelcomeScreen()
+        WelcomeScreen(type: welcomeScreenType),
       ));
     } else {
       User? currentUser = auth.currentUser;

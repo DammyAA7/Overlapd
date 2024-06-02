@@ -18,6 +18,7 @@ import 'package:overlapd/screens/payment.dart';
 import 'package:overlapd/screens/support.dart';
 import 'package:overlapd/services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'models/userModel.dart';
 import 'services/userAuthService/login.dart';
 import 'services/userAuthService/signup.dart';
 import 'screens/home.dart';
@@ -27,16 +28,14 @@ Future main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   final FirebaseAuthService _auth = FirebaseAuthService();
-  bool isLoggedInAsUser = await _auth.isLoggedInAsUser();
-  bool isLoggedInAsEmployee = await _auth.isLoggedInAsEmployee();
   await Hive.initFlutter();
-  await Hive.openBox('userInformation');
-  await Hive.openBox('userAddress');
+  Hive.registerAdapter(UserModelAdapter());
+  await Hive.openBox<UserModel>('userBox');
   Stripe.publishableKey = "pk_test_51OWmrwIaruu0MDtu9f0fOLYUdaDsxU6FHsV2TtXLw6CstWMCKPwZhhldZEWSmsStYYTYpfeRfzGVAZ9tfLKODOYt00gDUZP4EI";
   Stripe.instance.applySettings();
   runApp(ChangeNotifierProvider(
       create: (context) => Cart(),
-      child: MyApp(isLoggedInAsUser: isLoggedInAsUser, isLoggedInAsEmployee: isLoggedInAsEmployee)
+      child: MyApp()
   ));
 }
 
@@ -51,28 +50,12 @@ Future<bool> isUserLoggedInAsEmployee() async {
 }
 
 class MyApp extends StatelessWidget {
-  final bool isLoggedInAsUser;
-  final bool isLoggedInAsEmployee;
   final FirebaseAuthService _auth = FirebaseAuthService();
-  MyApp({super.key, required this.isLoggedInAsUser, required this.isLoggedInAsEmployee});
+  MyApp({super.key});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    Widget _getHomeWidget() {
-      if (isLoggedInAsUser) {
-        if(_auth.currentUser?.emailVerified == true){
-          return const Home();
-        } else {
-          return const EmailVerification();
-        }
-
-      } else if (isLoggedInAsEmployee) {
-        return const Picker();
-      } else {
-        return const Login();
-      }
-    }
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',

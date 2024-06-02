@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hive/hive.dart';
 import 'package:overlapd/utilities/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -233,5 +234,22 @@ class FirebaseAuthService{
     }
     return false;
   }
+
+  Future<Map<String, dynamic>?> getUserInfo(String uid) async {
+    try {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      return doc.data();
+    } catch (e) {
+      print('Error fetching user info: $e');
+      return null;
+    }
+  }
+
+  Future<void> storeUserInfoInHive(String uid, Map<String, dynamic> userInfo) async {
+    final userBox = await Hive.openBox('userInformation');
+    userBox.put(uid, userInfo);
+  }
+
+
 
 }

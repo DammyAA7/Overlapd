@@ -6,6 +6,7 @@ import 'package:hive/hive.dart';
 import 'package:overlapd/logic/signInLink.dart';
 import 'package:overlapd/utilities/customButton.dart';
 import '../logic/personalDetails.dart';
+import '../models/userModel.dart';
 import '../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 
 class TestScreen extends StatefulWidget {
@@ -17,7 +18,7 @@ class TestScreen extends StatefulWidget {
 
 class _TestScreenState extends State<TestScreen> {
   bool _isEmailVerified = false;
-  Map<String, dynamic>? _userJson;
+  UserModel? _userModel;
   final FirebaseAuthService _auth = FirebaseAuthService();
 
   @override
@@ -30,9 +31,9 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Future<void> _loadUserCredentials() async {
-    final userJson = await getUserCredentials(_auth.getUserId());
+    final userModel = await getUserCredentials(_auth.getUserId());
     setState(() {
-      _userJson = userJson;
+      _userModel = userModel;
     });
   }
 
@@ -61,8 +62,15 @@ class _TestScreenState extends State<TestScreen> {
             context,
             'attach',
                 () async{
-                  //await _auth.sendSignInLinkToEmail('dammyade07@gmail.com');
-                  print('First Name: ${_userJson!['First Name']}');
+                  await _auth.sendSignInLinkToEmail('dammyade07@gmail.com');
+                  if (_userModel != null) {
+                    print('First Name: ${_userModel!.firstName}');
+                    print('Last Name: ${_userModel!.lastName}');
+                    print('Email: ${_userModel!.email}');
+                    print('Phone Number: ${_userModel!.phoneNumber}');
+                  } else {
+                    print('No user data found');
+                  }
                 },
             MediaQuery.of(context).size.width * 0.3,
             Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.normal),

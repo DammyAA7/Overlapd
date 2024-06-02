@@ -5,6 +5,7 @@ import 'package:overlapd/screens/testScreen.dart';
 import 'package:overlapd/utilities/customTextField.dart';
 import 'package:overlapd/utilities/widgets.dart';
 import '../../logic/personalDetails.dart';
+import '../../logic/splash.dart';
 import '../../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 import '../../utilities/customButton.dart';
 
@@ -140,6 +141,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                           () async{
                         if(!isFNEmpty && !isLNEmpty && !isEAEmpty && incorrectFormat){
                           createUserCredentials(_auth.currentUser, firstName.text, lastName.text, emailAddress.text);
+                          await _auth.setLoggedInAsUser();
                           Navigator.of(context).pushReplacement(pageAnimationlr(const TestScreen()));
                         }
                       },
