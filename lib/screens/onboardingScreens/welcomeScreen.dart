@@ -45,7 +45,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         await Hive.box<UserModel>('userBox').delete(user.uid);
         await _auth.storeUserInfoInHive(user.uid, userInfo);
       }
-      await _auth.setLoggedInAsUser();
       Future.delayed(const Duration(seconds: 2), () {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(

@@ -1,9 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:hive/hive.dart';
 import '../../models/userModel.dart';
 import '../../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
+import 'package:overlapd/logic/signInLink.dart';
 import '../testScreen.dart';
 
 class Splash extends StatefulWidget {
@@ -42,7 +44,7 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin{
         await Hive.box<UserModel>('userBox').delete(user.uid);
         await _auth.storeUserInfoInHive(user.uid, userInfo);
       }
-      Future.delayed(const Duration(seconds: 2), () {
+      Future.delayed(const Duration(seconds: 1), () {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => const TestScreen(), // Navigate to your personal details screen

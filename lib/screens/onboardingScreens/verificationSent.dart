@@ -71,7 +71,7 @@ class _VerificationSentState extends State<VerificationSent> {
   Future<void> handleDynamicLinks(String email) async {
     FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) async {
       Uri deepLink = dynamicLinkData.link;
-      bool success = true;//await handleEmailLinkSignIn(deepLink, email);
+      bool success = await handleEmailLinkSignIn(deepLink, email);
       if (success) {
         Navigator.push(
           context,
