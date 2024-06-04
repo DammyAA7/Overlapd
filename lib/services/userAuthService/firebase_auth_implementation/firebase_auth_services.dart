@@ -194,6 +194,27 @@ class FirebaseAuthService{
     }
   }
 
+  Future<void> sendLinkToPhone(String email) async {
+    ActionCodeSettings actionCodeSettings = ActionCodeSettings(
+      url: 'https://overlapd.page.link/bAmq?email=$email', // This URL must be whitelisted in the Firebase Console
+      handleCodeInApp: true,
+      iOSBundleId: 'com.example.overlapd',
+      androidPackageName: 'com.example.overlapd',
+      androidInstallApp: true,
+      //androidMinimumVersion: '12',
+    );//com.example.overlapd
+
+    try {
+      await FirebaseAuth.instance.sendSignInLinkToEmail(
+        email: email,
+        actionCodeSettings: actionCodeSettings,
+      );
+      print('Sign-in email sent to $email');
+    } catch (e) {
+      print('Error sending sign-in email: $e');
+    }
+  }
+
   Future<void> resendOTP(String phoneNumber, BuildContext context) async {
     await _auth.verifyPhoneNumber(
       phoneNumber: '+353${phoneNumber.replaceAll(' ', '')}',

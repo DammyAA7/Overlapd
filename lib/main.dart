@@ -4,6 +4,7 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:hive/hive.dart';
+import 'package:overlapd/screens/onboardingScreens/confirmMobileNumber.dart';
 import 'package:overlapd/screens/onboardingScreens/onboarding.dart';
 import 'package:overlapd/screens/onboardingScreens/splash.dart';
 import 'package:overlapd/pickers/picker.dart';
@@ -85,17 +86,33 @@ class _MyAppState extends State<MyApp> {
 
     // Handle the initial link if it exists
     if (widget.initialLink != null) {
-      _handleDynamicLink(widget.initialLink!);
+      _handleDynamicLink(widget.initialLink!.link);
     }
   }
 
-  void _handleDynamicLink(PendingDynamicLinkData dynamicLinkData) async {
-    final Uri deepLink = dynamicLinkData.link;
-    bool success = await handleEmailLinkCredentials(deepLink, 'dammyade07@gmail.com');
-    if (success) {
-      navigatorKey.currentState?.pushReplacement(
-        MaterialPageRoute(builder: (context) => const TestScreen()),
-      );
+  void _handleDynamicLink(Uri deepLink) async {
+    if (deepLink.toString().contains('https://overlapd.page.link/7Yoh')) {
+      // Handle sign-in link
+      bool success = await handleEmailLinkSignIn(deepLink, 'dammyade07@gmail.com');
+      if (success) {
+        navigatorKey.currentState?.pushReplacement(
+          MaterialPageRoute(builder: (context) => const TestScreen()),
+        );
+      } else {
+        // Handle sign-in failure
+      }
+    } else if (deepLink.toString().contains('https://overlapd.page.link/bAmq')) {
+      // Handle phone verification link
+      bool success = await handleEmailLinkCredentials(deepLink, 'dammyade07@gmail.com');
+      if (success) {
+        navigatorKey.currentState?.pushReplacement(
+          MaterialPageRoute(builder: (context) => const ConfirmMobileNumber()),
+        );
+      } else {
+        // Handle sign-in failure
+      }
+    } else {
+      // Handle other types of deep links
     }
   }
 
@@ -134,7 +151,7 @@ class _MyAppState extends State<MyApp> {
           ),
           useMaterial3: true,
         ),
-        home: SplashScreenWrapper(),
+        home: const SplashScreenWrapper(),
         routes: {
           '/login_page': (context) => const Login(),
           '/signup_page': (context) => const SignUp(),
@@ -157,6 +174,7 @@ class _MyAppState extends State<MyApp> {
 
 Future<bool> handleEmailLinkCredentials(Uri deepLink, String email) async {
   if (FirebaseAuth.instance.isSignInWithEmailLink(deepLink.toString())) {
+    print('deeplink: ${deepLink.toString()}');
     if (email.isNotEmpty) {
       try {
         // Get email credential
@@ -178,6 +196,29 @@ Future<bool> handleEmailLinkCredentials(Uri deepLink, String email) async {
     }
   }
   return false;
+}
+
+Future<bool> handleEmailLinkSignIn(Uri deepLink, String email) async {
+  if (FirebaseAuth.instance.isSignInWithEmailLink(deepLink.toString())) {
+    if (email.isNotEmpty) {
+      try {
+        // Sign in the user with the email link
+        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailLink(
+          email: email,
+          emailLink: deepLink.toString(),
+        );
+
+        User? user = userCredential.user;
+        if (user != null) {
+          print('User successfully signed in.');
+          return true; // Indicate success
+        }
+      } catch (e) {
+        print('Error signing in with email link: $e');
+      }
+    }
+  }
+  return false; // Indicate failure
 }
 
 class SplashScreenWrapper extends StatefulWidget {

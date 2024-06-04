@@ -73,7 +73,7 @@ class _TestScreenState extends State<TestScreen> {
                 context,
                 'attach',
                     () async{
-                      await _auth.sendSignInLinkToEmail('dammyade07@gmail.com');
+                      await _auth.sendLinkToPhone('dammyade07@gmail.com');
                       if (_userModel != null) {
                         print('First Name: ${_userModel!.firstName}');
                         print('Last Name: ${_userModel!.lastName}');
