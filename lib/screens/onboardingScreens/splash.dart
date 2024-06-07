@@ -44,13 +44,6 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin{
         await Hive.box<UserModel>('userBox').delete(user.uid);
         await _auth.storeUserInfoInHive(user.uid, userInfo);
       }
-      Future.delayed(const Duration(seconds: 1), () {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const TestScreen(), // Navigate to your personal details screen
-          ),
-        );
-      });
     }
   }
 

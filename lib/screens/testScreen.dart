@@ -94,6 +94,7 @@ class _TestScreenState extends State<TestScreen> {
                 context,
                 'Sign out',
                     () async{
+                  FirebaseAuth.instance.signOut();
                   _auth.setLoggedOut();
                   Navigator.of(context).pushReplacement(pageAnimationlr(const Onboarding()));
                 },

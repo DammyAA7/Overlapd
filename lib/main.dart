@@ -21,12 +21,12 @@ import 'package:overlapd/screens/history.dart';
 import 'package:overlapd/screens/payment.dart';
 import 'package:overlapd/screens/support.dart';
 import 'package:overlapd/services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'models/userModel.dart';
 import 'services/userAuthService/login.dart';
 import 'services/userAuthService/signup.dart';
 import 'screens/home.dart';
 import 'screens/settings.dart';
+
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -58,6 +58,7 @@ class _MyAppState extends State<MyApp> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   bool isLoggedInAsUser = false;
   bool isLoggedInAsEmployee = false;
+  Uri? deepLinkUri;
 
   @override
   void initState() {
@@ -68,12 +69,7 @@ class _MyAppState extends State<MyApp> {
     FirebaseDynamicLinks.instance.onLink.listen((PendingDynamicLinkData? dynamicLinkData) async {
       if (dynamicLinkData?.link != null) {
         Uri deepLink = dynamicLinkData!.link;
-        bool success = await handleEmailLinkCredentials(deepLink, 'dammyade07@gmail.com');
-        if (success) {
-          navigatorKey.currentState?.pushReplacement(
-            MaterialPageRoute(builder: (context) => const TestScreen()),
-          );
-        }
+        _handleDynamicLink(deepLink);
       }
     }).onError((error) {
       print('Error handling dynamic link: $error');
@@ -86,14 +82,16 @@ class _MyAppState extends State<MyApp> {
 
     // Handle the initial link if it exists
     if (widget.initialLink != null) {
-      _handleDynamicLink(widget.initialLink!.link);
+      deepLinkUri = widget.initialLink!.link;
+      print("$deepLinkUri");
+      _handleDynamicLink(deepLinkUri!);
     }
   }
 
   void _handleDynamicLink(Uri deepLink) async {
-    if (deepLink.toString().contains('https://overlapd.page.link/7Yoh')) {
+    if (deepLink.toString().contains('https://overlapd.page.link/bAmq')) {
       // Handle sign-in link
-      bool success = await handleEmailLinkSignIn(deepLink, 'dammyade07@gmail.com');
+      bool success = await handleEmailLinkCredentials(deepLink, 'dammyade07@gmail.com');
       if (success) {
         navigatorKey.currentState?.pushReplacement(
           MaterialPageRoute(builder: (context) => const TestScreen()),
@@ -101,10 +99,11 @@ class _MyAppState extends State<MyApp> {
       } else {
         // Handle sign-in failure
       }
-    } else if (deepLink.toString().contains('https://overlapd.page.link/bAmq')) {
+    } else if (deepLink.toString().contains('https://overlapd.page.link/7Yoh')) {
       // Handle phone verification link
-      bool success = await handleEmailLinkCredentials(deepLink, 'dammyade07@gmail.com');
+      bool success = await handleEmailLinkSignIn(deepLink, 'dammyade07@gmail.com');
       if (success) {
+        print('working???????????????');
         navigatorKey.currentState?.pushReplacement(
           MaterialPageRoute(builder: (context) => const ConfirmMobileNumber()),
         );
@@ -151,7 +150,7 @@ class _MyAppState extends State<MyApp> {
           ),
           useMaterial3: true,
         ),
-        home: const SplashScreenWrapper(),
+        home: SplashScreenWrapper(deepLinkUri: deepLinkUri),
         routes: {
           '/login_page': (context) => const Login(),
           '/signup_page': (context) => const SignUp(),
@@ -222,7 +221,8 @@ Future<bool> handleEmailLinkSignIn(Uri deepLink, String email) async {
 }
 
 class SplashScreenWrapper extends StatefulWidget {
-  const SplashScreenWrapper({super.key});
+  final Uri? deepLinkUri;
+  const SplashScreenWrapper({super.key, this.deepLinkUri});
 
   @override
   _SplashScreenWrapperState createState() => _SplashScreenWrapperState();
@@ -241,26 +241,33 @@ class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
     await Future.delayed(const Duration(seconds: 3)); // Simulate a delay for the splash screen
     bool isLoggedInAsUser = await _auth.isLoggedInAsUser();
     bool isLoggedInAsEmployee = await _auth.isLoggedInAsEmployee();
-
-    if (isLoggedInAsUser) {
+    print("Deeplink ${widget.deepLinkUri }");
+    if (widget.deepLinkUri != null) {
+      // Do not navigate again if deep link was handled
+      print('worddddd');
       navigatorKey.currentState?.pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const TestScreen(), // Navigate to your personal details screen
-        ),
+        MaterialPageRoute(builder: (context) => const ConfirmMobileNumber()),
+      );
+      return;
+    } else if (isLoggedInAsUser) {
+      navigatorKey.currentState?.pushReplacement(
+        MaterialPageRoute(builder: (context) => const TestScreen()),
       );
     } else if (isLoggedInAsEmployee) {
-      navigatorKey.currentState?.pushReplacementNamed('/picker_page');
-    } else {
       navigatorKey.currentState?.pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const Onboarding(), // Navigate to your personal details screen
-        ),
+        MaterialPageRoute(builder: (context) => const Picker()),
+      );
+    } else {
+      print("outside Deeplink ${widget.deepLinkUri }");
+      FirebaseAuth.instance.signOut();
+      navigatorKey.currentState?.pushReplacement(
+        MaterialPageRoute(builder: (context) => const Onboarding()),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return const Splash();
+    return const Splash(); // Display the splash screen while initialization is in progress
   }
 }
