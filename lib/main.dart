@@ -14,6 +14,7 @@ import 'package:overlapd/services/userAuthService/forgottenPassword.dart';
 import 'package:overlapd/services/userAuthService/emailVerification.dart';
 import 'package:overlapd/services/userAuthService/phoneVerification.dart';
 import 'package:overlapd/services/userAuthService/phoneVerificationCode.dart';
+import 'package:overlapd/utilities/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:overlapd/screens/about.dart';
@@ -36,6 +37,7 @@ Future<void> main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(UserModelAdapter());
   await Hive.openBox<UserModel>('userBox');
+  await Hive.openBox<String>('deepLinkBox');  // Open a box to store the deep link URI
   Stripe.publishableKey = "pk_test_51OWmrwIaruu0MDtu9f0fOLYUdaDsxU6FHsV2TtXLw6CstWMCKPwZhhldZEWSmsStYYTYpfeRfzGVAZ9tfLKODOYt00gDUZP4EI";
   Stripe.instance.applySettings();
 
@@ -83,7 +85,9 @@ class _MyAppState extends State<MyApp> {
     // Handle the initial link if it exists
     if (widget.initialLink != null) {
       deepLinkUri = widget.initialLink!.link;
-      print("$deepLinkUri");
+      if (deepLinkUri.toString().contains('https://overlapd.page.link/7Yoh')){
+        await Hive.box<String>('deepLinkBox').put('deepLinkUri', deepLinkUri.toString());
+      }
       _handleDynamicLink(deepLinkUri!);
     }
   }
@@ -103,9 +107,8 @@ class _MyAppState extends State<MyApp> {
       // Handle phone verification link
       bool success = await handleEmailLinkSignIn(deepLink, 'dammyade07@gmail.com');
       if (success) {
-        print('working???????????????');
         navigatorKey.currentState?.pushReplacement(
-          MaterialPageRoute(builder: (context) => const ConfirmMobileNumber()),
+          pageAnimationrl(const ConfirmMobileNumber()),
         );
       } else {
         // Handle sign-in failure
@@ -117,15 +120,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    Widget _getHomeWidget() {
-      if (isLoggedInAsUser) {
-        return const TestScreen();
-      } else if (isLoggedInAsEmployee) {
-        return const Picker();
-      } else {
-        return const Onboarding();
-      }
-    }
 
     return ChangeNotifierProvider(
       create: (context) => Cart(),
@@ -150,7 +144,7 @@ class _MyAppState extends State<MyApp> {
           ),
           useMaterial3: true,
         ),
-        home: SplashScreenWrapper(deepLinkUri: deepLinkUri),
+        home: SplashScreenWrapper(),
         routes: {
           '/login_page': (context) => const Login(),
           '/signup_page': (context) => const SignUp(),
@@ -221,8 +215,7 @@ Future<bool> handleEmailLinkSignIn(Uri deepLink, String email) async {
 }
 
 class SplashScreenWrapper extends StatefulWidget {
-  final Uri? deepLinkUri;
-  const SplashScreenWrapper({super.key, this.deepLinkUri});
+  const SplashScreenWrapper({super.key});
 
   @override
   _SplashScreenWrapperState createState() => _SplashScreenWrapperState();
@@ -241,13 +234,14 @@ class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
     await Future.delayed(const Duration(seconds: 3)); // Simulate a delay for the splash screen
     bool isLoggedInAsUser = await _auth.isLoggedInAsUser();
     bool isLoggedInAsEmployee = await _auth.isLoggedInAsEmployee();
-    print("Deeplink ${widget.deepLinkUri }");
-    if (widget.deepLinkUri != null) {
+    String? storedUri = Hive.box<String>('deepLinkBox').get('deepLinkUri');
+    Uri? deepLinkUri;
+    if (storedUri != null) {
+      deepLinkUri = Uri.parse(storedUri);
+    }
+    if (deepLinkUri != null) {
       // Do not navigate again if deep link was handled
-      print('worddddd');
-      navigatorKey.currentState?.pushReplacement(
-        MaterialPageRoute(builder: (context) => const ConfirmMobileNumber()),
-      );
+      await Hive.box<String>('deepLinkBox').delete('deepLinkUri');
       return;
     } else if (isLoggedInAsUser) {
       navigatorKey.currentState?.pushReplacement(
@@ -258,7 +252,6 @@ class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
         MaterialPageRoute(builder: (context) => const Picker()),
       );
     } else {
-      print("outside Deeplink ${widget.deepLinkUri }");
       FirebaseAuth.instance.signOut();
       navigatorKey.currentState?.pushReplacement(
         MaterialPageRoute(builder: (context) => const Onboarding()),

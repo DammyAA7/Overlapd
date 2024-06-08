@@ -74,14 +74,6 @@ class _TestScreenState extends State<TestScreen> {
                 'attach',
                     () async{
                       await _auth.sendLinkToPhone('dammyade07@gmail.com');
-                      if (_userModel != null) {
-                        print('First Name: ${_userModel!.firstName}');
-                        print('Last Name: ${_userModel!.lastName}');
-                        print('Email: ${_userModel!.email}');
-                        print('Phone Number: ${_userModel!.phoneNumber}');
-                      } else {
-                        print('No user data found');
-                      }
                     },
                 MediaQuery.of(context).size.width * 0.3,
                 Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.normal),
@@ -109,6 +101,15 @@ class _TestScreenState extends State<TestScreen> {
                 context,
                 'Request',
                     () async{
+                      if (_userModel != null) {
+                        print('First Name: ${_userModel!.firstName}');
+                        print('Last Name: ${_userModel!.lastName}');
+                        print('Email: ${_userModel!.email}');
+                        print('Phone Number: ${_userModel!.phoneNumber}');
+                      } else {
+                        print('No user data found');
+                      }
+                      print('uid ${_auth.currentUser}');
                       RequestPermissionManager(PermissionType.whenInUseLocation)
                           .onPermissionDenied(() {
                         // Handle permission denied for location

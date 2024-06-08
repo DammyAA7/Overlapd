@@ -1,12 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:overlapd/logic/personalDetails.dart';
 import 'package:overlapd/screens/onboardingScreens/welcomeScreen.dart';
 import 'package:overlapd/screens/testScreen.dart';
+import '../models/userModel.dart';
+import '../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/widgets.dart';
 
 Future<bool> verifyOTP(BuildContext context, String verificationId, String pin, String type) async{
-  FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseAuthService auth = FirebaseAuthService();
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
   try{
     final credential = PhoneAuthProvider.credential(
       verificationId: verificationId,
@@ -14,7 +19,7 @@ Future<bool> verifyOTP(BuildContext context, String verificationId, String pin, 
     );
 
     if (type == 'Log in' || type == 'Sign up') {
-      await auth.signInWithCredential(credential);
+      await FirebaseAuth.instance.signInWithCredential(credential);
       if (type == 'Sign up') {
         await FirebaseFirestore.instance
             .collection('registeredPhoneNumbers')
@@ -31,10 +36,32 @@ Future<bool> verifyOTP(BuildContext context, String verificationId, String pin, 
         WelcomeScreen(type: welcomeScreenType),
       ));
     } else {
-      User? currentUser = auth.currentUser;
-      if (currentUser != null) {
-        await currentUser.updatePhoneNumber(credential);
+      User? user = auth.currentUser;
+      if (user != null) {
+        await user.updatePhoneNumber(credential);
+        FirebaseAuth.instance.currentUser?.reload();
+        user = auth.currentUser;
+
+        String newPhoneNumber = user?.phoneNumber ?? "";
+        print(user);
+        print('object $newPhoneNumber');
+        // Update the phone number in 'registeredPhoneNumbers' collection
+        await firestore.collection('registeredPhoneNumbers')
+            .doc(newPhoneNumber)
+            .set({'infoFilled': true}, SetOptions(merge: true));
+        // Update the phone number in Firestore
+
+        // Update the phone number in the 'users' collection
+        await firestore.collection('users')
+            .doc(user?.uid)
+            .update({'Phone Number': newPhoneNumber});
+        final userInfo = await auth.getUserInfo(user!.uid);
+        if (userInfo != null) {
+          await Hive.box<UserModel>('userBox').delete(user.uid);
+          await auth.storeUserInfoInHive(user.uid, userInfo);
+        }
       }
+      auth.setLoggedInAsUser();
       Navigator.of(context).push(pageAnimationrl(
           const TestScreen()
       ));
