@@ -1,19 +1,46 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 
-void handleDynamicLinks(String email) async {
+void handleDynamicLinkCredentials(String email) async {
   // Handle the initial dynamic link if the app is opened with a dynamic link
   final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
   if (initialLink != null) {
-    handleEmailLinkSignIn(initialLink.link, email);
+    handleEmailLinkCredentials(initialLink.link, email);
   }
 
   // Handle the dynamic link while the app is in the foreground
   FirebaseDynamicLinks.instance.onLink.listen((PendingDynamicLinkData data) {
-    handleEmailLinkSignIn(data.link, email);
+    handleEmailLinkCredentials(data.link, email);
   }).onError((error) {
     print('Error occurred while handling dynamic link: $error');
   });
+}
+
+Future<bool> handleEmailLinkCredentials(Uri deepLink, String email) async {
+  if (FirebaseAuth.instance.isSignInWithEmailLink(deepLink.toString())) {
+    if (email.isNotEmpty) {
+      try {
+        // Get email credential
+        final AuthCredential emailCredential = EmailAuthProvider.credentialWithLink(
+          email: email,
+          emailLink: deepLink.toString(),
+        );
+
+        // Link email credential to the current user
+        final User? user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          await user.linkWithCredential(emailCredential);
+          print('Email successfully linked to phone number.');
+          return true;
+        } else {
+          print('No current user to link email to.');
+        }
+      } catch (e) {
+        print('Error linking email to phone number: $e');
+      }
+    }
+  }
+  return false;
 }
 
 void handleDynamicLinkSignIn(String email) async {
@@ -29,33 +56,6 @@ void handleDynamicLinkSignIn(String email) async {
   }).onError((error) {
     print('Error occurred while handling dynamic link: $error');
   });
-}
-
-Future<bool> handleEmailLink(Uri deepLink, String email) async {
-  if (FirebaseAuth.instance.isSignInWithEmailLink(deepLink.toString())) {
-
-    if (email.isNotEmpty) {
-      try {
-        // Get email credential
-        final AuthCredential emailCredential = EmailAuthProvider.credentialWithLink(
-          email: email,
-          emailLink: deepLink.toString(),
-        );
-
-        // Link email credential to the current user
-        final User? user = FirebaseAuth.instance.currentUser;
-        if (user != null) {
-          await FirebaseAuth.instance.currentUser
-              ?.linkWithCredential(emailCredential);
-          print('Email successfully linked to phone number.');
-          return true;
-        }
-      } catch (e) {
-        print('Error linking email to phone number: $e');
-      }
-    }
-  }
-  return false;
 }
 
 Future<bool> handleEmailLinkSignIn(Uri deepLink, String email) async {
@@ -80,3 +80,6 @@ Future<bool> handleEmailLinkSignIn(Uri deepLink, String email) async {
   }
   return false; // Indicate failure
 }
+
+
+

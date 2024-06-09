@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../screens/onboardingScreens/accountRecovery.dart';
@@ -89,4 +90,23 @@ Widget cantAccessAccount(BuildContext context) {
 
 Widget shrinkedBox() {
   return const SizedBox.shrink();
+}
+
+Future<bool> isPhoneNumberRegistered(String phoneNumber) async {
+  final sanitizedNumber = phoneNumber.replaceAll(' ', '');
+  try {
+    final result = await FirebaseFirestore.instance
+        .collection('registeredPhoneNumbers')
+        .doc('+353$sanitizedNumber')
+        .get();
+
+    if (result.exists) {
+      return true;
+    }
+    // Document doesn't exist or infoFilled field is not present
+    return false;
+  } catch (e) {
+    print('Error checking phone number: $e');
+    return false;
+  }
 }
