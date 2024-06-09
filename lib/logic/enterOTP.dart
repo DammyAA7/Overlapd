@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:overlapd/logic/personalDetails.dart';
 import 'package:overlapd/screens/onboardingScreens/welcomeScreen.dart';
 import 'package:overlapd/screens/testScreen.dart';
 import '../models/userModel.dart';
@@ -42,9 +41,17 @@ Future<bool> verifyOTP(BuildContext context, String verificationId, String pin, 
         FirebaseAuth.instance.currentUser?.reload();
         user = auth.currentUser;
 
+        final docSnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(auth.currentUser?.uid)
+            .get();
+
+        //Delete old number
+        await firestore.collection('registeredPhoneNumbers')
+            .doc(docSnapshot.data()?['Phone Number'])
+            .delete();
+
         String newPhoneNumber = user?.phoneNumber ?? "";
-        print(user);
-        print('object $newPhoneNumber');
         // Update the phone number in 'registeredPhoneNumbers' collection
         await firestore.collection('registeredPhoneNumbers')
             .doc(newPhoneNumber)

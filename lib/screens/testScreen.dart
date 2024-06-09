@@ -110,20 +110,6 @@ class _TestScreenState extends State<TestScreen> {
                         print('No user data found');
                       }
                       print('uid ${_auth.currentUser}');
-                      RequestPermissionManager(PermissionType.whenInUseLocation)
-                          .onPermissionDenied(() {
-                        // Handle permission denied for location
-                        print('Location permission denied');
-                      })
-                          .onPermissionGranted(() {
-                        // Handle permission granted for location
-                        print('Location permission granted');
-                      })
-                          .onPermissionPermanentlyDenied(() {
-                        // Handle permission permanently denied for location
-                        print('Location permission permanently denied');
-                      })
-                          .execute();
                 },
                 MediaQuery.of(context).size.width * 0.3,
                 Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.normal),

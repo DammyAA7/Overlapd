@@ -5,6 +5,7 @@ import 'package:overlapd/screens/onboardingScreens/personalDetails.dart';
 import 'package:overlapd/screens/testScreen.dart';
 import 'package:overlapd/services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 import '../../models/userModel.dart';
+import '../../services/permissions/permissions.dart';
 
 class WelcomeScreen extends StatefulWidget {
   final String type;
@@ -22,6 +23,35 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     if (widget.type == 'Log in') {
       handleLogin();
     } else if (widget.type == 'Sign up') {
+      RequestPermissionManager(PermissionType.whenInUseLocation)
+          .onPermissionDenied(() {
+        // Handle permission denied for location
+        print('Location permission denied');
+      })
+          .onPermissionGranted(() {
+        // Handle permission granted for location
+        print('Location permission granted');
+      })
+          .onPermissionPermanentlyDenied(() {
+        // Handle permission permanently denied for location
+        print('Location permission permanently denied');
+      })
+          .execute();
+
+      RequestPermissionManager(PermissionType.notification)
+          .onPermissionDenied(() {
+        // Handle permission denied for location
+        print('Location permission denied');
+      })
+          .onPermissionGranted(() {
+        // Handle permission granted for location
+        print('Location permission granted');
+      })
+          .onPermissionPermanentlyDenied(() {
+        // Handle permission permanently denied for location
+        print('Location permission permanently denied');
+      })
+          .execute();
       handleSignup();
     }
   }
