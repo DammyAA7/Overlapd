@@ -4,6 +4,7 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:hive/hive.dart';
+import 'package:overlapd/screens/activity/activity.dart';
 import 'package:overlapd/screens/onboardingScreens/confirmMobileNumber.dart';
 import 'package:overlapd/screens/onboardingScreens/onboarding.dart';
 import 'package:overlapd/screens/onboardingScreens/splash.dart';
@@ -144,7 +145,7 @@ class _MyAppState extends State<MyApp> {
           ),
           useMaterial3: true,
         ),
-        home: SplashScreenWrapper(),
+        home: const Activity(), //SplashScreenWrapper(),
         routes: {
           '/login_page': (context) => const Login(),
           '/signup_page': (context) => const SignUp(),
