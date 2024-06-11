@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:overlapd/screens/activity/orderTimeline.dart';
+import 'package:overlapd/utilities/widgets.dart';
 
 
 enum ActivityTypes { orders, deliveries }
@@ -236,9 +238,14 @@ class _ActivityState extends State<Activity> {
                     'Order #000001',
                     style: Theme.of(context).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w300),
                   ),
-                  Text(
-                    'View',
-                    style: Theme.of(context).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w400),
+                  GestureDetector(
+                    onTap: (){
+                      Navigator.of(context).push(pageAnimationrl(const OrderTimeline()));
+                    },
+                    child: Text(
+                      'View',
+                      style: Theme.of(context).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w400),
+                    ),
                   ),
                 ],
               )

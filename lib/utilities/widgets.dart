@@ -534,7 +534,7 @@ Widget EventCard(Widget child){
   return Padding(
     padding: const EdgeInsets.all(8.0),
     child: Container(
-      height: 250,
+      constraints: BoxConstraints(minHeight: 150), // Minimum height for the container
       margin: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -555,51 +555,57 @@ Widget statusTimelineTile({
   required eventCard
 }){
   return SizedBox(
-    height: 180,
-
-    child: TimelineTile(
-      isFirst: isFirst,
-      isLast: isLast,
-      beforeLineStyle: LineStyle(
-          color: isPast ? const Color(0xFF21D19F) : Colors.white
-      ),
-      indicatorStyle: IndicatorStyle(
-          width: 35,
-          color: isPast ? const Color(0xFF21D19F) : Colors.white,
-          iconStyle: IconStyle(
-              iconData: isPast ? Icons.done : Icons.close,
-              color: Colors.white
-          )
-      ),
-      endChild: EventCard(eventCard),
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        return TimelineTile(
+          isFirst: isFirst,
+          isLast: isLast,
+          beforeLineStyle: LineStyle(
+              color: isPast ? const Color(0xFF21D19F) : Colors.grey.shade400
+          ),
+          indicatorStyle: IndicatorStyle(
+              width: 25,
+              color: isPast ? const Color(0xFF21D19F) : Colors.grey.shade400,
+              iconStyle: IconStyle(
+                  iconData: isPast ? Icons.done : Icons.close,
+                  color: Colors.white
+              )
+          ),
+          endChild: EventCard(eventCard),
+        );
+      },
     ),
   );
 }
 
+
 Widget timelineTileText(String header, String first, String second){
-  return  Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(header, style: const TextStyle(
-          fontWeight: FontWeight.bold
-      )
-      ),
-      Text(first,
-          overflow: TextOverflow.visible,
-          maxLines: 2,
-          style: const TextStyle(
-            fontSize: 18,
-          )
-      ),
-      Text(second,
-          overflow: TextOverflow.visible,
-          maxLines: 2,
-          style: const TextStyle(
-              fontSize: 18
-          )
-      )
-    ],
+  return  SingleChildScrollView(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(header, style: const TextStyle(
+            fontWeight: FontWeight.bold
+        )
+        ),
+        const SizedBox(height: 10),
+        Text(first,
+            overflow: TextOverflow.visible,
+            maxLines: 2,
+            style: const TextStyle(
+              fontSize: 18,
+            )
+        ),
+        Text(second,
+            overflow: TextOverflow.visible,
+            maxLines: 2,
+            style: const TextStyle(
+                fontSize: 18
+            )
+        )
+      ],
+    ),
   );
 }
 
