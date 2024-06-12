@@ -145,7 +145,7 @@ class _MyAppState extends State<MyApp> {
           ),
           useMaterial3: true,
         ),
-        home: const Activity(), //SplashScreenWrapper(),
+        home: SplashScreenWrapper(),//const Activity(),
         routes: {
           '/login_page': (context) => const Login(),
           '/signup_page': (context) => const SignUp(),

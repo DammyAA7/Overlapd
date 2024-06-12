@@ -56,11 +56,20 @@ class DeliveryService extends ChangeNotifier {
         .collection('Order Info')
         .add(public);
     orderNo = orderInfoDocRef.id;
+
     final private = {
       'Grocery Store': storeName,
+      'Delivery Address': address,
+      'Delivery Address Coordinates': coordinates,
       'accepted by' : 'N/A',
       'Order number': orderNo,
       'Item Delivered': productList,
+      'Item Total' : total,
+      'Service fee': serviceFee,
+      'delivery fee': deliveryFee,
+      'payment id': paymentID,
+      'reward card': rewardCardUrl,
+      'receipt':'N/A',
       'Time Stamp': DateTime.now(),
       'complete': 'no',
       'cancelled': 'no'

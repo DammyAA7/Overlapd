@@ -1,4 +1,5 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ class TestScreen extends StatefulWidget {
 class _TestScreenState extends State<TestScreen> {
   bool _isEmailVerified = false;
   UserModel? _userModel;
+  late final String _UID = _auth.getUserId();
   final FirebaseAuthService _auth = FirebaseAuthService();
 
   @override
@@ -31,6 +33,24 @@ class _TestScreenState extends State<TestScreen> {
     handleDynamicLinks('dammyade07@gmail.com');
     _checkEmailVerification();
     _loadUserCredentials();
+    _setupFirestoreListener();
+  }
+
+  void _setupFirestoreListener() {
+    FirebaseFirestore.instance.collection('users').doc(_UID).snapshots().listen((snapshot) {
+      if (snapshot.exists) {
+        _updateLocalStorage(snapshot);
+      } else {
+        print('Document does not exist');
+      }
+    });
+  }
+
+  void _updateLocalStorage(DocumentSnapshot doc) async {
+      final userInfo = doc.data() as Map<String, dynamic>;
+        await Hive.box<UserModel>('userBox').delete(_UID);
+        await _auth.storeUserInfoInHive(_UID, userInfo);
+        _loadUserCredentials();
   }
 
   Future<void> _loadUserCredentials() async {
@@ -109,7 +129,6 @@ class _TestScreenState extends State<TestScreen> {
                       } else {
                         print('No user data found');
                       }
-                      print('uid ${_auth.currentUser}');
                 },
                 MediaQuery.of(context).size.width * 0.3,
                 Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.normal),
