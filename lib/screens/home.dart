@@ -655,21 +655,6 @@ class _HomeState extends State<Home> {
                 return Column(
                   children: [
                     solidButton(context, 'Track Location of Deliverer', () => trackDelivery(activeOrderDocument), activeOrderDocument['status'] == 'Order Handed Over'),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 22),
-                        child: ListView(
-                            children: [
-                              statusTimelineTile(isFirst: true, isLast: false, isPast: true, eventCard: timelineTileText('Order Requested', 'User accepted your delivery request', 'They are on their way to store')),
-                              statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['accepted by'] != 'N/A', eventCard: timelineTileText('Shopping in porgress', 'Keep in contact with user', 'Confirm they\'ve purchased your desired item')),
-                              statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['complete'], eventCard: timelineTileText('Shopping Complete & Awaiting pick up', 'User on their way to you', activeOrderDocument['deliverer code'] != null ? 'Give the deliverer this code ${activeOrderDocument['deliverer code']}' : '')),
-                              statusTimelineTile(isFirst: false, isLast: false, isPast: activeOrderDocument['picked up by'] != 'N/A', eventCard: timelineTileText('Groceries Have been picked up', 'User on their way to you', 'Confirm the items on the receipt')),
-                              statusTimelineTile(isFirst: false, isLast: true, isPast: activeOrderDocument['delivered'], eventCard: timelineTileText('Delivered', 'Your items have been delivered succesfully', 'Rate your experience with user')),
-
-                            ]
-                        ),
-                      ),
-                    ),
                   ],
                 );
               } else{

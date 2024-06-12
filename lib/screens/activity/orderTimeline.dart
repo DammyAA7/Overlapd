@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../utilities/widgets.dart';
 
@@ -17,7 +18,7 @@ class _OrderTimelineState extends State<OrderTimeline> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        toolbarHeight: MediaQuery.of(context).size.height * 0.25,
+        toolbarHeight: MediaQuery.of(context).size.height * 0.10,
           title:  Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -51,15 +52,21 @@ class _OrderTimelineState extends State<OrderTimeline> {
                   )
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16.0),
-                child: Text('Your order is being completed',
-                    style: Theme.of(context).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w300)
-                ),
-              ),
-              Column(
+            ],
+          )
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text('Your order is being completed',
+                      style: Theme.of(context).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w300)
+                  ),
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
                     child: Text('Share this code with the person who delivers your order',
@@ -76,21 +83,21 @@ class _OrderTimelineState extends State<OrderTimeline> {
                     }),
                   )
                 ],
-              )
-            ],
-          )
-      ),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 22),
-        child: ListView(
-            children: [
-              statusTimelineTile(isFirst: true, isLast: false, isPast: true, eventCard: timelineTileText('Order Received', 'User accepted your delivery request', 'They are on their way to store')),
-              statusTimelineTile(isFirst: false, isLast: false, isPast: false, eventCard: timelineTileText('Shopping in progress', 'Shopper has confirmed your order, and is shopping your items', '')),
-              statusTimelineTile(isFirst: false, isLast: false, isPast: false, eventCard: timelineTileText('Shopping complete & Awaiting pick up', 'Your shopper has paid for the goods', 'Your delivery person will pick them up shortly')),
-              statusTimelineTile(isFirst: false, isLast: false, isPast: false, eventCard: timelineTileText('Groceries picked up', 'Your delivery person has picked up your groceries and is on their way to you.', 'You can follow their progress by tracking them on the map')),
-              statusTimelineTile(isFirst: false, isLast: true, isPast: false, eventCard: timelineTileText('Delivered', 'Your items have been delivered successfully', '')),
-
-            ]
+              ),
+            ),
+            Expanded(
+              child: ListView(
+                  children: [
+                    statusTimelineTile(isFirst: true, isLast: false, isPast: true, eventCard: timelineTileText(context, 'Order Received', 'User accepted your delivery request', 'They are on their way to store', null)),
+                    statusTimelineTile(isFirst: false, isLast: false, isPast: true, eventCard: timelineTileText(context, 'Shopping in progress', 'Shopper has confirmed your order, and is shopping your items', '', null)),
+                    statusTimelineTile(isFirst: false, isLast: false, isPast: true, eventCard: timelineTileText(context, 'Shopping complete & Awaiting pick up', 'Your shopper has paid for the goods', 'Your delivery person will pick them up shortly', null)),
+                    statusTimelineTile(isFirst: false, isLast: false, isPast: true, eventCard: timelineTileText(context, 'Groceries picked up', 'Your delivery person has picked up your groceries and is on their way to you.', 'You can follow their progress by tracking them on the map', true)),
+                    statusTimelineTile(isFirst: false, isLast: true, isPast: false, eventCard: timelineTileText(context, 'Delivered', 'Your items have been delivered successfully', '', null)),
+              
+                  ]
+              ),
+            ),
+          ],
         ),
       ),
     );
