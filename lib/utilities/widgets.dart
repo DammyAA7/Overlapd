@@ -8,6 +8,8 @@ import '../screens/settings.dart';
 import '../screens/support.dart';
 import 'package:overlapd/screens/history.dart';
 
+import 'customButton.dart';
+
 Widget pageText(BuildContext context, String text) {
   return Padding(
     padding: const EdgeInsets.only(top: 8.0, bottom: 4),
@@ -532,16 +534,15 @@ PageRouteBuilder<dynamic> pageAnimationFromBottomToTop(Widget pageRoute) {
 
 Widget EventCard(Widget child){
   return Padding(
-    padding: const EdgeInsets.all(8.0),
+    padding: const EdgeInsets.all(4.0),
     child: Container(
-      height: 250,
-      margin: const EdgeInsets.all(20),
+      constraints: BoxConstraints(
+          minHeight: 100,
+          maxHeight: 300
+      ), // Minimum height for the container
+      margin: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-            color: Colors.white,
-            width: 1
-        ),
+        borderRadius: BorderRadius.circular(5),
       ),
       child: child,
     ),
@@ -554,52 +555,91 @@ Widget statusTimelineTile({
   required bool isPast,
   required eventCard
 }){
-  return SizedBox(
-    height: 180,
-
-    child: TimelineTile(
-      isFirst: isFirst,
-      isLast: isLast,
-      beforeLineStyle: LineStyle(
-          color: isPast ? const Color(0xFF21D19F) : Colors.white
-      ),
-      indicatorStyle: IndicatorStyle(
-          width: 35,
-          color: isPast ? const Color(0xFF21D19F) : Colors.white,
-          iconStyle: IconStyle(
-              iconData: isPast ? Icons.done : Icons.close,
-              color: Colors.white
-          )
-      ),
-      endChild: EventCard(eventCard),
+  return TimelineTile(
+    alignment: TimelineAlign.start,
+    isFirst: isFirst,
+    isLast: isLast,
+    beforeLineStyle: LineStyle(
+        thickness: 2,
+        color: isPast ?  Colors.green.shade900 : Colors.grey.shade400
     ),
+    indicatorStyle: IndicatorStyle(
+        width: 25,
+        color: isPast ? Colors.green.shade900 : Colors.grey.shade400,
+        iconStyle: IconStyle(
+            iconData: isPast ? Icons.done : Icons.close,
+            color: Colors.white
+        )
+    ),
+    endChild: EventCard(eventCard)
   );
 }
 
-Widget timelineTileText(String header, String first, String second){
-  return  Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(header, style: const TextStyle(
-          fontWeight: FontWeight.bold
-      )
-      ),
-      Text(first,
-          overflow: TextOverflow.visible,
-          maxLines: 2,
-          style: const TextStyle(
-            fontSize: 18,
-          )
-      ),
-      Text(second,
-          overflow: TextOverflow.visible,
-          maxLines: 2,
-          style: const TextStyle(
-              fontSize: 18
-          )
-      )
-    ],
+
+Widget timelineTileText(BuildContext context, String header, String first, String second, bool? addButton){
+  addButton ??= false;
+  return  Padding(
+    padding: const EdgeInsets.all(4.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(header, style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w600)
+        ),
+        const SizedBox(height: 10),
+        Text(first,
+            overflow: TextOverflow.visible,
+            maxLines: 3,
+            style: Theme.of(context).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w300)
+        ),
+        Text(second,
+            overflow: TextOverflow.visible,
+            maxLines: 3,
+            style: Theme.of(context).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w300)
+        ),
+        addButton ? Padding(
+          padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+          child: Button(
+              context,
+              'Track Delivery',
+                  () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          title: const Text('Your delivery is 3 minutes away',
+                            textAlign: TextAlign.center,
+                          ),
+                          content: Text('You can track the exact location of your delivery person on Google maps',
+                            style: Theme.of(context).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.w300),
+                            textAlign: TextAlign.center,
+                          ),
+                          actions: <Widget>[
+                            Center(
+                              child: Button(
+                                context,
+                                'Open map',
+                                  (){},
+                                  MediaQuery.of(context).size.width * 0.7,
+                                  Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.normal),
+                                  Colors.black
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+              MediaQuery.of(context).size.width * 0.5,
+              Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.normal),
+              Colors.grey
+          ),
+        ) : const SizedBox.shrink()
+      ],
+    ),
   );
 }
 

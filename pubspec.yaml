@@ -66,6 +66,7 @@ dependencies:
   smooth_page_indicator: ^1.1.0
   firebase_dynamic_links: ^5.5.6
   permission_handler: ^11.3.1
+  badges: ^3.1.2
 
 dev_dependencies:
   flutter_test:
