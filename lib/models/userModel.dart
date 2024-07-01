@@ -16,11 +16,14 @@ class UserModel extends HiveObject {
   @HiveField(3)
   String phoneNumber;
 
+  @HiveField(4)
+  bool? emailVerified;
 
   UserModel({
     required this.firstName,
     required this.lastName,
     required this.email,
-    required this.phoneNumber
+    required this.phoneNumber,
+    required this.emailVerified,
   });
 }

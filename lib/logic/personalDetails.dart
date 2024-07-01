@@ -28,6 +28,7 @@ Future createUserCredentials(User? user, String firstName, String lastName, Stri
     lastName: lastName,
     email: email,
     phoneNumber: user?.phoneNumber ?? '',
+    emailVerified: user?.emailVerified ?? false
   );
   // Save to Hive
   userBox.put(user?.uid, userModel);
@@ -36,7 +37,8 @@ Future createUserCredentials(User? user, String firstName, String lastName, Stri
     'First Name': firstName,
     'Last Name': lastName,
     'Email Address': email,
-    'Phone Number': user?.phoneNumber
+    'Phone Number': user?.phoneNumber,
+    'Email Verified': user?.emailVerified
   };
 
   await docUser.set(json);
@@ -67,7 +69,8 @@ Future<UserModel?> getUserCredentials(String? uid) async {
           firstName: data['First Name'],
           lastName: data['Last Name'],
           email: data['Email Address'],
-          phoneNumber: data['Phone Number']
+          phoneNumber: data['Phone Number'],
+          emailVerified: data['Email Verified']
         );
         // Save to Hive for future retrieval
         userBox.put(uid, userModel);

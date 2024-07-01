@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
@@ -98,6 +99,10 @@ class _MyAppState extends State<MyApp> {
       // Handle sign-in link
       bool success = await handleEmailLinkCredentials(deepLink, 'dammyade07@gmail.com');
       if (success) {
+        _auth.currentUser?.reload();
+        await FirebaseFirestore.instance.collection('users').doc(_auth.currentUser?.uid).update({
+          'Email Verified': _auth.currentUser?.emailVerified,
+        });
         navigatorKey.currentState?.pushReplacement(
           MaterialPageRoute(builder: (context) => const TestScreen()),
         );
@@ -181,7 +186,13 @@ Future<bool> handleEmailLinkCredentials(Uri deepLink, String email) async {
         final User? user = FirebaseAuth.instance.currentUser;
         if (user != null) {
           await FirebaseAuth.instance.currentUser?.linkWithCredential(emailCredential);
+          // Update Firestore document
+          user.reload();
+          await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+            'Email Verified': user.emailVerified,
+          });
           print('Email successfully linked to phone number.');
+          print(user.emailVerified);
           return true;
         }
       } catch (e) {
