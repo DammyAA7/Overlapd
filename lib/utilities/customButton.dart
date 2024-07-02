@@ -4,7 +4,7 @@ Widget Button(
     BuildContext context,
     String buttonName,
     Function() onPressed,
-    double width,
+    double? width,
     TextStyle style,
     Color color
     ) {
@@ -21,9 +21,9 @@ Widget Button(
         elevation: 0,
       ),
       child: Text(
-        buttonName,
-        maxLines: 1,
-        style: style
+          buttonName,
+          maxLines: 1,
+          style: style
       ),
     ),
   );

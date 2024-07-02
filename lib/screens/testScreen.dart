@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:overlapd/logic/signInLink.dart';
 import 'package:overlapd/screens/onboardingScreens/onboarding.dart';
+import 'package:overlapd/screens/profile/profile.dart';
 import 'package:overlapd/services/permissions/permissions.dart';
 import 'package:overlapd/utilities/customButton.dart';
 import '../logic/personalDetails.dart';
@@ -21,7 +22,7 @@ class TestScreen extends StatefulWidget {
 }
 
 class _TestScreenState extends State<TestScreen> {
-  bool _isEmailVerified = false;
+  bool? _isEmailVerified;
   UserModel? _userModel;
   late final String _UID = _auth.getUserId();
   final FirebaseAuthService _auth = FirebaseAuthService();
@@ -58,6 +59,7 @@ class _TestScreenState extends State<TestScreen> {
     if (mounted) {
       setState(() {
         _userModel = userModel;
+        _isEmailVerified = userModel?.emailVerified;
       });
     }
   }
@@ -84,7 +86,7 @@ class _TestScreenState extends State<TestScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Center(
-            child: _isEmailVerified
+            child: _isEmailVerified ?? false
                 ? Text(
               'Email is verified',
               style: Theme.of(context).textTheme.headline6,
@@ -126,9 +128,11 @@ class _TestScreenState extends State<TestScreen> {
                         print('Last Name: ${_userModel!.lastName}');
                         print('Email: ${_userModel!.email}');
                         print('Phone Number: ${_userModel!.phoneNumber}');
+                        print('Email Verified ${_userModel!.emailVerified}');
                       } else {
                         print('No user data found');
                       }
+                      Navigator.of(context).push(pageAnimationrl(const Profile()));
                 },
                 MediaQuery.of(context).size.width * 0.3,
                 Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.normal),
