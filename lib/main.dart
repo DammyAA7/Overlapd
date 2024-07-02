@@ -16,6 +16,7 @@ import 'package:overlapd/services/userAuthService/forgottenPassword.dart';
 import 'package:overlapd/services/userAuthService/emailVerification.dart';
 import 'package:overlapd/services/userAuthService/phoneVerification.dart';
 import 'package:overlapd/services/userAuthService/phoneVerificationCode.dart';
+import 'package:overlapd/utilities/providers/userProviders.dart';
 import 'package:overlapd/utilities/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -127,44 +128,55 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
 
-    return ChangeNotifierProvider(
-      create: (context) => Cart(),
-      child: MaterialApp(
-        navigatorKey: navigatorKey,
-        debugShowCheckedModeBanner: false,
-        title: 'Overlap',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
-          fontFamily: 'Cabin',
-          textTheme: const TextTheme(
-            labelLarge: TextStyle(fontSize: 18),
-            displayMedium: TextStyle(fontSize: 35.0),
-            bodyLarge: TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.w200,
-                color: Color(0xFF072C22)),
-            bodyMedium: TextStyle(
-                fontSize: 24.0,
-                fontWeight: FontWeight.w300,
-                color: Color(0xFF072C22)),
-          ),
-          useMaterial3: true,
-        ),
-        home: SplashScreenWrapper(),//const Activity(),
-        routes: {
-          '/login_page': (context) => const Login(),
-          '/signup_page': (context) => const SignUp(),
-          '/home_page': (context) => const Home(),
-          '/settings_page': (context) => const Setting(),
-          '/history_page': (context) => const History(),
-          '/about_page': (context) => const About(),
-          '/support_page': (context) => const Support(),
-          '/payment_page': (context) => const Payment(),
-          '/picker_page': (context) => const Picker(),
-          '/forgotten_password_page': (context) => const ForgotPassword(),
-          '/email_verification_page': (context) => const EmailVerification(),
-          '/phone_verification_page': (context) => const PhoneVerification(),
-          '/phone_verification_code_page': (context) => const VerificationCode(verificationId: '', verificationType: ''),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => Cart()),
+        ChangeNotifierProvider(create: (context) => UserProvider()),
+      ],
+      child: Consumer<UserProvider>(
+        builder: (context, userProvider, child) {
+          final user = FirebaseAuth.instance.currentUser;
+          if (user != null) {
+            userProvider.initialize(user.uid);
+          }
+          return MaterialApp(
+            navigatorKey: navigatorKey,
+            debugShowCheckedModeBanner: false,
+            title: 'Overlap',
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
+              fontFamily: 'Cabin',
+              textTheme: const TextTheme(
+                labelLarge: TextStyle(fontSize: 18),
+                displayMedium: TextStyle(fontSize: 35.0),
+                bodyLarge: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w200,
+                    color: Color(0xFF072C22)),
+                bodyMedium: TextStyle(
+                    fontSize: 24.0,
+                    fontWeight: FontWeight.w300,
+                    color: Color(0xFF072C22)),
+              ),
+              useMaterial3: true,
+            ),
+            home: SplashScreenWrapper(),//const Activity(),
+            routes: {
+              '/login_page': (context) => const Login(),
+              '/signup_page': (context) => const SignUp(),
+              '/home_page': (context) => const Home(),
+              '/settings_page': (context) => const Setting(),
+              '/history_page': (context) => const History(),
+              '/about_page': (context) => const About(),
+              '/support_page': (context) => const Support(),
+              '/payment_page': (context) => const Payment(),
+              '/picker_page': (context) => const Picker(),
+              '/forgotten_password_page': (context) => const ForgotPassword(),
+              '/email_verification_page': (context) => const EmailVerification(),
+              '/phone_verification_page': (context) => const PhoneVerification(),
+              '/phone_verification_code_page': (context) => const VerificationCode(verificationId: '', verificationType: ''),
+            },
+          );
         },
       ),
     );
