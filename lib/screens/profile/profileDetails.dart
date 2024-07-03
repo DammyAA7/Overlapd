@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -95,6 +97,15 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         emailVerified: _auth.currentUser!.emailVerified
     );
     await box.put(_UID, _userModel!);
+    // Firestore update
+    await FirebaseFirestore.instance.collection('users').doc(_UID).set({
+      'First Name': firstName.text,
+      'Last Name': lastName.text,
+      'Email Address': emailAddress.text,
+      'Phone Number': '+353${mobileNumber.text.replaceAll(' ', '')}',
+      'Email Verified': _auth.currentUser!.emailVerified,
+    }, SetOptions(merge: true)); // Use merge to avoid overwriting existing fields
+
     setState(() {});
   }
 
@@ -303,7 +314,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                     context,
                     'Update account name',
                         () async {
-                      if (!isFNEmpty && !isLNEmpty) {
+                      if (!isFNEmpty && !isLNEmpty && (_userModel!.firstName != firstName.text || _userModel!.lastName != lastName.text)) {
                         await _updateUserModel();
                         Navigator.of(context).pop();
                       }
@@ -365,9 +376,22 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                         incorrectFormat = isValidEmail(emailAddress.text);
                         isEAEmpty = emailAddress.text.isEmpty;
                       });
-                      if (!isEAEmpty && incorrectFormat) {
-                        await _updateUserModel();
-                        Navigator.of(context).pop();
+                      await _auth.currentUser?.reload();
+                      await _auth.currentUser?.getIdToken(true); // Force refresh the token
+                      User? updatedUser = FirebaseAuth.instance.currentUser;
+                      print(updatedUser?.emailVerified);
+                      if (!isEAEmpty && incorrectFormat && _userModel!.email != emailAddress.text) {
+                        if(_userModel?.emailVerified ?? false){
+                          await _auth.currentUser?.unlink('password');
+                          await _auth.currentUser?.reload();
+                          print(_auth.currentUser?.emailVerified);
+                          await _auth.sendLinkToPhone(emailAddress.text);
+                          await _updateUserModel();
+                          setState((){
+                            _isEmailVerified = _auth.currentUser?.emailVerified;
+                          });
+                          Navigator.of(context).pop();
+                        }
                       }
                     },
                     double.infinity,
@@ -407,7 +431,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                     context,
                     'Update phone number',
                         () async {
-                      if (!isMNEmpty) {
+                      if (!isMNEmpty && _userModel!.phoneNumber != mobileNumber.text) {
                         await _updateUserModel();
                         Navigator.of(context).pop();
                       }
