@@ -31,8 +31,6 @@ class _TestScreenState extends State<TestScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    handleDynamicLinks('dammyade07@gmail.com');
-    _checkEmailVerification();
     _loadUserCredentials();
     _setupFirestoreListener();
   }
@@ -62,21 +60,7 @@ class _TestScreenState extends State<TestScreen> {
         _isEmailVerified = userModel?.emailVerified;
       });
     }
-  }
-
-  Future<void> _checkEmailVerification() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      await user.reload();
-      user = FirebaseAuth.instance.currentUser; // Refresh the user instance
-      if (user!.emailVerified) {
-        if (mounted) {
-          setState(() {
-            _isEmailVerified = true;
-          });
-        }
-      }
-    }
+    handleDynamicLinks(_userModel!.email);
   }
 
   @override
@@ -95,7 +79,7 @@ class _TestScreenState extends State<TestScreen> {
                 context,
                 'attach',
                     () async{
-                      await _auth.sendLinkToPhone('dammyade07@gmail.com');
+                      await _auth.sendLinkToPhone(_userModel!.email);
                     },
                 MediaQuery.of(context).size.width * 0.3,
                 Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.normal),
@@ -148,7 +132,7 @@ class _TestScreenState extends State<TestScreen> {
       Uri deepLink = dynamicLinkData.link;
       bool success = await handleEmailLinkCredentials(deepLink, email);
       if (success && mounted) {
-        _checkEmailVerification(); // Call navigation function
+        // Call navigation function
       }
     }).onError((error) {
       // Handle errors (e.g., show a message to the user)
@@ -159,7 +143,7 @@ class _TestScreenState extends State<TestScreen> {
     if (initialLink != null) {
       bool success = await handleEmailLinkCredentials(initialLink.link, email);
       if (success && mounted) {
-        _checkEmailVerification(); // Call navigation function
+        // Call navigation function
       }
     }
   }

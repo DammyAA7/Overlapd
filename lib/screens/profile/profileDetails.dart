@@ -14,6 +14,7 @@ import '../../utilities/customButton.dart';
 import '../../utilities/customNumberField.dart';
 import '../../utilities/customTextField.dart';
 import '../../utilities/widgets.dart';
+import '../onboardingScreens/onboarding.dart';
 
 class ProfileDetails extends StatefulWidget {
   const ProfileDetails({super.key});
@@ -382,15 +383,40 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       print(updatedUser?.emailVerified);
                       if (!isEAEmpty && incorrectFormat && _userModel!.email != emailAddress.text) {
                         if(_userModel?.emailVerified ?? false){
-                          await _auth.currentUser?.unlink('password');
+                          await _auth.currentUser?.verifyBeforeUpdateEmail(emailAddress.text);
                           await _auth.currentUser?.reload();
-                          print(_auth.currentUser?.emailVerified);
-                          await _auth.sendLinkToPhone(emailAddress.text);
-                          await _updateUserModel();
-                          setState((){
-                            _isEmailVerified = _auth.currentUser?.emailVerified;
-                          });
-                          Navigator.of(context).pop();
+                          showDialog(
+                            barrierDismissible: false,
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                backgroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                title: const Text('Your are being logged out and will need to log back in',
+                                  textAlign: TextAlign.center,
+                                ),
+                                actions: <Widget>[
+                                  Center(
+                                    child: Button(
+                                        context,
+                                        'Okay',
+                                            (){
+                                              FirebaseAuth.instance.signOut();
+                                              _auth.setLoggedOut();
+                                              Navigator.of(context).pushReplacement(pageAnimationlr(const Onboarding()));
+                                            },
+                                        MediaQuery.of(context).size.width * 0.7,
+                                        Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.normal),
+                                        Colors.black
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                          //await _updateUserModel();
                         }
                       }
                     },
