@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:overlapd/screens/address/address.dart';
 import 'package:overlapd/screens/profile/profileDetails.dart';
 import 'package:overlapd/screens/testScreen.dart';
 import '../../models/userModel.dart';
@@ -78,7 +79,7 @@ class _ProfileState extends State<Profile> {
     final titles = ['Profile details', 'Addresses', 'Earnings', 'Referrals', 'Reward cards'];
     final routes = [
       const ProfileDetails(),  // Add your actual destination pages here
-      TestScreen(),
+      const Address(),
       TestScreen(),
       TestScreen(),
       TestScreen(),
