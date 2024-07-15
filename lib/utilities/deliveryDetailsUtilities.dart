@@ -12,17 +12,16 @@ class AddressComponents {
   final String? postcode;
   final String? fullAddress;
 
-  AddressComponents({
-    this.buildingNumber,
-    this.streetAddress,
-    this.locality,
-    this.area,
-    this.postcode,
-    this.fullAddress
-  });
+  AddressComponents(
+      {this.buildingNumber,
+      this.streetAddress,
+      this.locality,
+      this.area,
+      this.postcode,
+      this.fullAddress});
 }
 
-Widget locationListTile(String location, VoidCallback press){
+Widget locationListTile(String location, VoidCallback press) {
   return Column(
     children: [
       ListTile(
@@ -42,7 +41,8 @@ Widget locationListTile(String location, VoidCallback press){
   );
 }
 
-Future<AddressComponents?> getAddressDetailsFromCoordinates(double latitude, double longitude) async {
+Future<AddressComponents?> getAddressDetailsFromCoordinates(
+    double latitude, double longitude) async {
   Uri uri = Uri.https(
     "maps.googleapis.com",
     'maps/api/geocode/json',
@@ -68,8 +68,8 @@ Future<AddressComponents?> getAddressDetailsFromCoordinates(double latitude, dou
         String? fullAddress;
 
         fullAddress = decodedResponse["results"][0]["formatted_address"];
-        List<dynamic> addressComponents = decodedResponse["results"][0]["address_components"];
-
+        List<dynamic> addressComponents =
+            decodedResponse["results"][0]["address_components"];
 
         for (var component in addressComponents) {
           List<String> types = List<String>.from(component["types"]);
@@ -77,7 +77,8 @@ Future<AddressComponents?> getAddressDetailsFromCoordinates(double latitude, dou
             buildingNumber = component["long_name"];
           } else if (types.contains("route")) {
             streetAddress = component["long_name"];
-          } else if (types.contains("neighborhood") || types.contains("locality")) {
+          } else if (types.contains("neighborhood") ||
+              types.contains("locality")) {
             locality = component["long_name"];
           } else if (types.contains("administrative_area_level_1")) {
             area = component["long_name"];
@@ -87,13 +88,12 @@ Future<AddressComponents?> getAddressDetailsFromCoordinates(double latitude, dou
         }
 
         return AddressComponents(
-          buildingNumber: buildingNumber,
-          streetAddress: streetAddress,
-          locality: locality,
-          area: area,
-          postcode: postcode,
-          fullAddress: fullAddress
-        );
+            buildingNumber: buildingNumber,
+            streetAddress: streetAddress,
+            locality: locality,
+            area: area,
+            postcode: postcode,
+            fullAddress: fullAddress);
       }
     }
   } catch (e) {
@@ -144,7 +144,6 @@ class Coordinates {
   final double longitude;
 
   Coordinates(this.latitude, this.longitude);
-
 }
 
 Future<Coordinates?> getCoordinates(String address) async {
@@ -153,7 +152,8 @@ Future<Coordinates?> getCoordinates(String address) async {
     'maps/api/geocode/json',
     {
       "address": address,
-      "key": "AIzaSyDFcJ0SWLhnTZVktTPn8jB5nJ2hpuSfwNk", // Replace with your Google Maps API key
+      "key":
+          "AIzaSyDFcJ0SWLhnTZVktTPn8jB5nJ2hpuSfwNk", // Replace with your Google Maps API key
     },
   );
 
@@ -180,6 +180,8 @@ class DeliveryDetails {
   late final String storeToDestination;
   late final int totalJourneyTime;
 
-  DeliveryDetails({required this.distanceToStore, required this.storeToDestination, required this.totalJourneyTime});
+  DeliveryDetails(
+      {required this.distanceToStore,
+      required this.storeToDestination,
+      required this.totalJourneyTime});
 }
-

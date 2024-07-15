@@ -23,27 +23,26 @@ class _PhoneVerificationState extends State<PhoneVerification> {
   final InputBoxController _phoneNumber = InputBoxController();
   FocusNode focusNode = FocusNode();
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title:  Row(
+        title: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             IconButton(
-              onPressed: () async{
+              onPressed: () async {
                 // Navigate to the home page with a fade transition
-                try{
+                try {
                   await _auth.setLoggedOut();
                   await FirebaseAuth.instance.signOut();
                   Navigator.pushReplacement(
                     context,
                     pageAnimationlr(const Login()),
                   );
-                } catch (e){
+                } catch (e) {
                   print(e);
                 }
               },
@@ -64,8 +63,8 @@ class _PhoneVerificationState extends State<PhoneVerification> {
               IntlPhoneField(
                 focusNode: focusNode,
                 decoration: InputDecoration(
-                  contentPadding:
-                  const EdgeInsets.only(left: 15, right: 15, top: 20, bottom: 20),
+                  contentPadding: const EdgeInsets.only(
+                      left: 15, right: 15, top: 20, bottom: 20),
                   filled: true,
                   fillColor: const Color(0xFF6EE8C5).withOpacity(0.1),
                   enabledBorder: OutlineInputBorder(
@@ -97,21 +96,22 @@ class _PhoneVerificationState extends State<PhoneVerification> {
                   hintStyle: const TextStyle(
                       color: Color(0xFF727E7B),
                       fontFamily: 'Darker Grotesque',
-                      fontSize: 22.0
-                  ),
+                      fontSize: 22.0),
                 ),
                 languageCode: "ie",
                 onChanged: (phone) {
                   _phoneNumber.controller.text = phone.completeNumber;
-
                 },
                 onCountryChanged: (country) {
-                  if(country.name != 'Ireland'){
-                    showToast(text: 'Country not supported. Only available in Ireland');
+                  if (country.name != 'Ireland') {
+                    showToast(
+                        text:
+                            'Country not supported. Only available in Ireland');
                   }
                 },
               ),
-              solidButton(context, 'Send code', () => storeNumber(), _phoneNumber.getText().isNotEmpty)
+              solidButton(context, 'Send code', () => storeNumber(),
+                  _phoneNumber.getText().isNotEmpty)
             ],
           ),
         ),
@@ -119,7 +119,7 @@ class _PhoneVerificationState extends State<PhoneVerification> {
     );
   }
 
-  void storeNumber() async{
+  void storeNumber() async {
     await FirebaseFirestore.instance
         .collection('users')
         .doc(_UID)
@@ -128,24 +128,26 @@ class _PhoneVerificationState extends State<PhoneVerification> {
     getSMSVerification();
   }
 
-  void getSMSVerification() async{
-    DocumentSnapshot userInfo = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_UID)
-        .get();
-    final session = await FirebaseAuth.instance.currentUser!.multiFactor.getSession();
+  void getSMSVerification() async {
+    DocumentSnapshot userInfo =
+        await FirebaseFirestore.instance.collection('users').doc(_UID).get();
+    final session =
+        await FirebaseAuth.instance.currentUser!.multiFactor.getSession();
     final auth = FirebaseAuth.instance;
     await auth.verifyPhoneNumber(
       multiFactorSession: session,
       phoneNumber: userInfo['Phone Number'],
       verificationCompleted: (_) {},
       verificationFailed: (_) {},
-      codeSent: (verificationId, resendToken){
+      codeSent: (verificationId, resendToken) {
         // See `firebase_auth` example app for a method of retrieving user's sms code:
         // https://github.com/firebase/flutterfire/blob/master/packages/firebase_auth/firebase_auth/example/lib/auth.dart#L591
         Navigator.pushReplacement(
           context,
-          pageAnimationlr(VerificationCode(verificationId: verificationId, verificationType: 'Enroll',)),
+          pageAnimationlr(VerificationCode(
+            verificationId: verificationId,
+            verificationType: 'Enroll',
+          )),
         );
       },
       codeAutoRetrievalTimeout: (_) {},

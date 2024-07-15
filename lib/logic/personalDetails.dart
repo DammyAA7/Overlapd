@@ -7,8 +7,8 @@ bool isValidEmail(String email) {
 
 Color buttonColor(bool isValid) => isValid ? Colors.black : Colors.grey;
 
-Color textButtonColor(bool isValid) =>  isValid ? Colors.white : Colors.black54;
+Color textButtonColor(bool isValid) => isValid ? Colors.white : Colors.black54;
 
-Color borderColor(bool isValid) =>  isValid ? Colors.grey : Colors.black;
+Color borderColor(bool isValid) => isValid ? Colors.grey : Colors.black;
 
-Color textColor(bool isValid) =>  isValid ? Colors.grey : Colors.black;
+Color textColor(bool isValid) => isValid ? Colors.grey : Colors.black;

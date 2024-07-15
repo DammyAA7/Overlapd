@@ -9,7 +9,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:overlapd/utilities/toast.dart';
 import '../utilities/widgets.dart';
 import 'chat/chat.dart';
-import 'home.dart';
+import 'home/home.dart';
+
 class AcceptedDeliveryDetails extends StatefulWidget {
   final String placedByUserId;
   final String acceptedByUserName;
@@ -17,22 +18,28 @@ class AcceptedDeliveryDetails extends StatefulWidget {
   final String? deliveryAddress;
   final List? itemList;
   static const id = 'accepteddeliverydetails_page';
-  const AcceptedDeliveryDetails({super.key, required this.placedByUserId, required this.acceptedByUserName, this.orderID, this.deliveryAddress, this.itemList});
+  const AcceptedDeliveryDetails(
+      {super.key,
+      required this.placedByUserId,
+      required this.acceptedByUserName,
+      this.orderID,
+      this.deliveryAddress,
+      this.itemList});
 
   @override
-  State<AcceptedDeliveryDetails> createState() => _AcceptedDeliveryDetailsState();
+  State<AcceptedDeliveryDetails> createState() =>
+      _AcceptedDeliveryDetailsState();
 }
 
-
-
-class _AcceptedDeliveryDetailsState extends State<AcceptedDeliveryDetails>{
+class _AcceptedDeliveryDetailsState extends State<AcceptedDeliveryDetails> {
   late List<bool?> isCheckedList;
   late Box<bool?> checkboxStateBox;
   Position? liveLocation;
   @override
   void initState() {
     super.initState();
-    isCheckedList = List.generate(widget.itemList?.length ?? 0, (index) => false);
+    isCheckedList =
+        List.generate(widget.itemList?.length ?? 0, (index) => false);
     initHive();
     _liveLocation();
   }
@@ -49,44 +56,53 @@ class _AcceptedDeliveryDetailsState extends State<AcceptedDeliveryDetails>{
     setState(() {});
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title:  Row(
+        title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-              IconButton(
+                IconButton(
+                  onPressed: () {
+                    // Navigate to the home page with a fade transition
+                    Navigator.push(
+                      context,
+                      pageAnimationlr(const Home()),
+                    );
+                  },
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                ),
+                Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Active Delivery',
+                    style: Theme.of(context).textTheme.displayMedium,
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            IconButton(
                 onPressed: () {
-                  // Navigate to the home page with a fade transition
                   Navigator.push(
                     context,
-                    pageAnimationlr(const Home()),
+                    pageAnimationFromBottomToTop(Chat(
+                      whatUser: false,
+                      receiverUserName: widget.acceptedByUserName,
+                      receiverUserId: widget.placedByUserId,
+                      orderID: widget.orderID,
+                      deliveryAddress: widget.deliveryAddress,
+                      itemList: widget.itemList,
+                    )),
                   );
                 },
-                icon: const Icon(Icons.arrow_back_ios_new_rounded),
-              ),
-              Align(
-                alignment: Alignment.center,
-                child: Text(
-                  'Active Delivery',
-                  style: Theme.of(context).textTheme.displayMedium,
-                ),
-              ),
-            ],),
-            const Spacer(),
-            IconButton(onPressed: (){
-              Navigator.push(
-                context,
-                pageAnimationFromBottomToTop(Chat(whatUser: false, receiverUserName: widget.acceptedByUserName, receiverUserId: widget.placedByUserId, orderID: widget.orderID, deliveryAddress: widget.deliveryAddress, itemList: widget.itemList,)),
-              );
-            }, icon:  const Icon((Icons.chat))),
+                icon: const Icon((Icons.chat))),
             const SizedBox(width: 5),
             const Icon((Icons.call)),
           ],
@@ -96,11 +112,14 @@ class _AcceptedDeliveryDetailsState extends State<AcceptedDeliveryDetails>{
         children: [
           Text('Order No: ${widget.orderID}'),
           Text((widget.deliveryAddress)!),
-          Text('lat: ${liveLocation?.latitude} lng: ${liveLocation?.longitude}'),
-          MaterialButton(onPressed: (){
-            _liveLocation();
-          },
-          child: const Text('get live location'),),
+          Text(
+              'lat: ${liveLocation?.latitude} lng: ${liveLocation?.longitude}'),
+          MaterialButton(
+            onPressed: () {
+              _liveLocation();
+            },
+            child: const Text('get live location'),
+          ),
           const Text('Item List'),
           Expanded(
             child: ListView.builder(
@@ -120,7 +139,6 @@ class _AcceptedDeliveryDetailsState extends State<AcceptedDeliveryDetails>{
                           // Save checkbox state to Hive
                           checkboxStateBox.put(index, value);
                         });
-
                       },
                       title: Text('$itemName - $itemQuantity')),
                   // Add more details or customize the ListTile as needed
@@ -134,12 +152,13 @@ class _AcceptedDeliveryDetailsState extends State<AcceptedDeliveryDetails>{
     );
   }
 
-  void _liveLocation(){
+  void _liveLocation() {
     LocationSettings locationSettings = const LocationSettings(
       accuracy: LocationAccuracy.high,
       distanceFilter: 30,
     );
-    Geolocator.getPositionStream(locationSettings: locationSettings).listen((Position position) {
+    Geolocator.getPositionStream(locationSettings: locationSettings)
+        .listen((Position position) {
       setState(() async {
         GeoPoint point = GeoPoint(position.latitude, position.longitude);
         await FirebaseFirestore.instance
@@ -151,14 +170,16 @@ class _AcceptedDeliveryDetailsState extends State<AcceptedDeliveryDetails>{
       });
     });
   }
-  void _captureReceipt() async{
+
+  void _captureReceipt() async {
     ImagePicker imagePicker = ImagePicker();
     XFile? receipt = await imagePicker.pickImage(source: ImageSource.camera);
-    if( receipt== null) return;
+    if (receipt == null) return;
     Reference referenceRoot = FirebaseStorage.instance.ref();
     Reference referenceDirImages = referenceRoot.child('Receipts');
-    Reference referenceImageToUpload = referenceDirImages.child((widget.orderID)!);
-    try{
+    Reference referenceImageToUpload =
+        referenceDirImages.child((widget.orderID)!);
+    try {
       await referenceImageToUpload.putFile(File(receipt.path));
       String downloadURL = await referenceImageToUpload.getDownloadURL();
       await FirebaseFirestore.instance
@@ -168,9 +189,8 @@ class _AcceptedDeliveryDetailsState extends State<AcceptedDeliveryDetails>{
           .doc(widget.orderID)
           .update({'receipt': downloadURL});
       showToast(text: "Successfully uploaded receipt");
-    }catch(e){
+    } catch (e) {
       showToast(text: "Error uploading Image");
     }
-
   }
 }

@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 
-Widget Button(
-    BuildContext context,
-    String buttonName,
-    Function() onPressed,
-    double width,
-    TextStyle style,
-    Color color
-    ) {
+Widget Button(BuildContext context, String buttonName, Function() onPressed,
+    double width, TextStyle style, Color color) {
   return SizedBox(
     width: width,
     height: 50,
@@ -20,11 +14,7 @@ Widget Button(
         backgroundColor: color,
         elevation: 0,
       ),
-      child: Text(
-        buttonName,
-        maxLines: 1,
-        style: style
-      ),
+      child: Text(buttonName, maxLines: 1, style: style),
     ),
   );
 }

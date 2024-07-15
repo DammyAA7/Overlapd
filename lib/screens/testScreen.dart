@@ -1,4 +1,3 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
@@ -20,23 +19,21 @@ class _TestScreenState extends State<TestScreen> {
     super.initState();
     handleDynamicLinks('dammyade07@gmail.com');
   }
+
   @override
   Widget build(BuildContext context) {
     final FirebaseAuthService _auth = FirebaseAuthService();
     return Scaffold(
       body: Center(
-        child: Button(
-            context,
-            'attach',
-                () async{
-                  await _auth.sendSignInLinkToEmail('dammyade07@gmail.com');
-                },
-            MediaQuery.of(context).size.width * 0.3,
-            Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.normal),
-            Colors.black
-        )
-      ),
+          child: Button(context, 'attach', () async {
+        await _auth.sendSignInLinkToEmail('dammyade07@gmail.com');
+      },
+              MediaQuery.of(context).size.width * 0.3,
+              Theme.of(context)
+                  .textTheme
+                  .labelLarge!
+                  .copyWith(color: Colors.white, fontWeight: FontWeight.normal),
+              Colors.black)),
     );
   }
-
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../utilities/widgets.dart';
-import 'home.dart';
+import 'home/home.dart';
 
 class About extends StatefulWidget {
   static const id = 'about_page';
@@ -17,7 +17,7 @@ class _AboutState extends State<About> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title:  Row(
+        title: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

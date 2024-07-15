@@ -6,9 +6,11 @@ import 'package:overlapd/utilities/widgets.dart';
 import '../pickers/requestedDeliveryStatus.dart';
 
 //when the user accepts a delivery, the currents unaccepted delivery requested are replaced with the card below. It gives the user a brief description of the order.
-Widget activeDeliveryCard(String placedByUser, String orderID, String acceptedByUser, String deliveryAddress, List itemList){
+Widget activeDeliveryCard(String placedByUser, String orderID,
+    String acceptedByUser, String deliveryAddress, List itemList) {
   return FutureBuilder(
-    future: Future.wait([getFirstName(placedByUser), getFirstName(acceptedByUser)]),
+    future:
+        Future.wait([getFirstName(placedByUser), getFirstName(acceptedByUser)]),
     builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const CircularProgressIndicator();
@@ -18,10 +20,15 @@ Widget activeDeliveryCard(String placedByUser, String orderID, String acceptedBy
         String firstName = snapshot.data?[0];
         String acceptedUserFirstName = snapshot.data?[1];
         return GestureDetector(
-          onTap: (){
+          onTap: () {
             Navigator.push(
               context,
-              pageAnimationrl(AcceptedDeliveryDetails(placedByUserId: placedByUser, acceptedByUserName: acceptedUserFirstName, orderID: orderID, deliveryAddress: deliveryAddress, itemList: itemList)),
+              pageAnimationrl(AcceptedDeliveryDetails(
+                  placedByUserId: placedByUser,
+                  acceptedByUserName: acceptedUserFirstName,
+                  orderID: orderID,
+                  deliveryAddress: deliveryAddress,
+                  itemList: itemList)),
             );
           },
           child: Padding(
@@ -47,9 +54,14 @@ Widget activeDeliveryCard(String placedByUser, String orderID, String acceptedBy
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Order No: $orderID', style: const TextStyle(fontSize: 20)),
-                              Text('You\'ll be delivering groceries for $firstName', style: const TextStyle(fontSize: 20)),
-                              const Text('You will earn €6.99 from this delivery', style: TextStyle(fontSize: 20))
+                              Text('Order No: $orderID',
+                                  style: const TextStyle(fontSize: 20)),
+                              Text(
+                                  'You\'ll be delivering groceries for $firstName',
+                                  style: const TextStyle(fontSize: 20)),
+                              const Text(
+                                  'You will earn €6.99 from this delivery',
+                                  style: TextStyle(fontSize: 20))
                             ],
                           ),
                         ),
@@ -70,16 +82,16 @@ Widget activeDeliveryCard(String placedByUser, String orderID, String acceptedBy
 
 //gets the first name of the user from the users collection using their unique ID
 Future<String> getFirstName(String userId) async {
-  DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
-      .collection('users')
-      .doc(userId).get();
+  DocumentSnapshot userSnapshot =
+      await FirebaseFirestore.instance.collection('users').doc(userId).get();
   return userSnapshot['First Name'];
 }
 
-
-Widget activeDeliveryStatusCard(String acceptedByUser, String orderID, String placedByUser){
+Widget activeDeliveryStatusCard(
+    String acceptedByUser, String orderID, String placedByUser) {
   return FutureBuilder(
-    future: Future.wait([getFirstName(acceptedByUser), getFirstName(placedByUser)]),
+    future:
+        Future.wait([getFirstName(acceptedByUser), getFirstName(placedByUser)]),
     builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const CircularProgressIndicator();
@@ -89,7 +101,7 @@ Widget activeDeliveryStatusCard(String acceptedByUser, String orderID, String pl
         String firstName = snapshot.data?[0];
         String placedByFirstName = snapshot.data?[1];
         return GestureDetector(
-          onTap: (){
+          onTap: () {
             //Navigator.push(context, pageAnimationrl(RequestedDeliveryStatus(acceptedByUserId: acceptedByUser, placedByUserName: placedByFirstName)),);
           },
           child: Padding(
@@ -114,8 +126,10 @@ Widget activeDeliveryStatusCard(String acceptedByUser, String orderID, String pl
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Order No: $orderID', style: const TextStyle(fontSize: 20)),
-                              Text('$firstName will shop and deliver your items',
+                              Text('Order No: $orderID',
+                                  style: const TextStyle(fontSize: 20)),
+                              Text(
+                                  '$firstName will shop and deliver your items',
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 2,
                                   style: const TextStyle(fontSize: 20)),
@@ -136,22 +150,22 @@ Widget activeDeliveryStatusCard(String acceptedByUser, String orderID, String pl
   );
 }
 
-Future<Position> getCurrentLocation() async{
+Future<Position> getCurrentLocation() async {
   bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  if(!serviceEnabled){
+  if (!serviceEnabled) {
     return Future.error('Location Services are disabled');
   }
   LocationPermission permission = await Geolocator.checkPermission();
-  if(permission == LocationPermission.denied){
+  if (permission == LocationPermission.denied) {
     permission = await Geolocator.requestPermission();
-    if(permission == LocationPermission.denied){
-      return Future.error('Location permissions are denied, enable location to request or accept delivery');
+    if (permission == LocationPermission.denied) {
+      return Future.error(
+          'Location permissions are denied, enable location to request or accept delivery');
     }
   }
-  if(permission == LocationPermission.deniedForever){
-    return Future.error('Location permissions are permanently denied, enable location to request or accept delivery');
+  if (permission == LocationPermission.deniedForever) {
+    return Future.error(
+        'Location permissions are permanently denied, enable location to request or accept delivery');
   }
   return await Geolocator.getCurrentPosition();
 }
-
-

@@ -3,7 +3,8 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 
 void handleDynamicLinks(String email) async {
   // Handle the initial dynamic link if the app is opened with a dynamic link
-  final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
+  final PendingDynamicLinkData? initialLink =
+      await FirebaseDynamicLinks.instance.getInitialLink();
   if (initialLink != null) {
     handleEmailLinkSignIn(initialLink.link, email);
   }
@@ -18,7 +19,8 @@ void handleDynamicLinks(String email) async {
 
 void handleDynamicLinkSignIn(String email) async {
   // Handle the initial dynamic link if the app is opened with a dynamic link
-  final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
+  final PendingDynamicLinkData? initialLink =
+      await FirebaseDynamicLinks.instance.getInitialLink();
   if (initialLink != null) {
     handleEmailLinkSignIn(initialLink.link, email);
   }
@@ -33,11 +35,11 @@ void handleDynamicLinkSignIn(String email) async {
 
 Future<bool> handleEmailLink(Uri deepLink, String email) async {
   if (FirebaseAuth.instance.isSignInWithEmailLink(deepLink.toString())) {
-
     if (email.isNotEmpty) {
       try {
         // Get email credential
-        final AuthCredential emailCredential = EmailAuthProvider.credentialWithLink(
+        final AuthCredential emailCredential =
+            EmailAuthProvider.credentialWithLink(
           email: email,
           emailLink: deepLink.toString(),
         );
@@ -63,7 +65,8 @@ Future<bool> handleEmailLinkSignIn(Uri deepLink, String email) async {
     if (email.isNotEmpty) {
       try {
         // Sign in the user with the email link
-        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailLink(
+        UserCredential userCredential =
+            await FirebaseAuth.instance.signInWithEmailLink(
           email: email,
           emailLink: deepLink.toString(),
         );

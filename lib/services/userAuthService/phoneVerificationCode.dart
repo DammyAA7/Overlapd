@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:overlapd/screens/home.dart';
+import 'package:overlapd/screens/home/home.dart';
 import 'package:overlapd/utilities/toast.dart';
 import '../../utilities/widgets.dart';
 import 'firebase_auth_implementation/firebase_auth_services.dart';
@@ -14,7 +14,11 @@ class VerificationCode extends StatefulWidget {
   final String verificationId;
   final String verificationType;
   final resolver;
-  const VerificationCode({super.key, required this.verificationId, required this.verificationType, this.resolver});
+  const VerificationCode(
+      {super.key,
+      required this.verificationId,
+      required this.verificationType,
+      this.resolver});
 
   @override
   State<VerificationCode> createState() => _VerificationCodeState();
@@ -29,16 +33,18 @@ class _VerificationCodeState extends State<VerificationCode> {
   final defaultPinTheme = PinTheme(
     width: 56,
     height: 56,
-    textStyle: const TextStyle(fontSize: 20, color: Color.fromRGBO(30, 60, 87, 1), fontWeight: FontWeight.w700),
+    textStyle: const TextStyle(
+        fontSize: 20,
+        color: Color.fromRGBO(30, 60, 87, 1),
+        fontWeight: FontWeight.w700),
     decoration: BoxDecoration(
       border: Border.all(color: const Color(0xFF6EE8C5).withOpacity(0.8)),
       borderRadius: BorderRadius.circular(20),
-
     ),
   );
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
   }
 
@@ -52,21 +58,21 @@ class _VerificationCodeState extends State<VerificationCode> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title:  Row(
+        title: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             IconButton(
-              onPressed: () async{
+              onPressed: () async {
                 // Navigate to the home page with a fade transition
-                try{
+                try {
                   await _auth.setLoggedOut();
                   await FirebaseAuth.instance.signOut();
                   Navigator.pushReplacement(
                     context,
                     pageAnimationlr(const Login()),
                   );
-                } catch (e){
+                } catch (e) {
                   print(e);
                 }
               },
@@ -89,17 +95,19 @@ class _VerificationCodeState extends State<VerificationCode> {
                   length: 6,
                   defaultPinTheme: defaultPinTheme,
                   focusedPinTheme: defaultPinTheme.copyDecorationWith(
-                    border: Border.all(color: const Color(0xFF6EE8C5).withOpacity(0.8), width: 3),
+                    border: Border.all(
+                        color: const Color(0xFF6EE8C5).withOpacity(0.8),
+                        width: 3),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   submittedPinTheme: defaultPinTheme.copyWith(
                       decoration: defaultPinTheme.decoration?.copyWith(
-                        color: const Color(0xFF6EE8C5).withOpacity(0.3),
-                      )),
+                    color: const Color(0xFF6EE8C5).withOpacity(0.3),
+                  )),
                   pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
                   showCursor: true,
-                  onChanged: (s){
-                    if(s.length < 6){
+                  onChanged: (s) {
+                    if (s.length < 6) {
                       setState(() {
                         incorrectCode = true;
                       });
@@ -113,9 +121,10 @@ class _VerificationCodeState extends State<VerificationCode> {
                       verificationId: widget.verificationId,
                       smsCode: pin,
                     );
-                    if(widget.verificationType == 'Enroll'){
+                    if (widget.verificationType == 'Enroll') {
                       try {
-                        await FirebaseAuth.instance.currentUser!.multiFactor.enroll(
+                        await FirebaseAuth.instance.currentUser!.multiFactor
+                            .enroll(
                           PhoneMultiFactorGenerator.getAssertion(
                             credential,
                           ),
@@ -134,7 +143,7 @@ class _VerificationCodeState extends State<VerificationCode> {
                           incorrectCode = false;
                         });
                       }
-                    } else if(widget.verificationType == 'Resolve'){
+                    } else if (widget.verificationType == 'Resolve') {
                       try {
                         await widget.resolver.resolveSignIn(
                           PhoneMultiFactorGenerator.getAssertion(
@@ -155,7 +164,9 @@ class _VerificationCodeState extends State<VerificationCode> {
                   },
                 ),
               ),
-              incorrectCode ? const SizedBox.shrink() : const Text('Pin is incorrect')
+              incorrectCode
+                  ? const SizedBox.shrink()
+                  : const Text('Pin is incorrect')
             ],
           ),
         ),
@@ -163,8 +174,8 @@ class _VerificationCodeState extends State<VerificationCode> {
     );
   }
 
-  void _checkUserRoleAndNavigate() async{
-      await _auth.setLoggedInAsUser();
-      Navigator.pushReplacementNamed(context, '/home_page');
+  void _checkUserRoleAndNavigate() async {
+    await _auth.setLoggedInAsUser();
+    Navigator.pushReplacementNamed(context, '/home_page');
   }
 }

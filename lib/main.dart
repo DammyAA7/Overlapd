@@ -1,10 +1,15 @@
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:hive/hive.dart';
+import 'package:overlapd/screens/cart/provider/cart_provider.dart';
+// import 'package:hive/hive.dart';
+import 'package:overlapd/screens/category/provider/shop_by_category_provider.dart';
+// import 'package:overlapd/screens/category/shop_by_category.dart';
+// import 'package:overlapd/screens/home/home_screen.dart';
+import 'package:overlapd/screens/home/provider/home_provider.dart';
 import 'package:overlapd/screens/onboardingScreens/splash.dart';
 import 'package:overlapd/pickers/picker.dart';
+import 'package:overlapd/screens/store/provider/store_provider.dart';
 import 'package:overlapd/services/storeService/groceryRange.dart';
 import 'package:overlapd/services/userAuthService/forgottenPassword.dart';
 import 'package:overlapd/services/userAuthService/emailVerification.dart';
@@ -20,22 +25,32 @@ import 'package:overlapd/services/userAuthService/firebase_auth_implementation/f
 import 'package:shared_preferences/shared_preferences.dart';
 import 'services/userAuthService/login.dart';
 import 'services/userAuthService/signup.dart';
-import 'screens/home.dart';
+import 'screens/home/home.dart';
 import 'screens/settings.dart';
 
-Future main() async{
+Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   final FirebaseAuthService _auth = FirebaseAuthService();
   bool isLoggedInAsUser = await _auth.isLoggedInAsUser();
   bool isLoggedInAsEmployee = await _auth.isLoggedInAsEmployee();
   await Hive.initFlutter();
-  Stripe.publishableKey = "pk_test_51OWmrwIaruu0MDtu9f0fOLYUdaDsxU6FHsV2TtXLw6CstWMCKPwZhhldZEWSmsStYYTYpfeRfzGVAZ9tfLKODOYt00gDUZP4EI";
+  Stripe.publishableKey =
+      "pk_test_51OWmrwIaruu0MDtu9f0fOLYUdaDsxU6FHsV2TtXLw6CstWMCKPwZhhldZEWSmsStYYTYpfeRfzGVAZ9tfLKODOYt00gDUZP4EI";
   Stripe.instance.applySettings();
-  runApp(ChangeNotifierProvider(
-      create: (context) => Cart(),
-      child: MyApp(isLoggedInAsUser: isLoggedInAsUser, isLoggedInAsEmployee: isLoggedInAsEmployee)
-  ));
+  runApp(MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => Cart()),
+        ChangeNotifierProvider(create: (context) => HomeProvider()),
+        ChangeNotifierProvider(create: (context) => ShopByCategoryProvider()),
+        ChangeNotifierProvider(create: (context) => StoreScreenProvider()),
+        ChangeNotifierProvider(create: (context) => CartProvider())
+      ],
+      // create: (context) => Cart(),
+      child: Consumer(
+          builder: (context, value, child) => MyApp(
+              isLoggedInAsUser: isLoggedInAsUser,
+              isLoggedInAsEmployee: isLoggedInAsEmployee))));
 }
 
 Future<bool> isUserLoggedInAsUser() async {
@@ -52,25 +67,28 @@ class MyApp extends StatelessWidget {
   final bool isLoggedInAsUser;
   final bool isLoggedInAsEmployee;
   final FirebaseAuthService _auth = FirebaseAuthService();
-  MyApp({super.key, required this.isLoggedInAsUser, required this.isLoggedInAsEmployee});
+  MyApp(
+      {super.key,
+      required this.isLoggedInAsUser,
+      required this.isLoggedInAsEmployee});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     Widget _getHomeWidget() {
       if (isLoggedInAsUser) {
-        if(_auth.currentUser?.emailVerified == true){
+        if (_auth.currentUser?.emailVerified == true) {
           return const Home();
         } else {
           return const EmailVerification();
         }
-
       } else if (isLoggedInAsEmployee) {
         return const Picker();
       } else {
         return const Login();
       }
     }
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
@@ -92,22 +110,22 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const Splash(), //_getHomeWidget()
-        routes: {
-          '/login_page': (context) => const Login(),
-          '/signup_page': (context) => const SignUp(),
-          '/home_page': (context) => const Home(),
-          '/settings_page' : (context) => const Setting(),
-          '/history_page' : (context) => const History(),
-          '/about_page' : (context) => const About(),
-          '/support_page' : (context) => const Support(),
-          '/payment_page' : (context) => const Payment(),
-          '/picker_page' : (context) => const Picker(),
-          '/forgotten_password_page' : (context) => const ForgotPassword(),
-          '/email_verification_page' : (context) => const EmailVerification(),
-          '/phone_verification_page' : (context) => const PhoneVerification(),
-          '/phone_verification_code_page' : (context) => const VerificationCode(verificationId: '', verificationType: '')
-        },
+      routes: {
+        '/login_page': (context) => const Login(),
+        '/signup_page': (context) => const SignUp(),
+        '/home_page': (context) => const Home(),
+        '/settings_page': (context) => const Setting(),
+        '/history_page': (context) => const History(),
+        '/about_page': (context) => const About(),
+        '/support_page': (context) => const Support(),
+        '/payment_page': (context) => const Payment(),
+        '/picker_page': (context) => const Picker(),
+        '/forgotten_password_page': (context) => const ForgotPassword(),
+        '/email_verification_page': (context) => const EmailVerification(),
+        '/phone_verification_page': (context) => const PhoneVerification(),
+        '/phone_verification_code_page': (context) =>
+            const VerificationCode(verificationId: '', verificationType: '')
+      },
     );
   }
 }
-

@@ -14,6 +14,7 @@ Widget pageText(BuildContext context, String text) {
     child: Text(text, style: Theme.of(context).textTheme.bodyLarge),
   );
 }
+
 class InputBoxController {
   final TextEditingController controller = TextEditingController();
   VoidCallback? _listener;
@@ -42,8 +43,8 @@ class InputBoxController {
   }
 }
 
-Widget multilineLetterInputBox(String hintText, bool autoCorrect, bool obscureText,
-    InputBoxController inputBoxController) {
+Widget multilineLetterInputBox(String hintText, bool autoCorrect,
+    bool obscureText, InputBoxController inputBoxController) {
   return widgetInputBox(
     maxLines: null,
     hintText: hintText,
@@ -57,8 +58,8 @@ Widget multilineLetterInputBox(String hintText, bool autoCorrect, bool obscureTe
   );
 }
 
-Widget supportLetterInputBox(String hintText, bool autoCorrect, bool obscureText,
-    InputBoxController inputBoxController) {
+Widget supportLetterInputBox(String hintText, bool autoCorrect,
+    bool obscureText, InputBoxController inputBoxController) {
   return widgetInputBox(
     maxLines: 1,
     hintText: hintText,
@@ -111,13 +112,8 @@ Widget letterInputBox(String hintText, bool autoCorrect, bool obscureText,
   );
 }
 
-Widget alphanumericInputBox(
-    String hintText,
-    bool autoCorrect,
-    bool obscureText,
-    InputBoxController inputBoxController,
-    String? initialValue
-    ) {
+Widget alphanumericInputBox(String hintText, bool autoCorrect, bool obscureText,
+    InputBoxController inputBoxController, String? initialValue) {
   return widgetInputBox(
     maxLines: 1,
     hintText: hintText,
@@ -129,7 +125,8 @@ Widget alphanumericInputBox(
       // You can perform any additional actions when the text changes here
     },
     inputBoxController: inputBoxController,
-    inputFormatter: FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z0-9'\s-]")),
+    inputFormatter:
+        FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z0-9'\s-]")),
     validator: (String? value) {
       if (value != null && value.isNotEmpty) {
         if (!RegExp(r"^[a-zA-Z0-9'\s-]+$").hasMatch(value)) {
@@ -142,13 +139,13 @@ Widget alphanumericInputBox(
 }
 
 Widget addressInputBox(
-    String hintText,
-    bool autoCorrect,
-    bool obscureText,
-    String? initialValue,
-    TextInputType type,
-    Function(String) onSaved,
-    ) {
+  String hintText,
+  bool autoCorrect,
+  bool obscureText,
+  String? initialValue,
+  TextInputType type,
+  Function(String) onSaved,
+) {
   return TextFormField(
     initialValue: initialValue,
     obscureText: obscureText,
@@ -161,7 +158,7 @@ Widget addressInputBox(
     ),
     decoration: InputDecoration(
       contentPadding:
-      const EdgeInsets.only(left: 15, right: 15, top: 20, bottom: 20),
+          const EdgeInsets.only(left: 15, right: 15, top: 20, bottom: 20),
       filled: true,
       fillColor: const Color(0xFF6EE8C5).withOpacity(0.1),
       enabledBorder: OutlineInputBorder(
@@ -179,10 +176,7 @@ Widget addressInputBox(
           width: 4.5,
         ),
       ),
-      hintStyle: const TextStyle(
-          color: Color(0xFF727E7B),
-          fontSize: 22.0
-      ),
+      hintStyle: const TextStyle(color: Color(0xFF727E7B), fontSize: 22.0),
       hintText: hintText,
     ),
   );
@@ -202,7 +196,8 @@ Widget emailInputBox(String hintText, bool autoCorrect, bool obscureText,
     inputBoxController: inputBoxController,
     validator: (String? value) {
       if (value != null && value.isNotEmpty) {
-        if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$').hasMatch(value)) {
+        if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
+            .hasMatch(value)) {
           return 'Invalid email address.';
         }
       }
@@ -211,8 +206,8 @@ Widget emailInputBox(String hintText, bool autoCorrect, bool obscureText,
   );
 }
 
-Widget passwordInputBoxForLogin(String hintText, bool autoCorrect, bool obscureText,
-    InputBoxController inputBoxController) {
+Widget passwordInputBoxForLogin(String hintText, bool autoCorrect,
+    bool obscureText, InputBoxController inputBoxController) {
   return widgetInputBox(
     maxLines: 1,
     hintText: hintText,
@@ -225,7 +220,6 @@ Widget passwordInputBoxForLogin(String hintText, bool autoCorrect, bool obscureT
     inputBoxController: inputBoxController,
   );
 }
-
 
 Widget passwordInputBox(String hintText, bool autoCorrect, bool obscureText,
     InputBoxController inputBoxController) {
@@ -268,12 +262,12 @@ Widget passwordInputBox(String hintText, bool autoCorrect, bool obscureText,
 }
 
 Widget passwordConfirmationInputBox(
-    String hintText,
-    bool autoCorrect,
-    bool obscureText,
-    InputBoxController passwordController,
-    InputBoxController confirmationController,
-    ) {
+  String hintText,
+  bool autoCorrect,
+  bool obscureText,
+  InputBoxController passwordController,
+  InputBoxController confirmationController,
+) {
   return widgetInputBox(
     maxLines: 1,
     hintText: hintText,
@@ -296,8 +290,6 @@ Widget passwordConfirmationInputBox(
     },
   );
 }
-
-
 
 Widget widgetInputBox({
   required String hintText,
@@ -322,7 +314,8 @@ Widget widgetInputBox({
     }
   });
 
-  bool hasError = validator != null && validator(inputBoxController?.controller.text) != null;
+  bool hasError = validator != null &&
+      validator(inputBoxController?.controller.text) != null;
 
   return TextFormField(
     maxLines: maxLines == null ? maxLines : 1,
@@ -340,7 +333,7 @@ Widget widgetInputBox({
     ),
     decoration: InputDecoration(
       contentPadding:
-      const EdgeInsets.only(left: 15, right: 15, top: 20, bottom: 20),
+          const EdgeInsets.only(left: 15, right: 15, top: 20, bottom: 20),
       filled: true,
       fillColor: hasError
           ? Colors.red.withOpacity(0.1)
@@ -364,7 +357,8 @@ Widget widgetInputBox({
           width: 4.5,
         ),
       ),
-      errorText: hasError ? validator!(inputBoxController?.controller.text) : null,
+      errorText:
+          hasError ? validator!(inputBoxController?.controller.text) : null,
       errorStyle: const TextStyle(
         fontSize: 18.0, // Adjust as needed
         fontWeight: FontWeight.bold,
@@ -377,15 +371,13 @@ Widget widgetInputBox({
         ),
       ),
       hintStyle: const TextStyle(
-        color: Color(0xFF727E7B),
-        fontFamily: 'Darker Grotesque',
-        fontSize: 22.0
-      ),
+          color: Color(0xFF727E7B),
+          fontFamily: 'Darker Grotesque',
+          fontSize: 22.0),
       hintText: hintText,
     ),
   );
 }
-
 
 Widget textButton(BuildContext context, String buttonText, String routeName) {
   return TextButton(
@@ -398,11 +390,11 @@ Widget textButton(BuildContext context, String buttonText, String routeName) {
 }
 
 Widget solidButton(
-    BuildContext context,
-    String buttonName,
-    Function() onPressed,
-    bool isEnabled,
-    ) {
+  BuildContext context,
+  String buttonName,
+  Function() onPressed,
+  bool isEnabled,
+) {
   return SizedBox(
     width: MediaQuery.of(context).size.width,
     height: 70,
@@ -422,54 +414,43 @@ Widget solidButton(
           color: isEnabled ? const Color(0xFFF6FEFC) : Colors.white70,
           fontWeight: FontWeight.w500,
           fontSize: 22,
-
         ),
       ),
     ),
   );
 }
 
-Widget sideBarCard(
-    BuildContext context,
-    Icon icon,
-    String title,
-    String subtitle,
-    Widget pageRoute
-    ) {
+Widget sideBarCard(BuildContext context, Icon icon, String title,
+    String subtitle, Widget pageRoute) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 8.0),
     child: ListTile(
       onTap: () {
-    // Navigate to the home page with a fade transition
-    Navigator.pushReplacement(
-    context,
-    pageAnimationrl(pageRoute),
-  );
-},
+        // Navigate to the home page with a fade transition
+        Navigator.pushReplacement(
+          context,
+          pageAnimationrl(pageRoute),
+        );
+      },
       leading: CircleAvatar(
         backgroundColor: Colors.white,
         child: icon,
       ),
       title: Text(title,
           style: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 20
-          )
-      ),
-      subtitle: subtitle.isEmpty ? null : Text(subtitle,
-          style: const TextStyle(
-              color: Colors.black,
-              fontSize: 16,
-              fontWeight: FontWeight.bold
-          )
-      ),
+              color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20)),
+      subtitle: subtitle.isEmpty
+          ? null
+          : Text(subtitle,
+              style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold)),
     ),
   );
 }
 
 PageRouteBuilder<dynamic> pageAnimationlr(Widget pageRoute) {
-
   return PageRouteBuilder(
     pageBuilder: (_, __, ___) => pageRoute,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -490,7 +471,6 @@ PageRouteBuilder<dynamic> pageAnimationlr(Widget pageRoute) {
 }
 
 PageRouteBuilder<dynamic> pageAnimationrl(Widget pageRoute) {
-
   return PageRouteBuilder(
     pageBuilder: (_, __, ___) => pageRoute,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -530,7 +510,7 @@ PageRouteBuilder<dynamic> pageAnimationFromBottomToTop(Widget pageRoute) {
   );
 }
 
-Widget EventCard(Widget child){
+Widget EventCard(Widget child) {
   return Padding(
     padding: const EdgeInsets.all(8.0),
     child: Container(
@@ -538,67 +518,52 @@ Widget EventCard(Widget child){
       margin: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-            color: Colors.white,
-            width: 1
-        ),
+        border: Border.all(color: Colors.white, width: 1),
       ),
       child: child,
     ),
   );
 }
 
-Widget statusTimelineTile({
-  required bool isFirst,
-  required bool isLast,
-  required bool isPast,
-  required eventCard
-}){
+Widget statusTimelineTile(
+    {required bool isFirst,
+    required bool isLast,
+    required bool isPast,
+    required eventCard}) {
   return SizedBox(
     height: 180,
-
     child: TimelineTile(
       isFirst: isFirst,
       isLast: isLast,
-      beforeLineStyle: LineStyle(
-          color: isPast ? const Color(0xFF21D19F) : Colors.white
-      ),
+      beforeLineStyle:
+          LineStyle(color: isPast ? const Color(0xFF21D19F) : Colors.white),
       indicatorStyle: IndicatorStyle(
           width: 35,
           color: isPast ? const Color(0xFF21D19F) : Colors.white,
           iconStyle: IconStyle(
               iconData: isPast ? Icons.done : Icons.close,
-              color: Colors.white
-          )
-      ),
+              color: Colors.white)),
       endChild: EventCard(eventCard),
     ),
   );
 }
 
-Widget timelineTileText(String header, String first, String second){
-  return  Column(
+Widget timelineTileText(String header, String first, String second) {
+  return Column(
     mainAxisAlignment: MainAxisAlignment.center,
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(header, style: const TextStyle(
-          fontWeight: FontWeight.bold
-      )
-      ),
+      Text(header, style: const TextStyle(fontWeight: FontWeight.bold)),
       Text(first,
           overflow: TextOverflow.visible,
           maxLines: 2,
           style: const TextStyle(
             fontSize: 18,
-          )
-      ),
+          )),
       Text(second,
           overflow: TextOverflow.visible,
           maxLines: 2,
-          style: const TextStyle(
-              fontSize: 18
-          )
-      )
+          style: const TextStyle(fontSize: 18))
     ],
   );
 }
@@ -623,47 +588,50 @@ PageRouteBuilder<dynamic> pageAnimationFromTopToBottom(Widget pageRoute) {
   );
 }
 
-
-
 Drawer buildDrawer(BuildContext context, String userName) {
   return Drawer(
     backgroundColor: Colors.white,
     child: SafeArea(
         child: Container(
-          width: 288,
-          height: double.infinity,
-          color: Colors.white,
-          child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                sideBarCard(context, const Icon(Icons.person),userName, "Personal Information", const Setting()),
-                sideBarCard(context, const Icon(Icons.payment), "Payment", "", const Payment()),
-                sideBarCard(context, const Icon(Icons.access_time_outlined), "History", "", const History()),
-                sideBarCard(context, const Icon(Icons.support_agent_outlined), "Support", "", const Support()),
-                sideBarCard(context, const Icon(Icons.info_outline_rounded), "About", "", const About())
-              ],
-            ),
-          ),
-        )
-    ),
+      width: 288,
+      height: double.infinity,
+      color: Colors.white,
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            sideBarCard(context, const Icon(Icons.person), userName,
+                "Personal Information", const Setting()),
+            sideBarCard(context, const Icon(Icons.payment), "Payment", "",
+                const Payment()),
+            sideBarCard(context, const Icon(Icons.access_time_outlined),
+                "History", "", const History()),
+            sideBarCard(context, const Icon(Icons.support_agent_outlined),
+                "Support", "", const Support()),
+            sideBarCard(context, const Icon(Icons.info_outline_rounded),
+                "About", "", const About())
+          ],
+        ),
+      ),
+    )),
   );
 }
 
-Widget itemTile(String itemName, int itemQTY, void Function()? add, void Function()? subtract){
+Widget itemTile(String itemName, int itemQTY, void Function()? add,
+    void Function()? subtract) {
   String capitalizedItemName = itemName
       .split(' ')
-      .map((word) => word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '')
+      .map((word) =>
+          word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '')
       .join(' ');
   return Padding(
     padding: const EdgeInsets.only(top: 25),
     child: Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: const Color(0xFF21D19F).withOpacity(0.5),
-        borderRadius: BorderRadius.circular(20)
-      ),
+          color: const Color(0xFF21D19F).withOpacity(0.5),
+          borderRadius: BorderRadius.circular(20)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -677,15 +645,156 @@ Widget itemTile(String itemName, int itemQTY, void Function()? add, void Functio
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-            IconButton(onPressed: subtract, icon: const Icon(Icons.remove)),
-            Text('$itemQTY'),
-            IconButton(onPressed: add, icon: const Icon(Icons.add)),
-          ],)
-
+              IconButton(onPressed: subtract, icon: const Icon(Icons.remove)),
+              Text('$itemQTY'),
+              IconButton(onPressed: add, icon: const Icon(Icons.add)),
+            ],
+          )
         ],
       ),
     ),
   );
 }
 
+class BaseButton extends StatelessWidget {
+  const BaseButton(
+      {Key? key,
+      required this.text,
+      this.onPressed,
+      this.buttonStyle,
+      this.isDisabled,
+      this.buttonTextStyle,
+      this.height,
+      this.width,
+      this.alignment,
+      this.margin})
+      : super(key: key);
 
+  final String text;
+
+  final VoidCallback? onPressed;
+
+  final ButtonStyle? buttonStyle;
+
+  final bool? isDisabled;
+
+  final TextStyle? buttonTextStyle;
+
+  final double? height;
+
+  final double? width;
+
+  final Alignment? alignment;
+
+  final EdgeInsets? margin;
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox.shrink();
+  }
+}
+
+class CustomElevatedButton extends BaseButton {
+  CustomElevatedButton(
+      {Key? key,
+      this.decoration,
+      this.leftIcon,
+      this.rightIcon,
+      EdgeInsets? margin,
+      VoidCallback? onPressed,
+      ButtonStyle? buttonStyle,
+      Alignment? alignment,
+      TextStyle? buttonTextStyle,
+      bool? isDisabled,
+      double? height,
+      double? width,
+      required String text})
+      : super(
+          key: key,
+          text: text,
+          onPressed: onPressed,
+          buttonStyle: buttonStyle,
+          isDisabled: isDisabled,
+          buttonTextStyle: buttonTextStyle,
+          height: height,
+          width: width,
+          alignment: alignment,
+          margin: margin,
+        );
+
+  final BoxDecoration? decoration;
+
+  final Widget? leftIcon;
+
+  final Widget? rightIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    return alignment != null
+        ? Align(
+            alignment: alignment ?? Alignment.center,
+            child: buildElevatedButtonWidget)
+        : buildElevatedButtonWidget;
+  }
+
+  Widget get buildElevatedButtonWidget => Container(
+        height: this.height ?? 31,
+        width: this.width ?? double.maxFinite,
+        margin: margin,
+        decoration: decoration,
+        child: ElevatedButton(
+          style: buttonStyle,
+          onPressed: isDisabled ?? false ? null : onPressed ?? () {},
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              leftIcon ?? const SizedBox.shrink(),
+              Text(
+                text,
+                style: buttonTextStyle ?? const TextStyle(fontSize: 16),
+              ),
+              rightIcon ?? const SizedBox.shrink()
+            ],
+          ),
+        ),
+      );
+}
+
+// Image Widget
+
+class CustomImageView extends StatelessWidget {
+  const CustomImageView({
+    Key? key,
+    required this.imagePath,
+    this.width,
+    this.height,
+    this.fit,
+    this.alignment,
+    this.margin,
+    this.borderRadius,
+    this.boxShadow,
+  }) : super(key: key);
+
+  final String imagePath;
+  final double? width;
+  final double? height;
+  final BoxFit? fit;
+  final Alignment? alignment;
+  final EdgeInsets? margin;
+  final BorderRadius? borderRadius;
+  final List<BoxShadow>? boxShadow;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      margin: margin,
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        boxShadow: boxShadow,
+      ),
+    );
+  }
+}
