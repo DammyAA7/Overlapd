@@ -64,12 +64,12 @@ class _MyAppState extends State<MyApp> {
   bool isLoggedInAsUser = false;
   bool isLoggedInAsEmployee = false;
   Uri? deepLinkUri;
+  UserModel? userModel;
 
   @override
   void initState() {
     super.initState();
     _initialize();
-
     // Listen for dynamic links while the app is running or in the background
     FirebaseDynamicLinks.instance.onLink.listen((PendingDynamicLinkData? dynamicLinkData) async {
       if (dynamicLinkData?.link != null) {
@@ -85,6 +85,10 @@ class _MyAppState extends State<MyApp> {
     isLoggedInAsUser = await _auth.isLoggedInAsUser();
     isLoggedInAsEmployee = await _auth.isLoggedInAsEmployee();
 
+    // Retrieve user data from Hive
+    final userBox = Hive.box<UserModel>('userBox');
+    userModel = userBox.get(_auth.getUserId());
+
     // Handle the initial link if it exists
     if (widget.initialLink != null) {
       deepLinkUri = widget.initialLink!.link;
@@ -96,9 +100,15 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _handleDynamicLink(Uri deepLink) async {
+    if (userModel == null) {
+      print('No user data found');
+      return;
+    }
+
+    final email = userModel!.email;
     if (deepLink.toString().contains('https://overlapd.page.link/bAmq')) {
       // Handle sign-in link
-      bool success = await handleEmailLinkCredentials(deepLink, 'dammyade07@gmail.com');
+      bool success = await handleEmailLinkCredentials(deepLink, email);
       if (success) {
         _auth.currentUser?.reload();
         await FirebaseFirestore.instance.collection('users').doc(_auth.currentUser?.uid).update({
@@ -112,7 +122,7 @@ class _MyAppState extends State<MyApp> {
       }
     } else if (deepLink.toString().contains('https://overlapd.page.link/7Yoh')) {
       // Handle phone verification link
-      bool success = await handleEmailLinkSignIn(deepLink, 'dammyade07@gmail.com');
+      bool success = await handleEmailLinkSignIn(deepLink, email);
       if (success) {
         navigatorKey.currentState?.pushReplacement(
           pageAnimationrl(const ConfirmMobileNumber()),

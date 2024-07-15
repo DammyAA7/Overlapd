@@ -96,11 +96,13 @@ class _ProfileState extends State<Profile> {
 
   Widget _buildListItem(BuildContext context, int index, String title, Widget route) {
     return InkWell(
-      onTap: () {
-        Navigator.push(
+      onTap: () async{
+        await Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => route),
         );
+        await _openHiveBox();
+        setState(() {});
       },
       child: Padding(
         padding: const EdgeInsets.all(8.0),

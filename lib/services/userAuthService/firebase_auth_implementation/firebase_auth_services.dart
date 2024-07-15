@@ -101,7 +101,7 @@ class FirebaseAuthService{
 
   String getUserId()  {
     User? user = _auth.currentUser;
-    return (user?.uid)!;
+    return (user?.uid)        !;
   }
 
   Future<String?> getUserMobileNumber() async {
