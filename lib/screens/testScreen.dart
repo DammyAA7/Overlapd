@@ -33,6 +33,24 @@ class _TestScreenState extends State<TestScreen> {
     super.initState();
     _loadUserCredentials();
     _setupFirestoreListener();
+    addUserChangeListener();
+  }
+
+  void addUserChangeListener() {
+    FirebaseAuth.instance.userChanges().listen((User? user) {
+      user?.reload();
+      if (user != null) {
+        print('User updated:');
+        print('UID: ${user.uid}');
+        print('Email: ${user.email}');
+        print('Email Verified: ${user.emailVerified}');
+        print('Display Name: ${user.displayName}');
+        print('Phone Number: ${user.phoneNumber}');
+        // Add more fields if needed
+      } else {
+        print('No user is currently signed in.');
+      }
+    });
   }
 
   void _setupFirestoreListener() {

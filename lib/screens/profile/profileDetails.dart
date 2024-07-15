@@ -376,8 +376,35 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       setState(() {
                         incorrectFormat = isValidEmail(emailAddress.text);
                         isEAEmpty = emailAddress.text.isEmpty;
-                      });
-                      await _auth.currentUser?.reload();
+                      });try{
+                        await _auth.currentUser?.reload();
+                      } catch (e){
+                        showDialog(
+                          barrierDismissible: false,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              title: const Text('Session Expired'),
+                              content: const Text('Your session has expired. Please sign in again.'),
+                              actions: <Widget>[
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    FirebaseAuth.instance.signOut();
+                                    _auth.setLoggedOut();
+                                    Navigator.of(context).pushReplacement(pageAnimationlr(const Onboarding()));
+                                  },
+                                  child: const Text('Sign In'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
                       await _auth.currentUser?.getIdToken(true); // Force refresh the token
                       User? updatedUser = FirebaseAuth.instance.currentUser;
                       print(updatedUser?.emailVerified);
