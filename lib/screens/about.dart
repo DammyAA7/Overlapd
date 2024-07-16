@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../utilities/widgets.dart';
-import 'home/home.dart';
+import 'home.dart';
 
 class About extends StatefulWidget {
   static const id = 'about_page';

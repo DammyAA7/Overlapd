@@ -4,7 +4,7 @@ import 'package:overlapd/utilities/toast.dart';
 
 import '../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/widgets.dart';
-import 'home/home.dart';
+import 'home.dart';
 
 class Setting extends StatefulWidget {
   static const id = 'settings_page';

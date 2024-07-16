@@ -18,8 +18,6 @@ Color borderColor(bool isValid) => isValid ? Colors.grey : Colors.black;
 
 Color textColor(bool isValid) => isValid ? Colors.grey : Colors.black;
 
-Color textColor(bool isValid) =>  isValid ? Colors.grey : Colors.black;
-
 Future createUserCredentials(User? user, String firstName, String lastName, String email) async{
   final docUser = FirebaseFirestore.instance.collection('users').doc(user?.uid);
 

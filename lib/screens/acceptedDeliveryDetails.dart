@@ -9,7 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:overlapd/utilities/toast.dart';
 import '../utilities/widgets.dart';
 import 'chat/chat.dart';
-import 'home/home.dart';
+import 'home.dart';
 
 class AcceptedDeliveryDetails extends StatefulWidget {
   final String placedByUserId;

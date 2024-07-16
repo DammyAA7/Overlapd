@@ -12,7 +12,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:overlapd/services/deliveryService/addressList.dart';
 import 'package:provider/provider.dart';
 import '../deliveryService/delivery_service.dart';
-import '../../screens/home/home.dart';
+import '../../screens/home.dart';
 import '../userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 import '../../utilities/toast.dart';
 import '../../utilities/widgets.dart';

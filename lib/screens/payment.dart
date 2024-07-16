@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 import '../utilities/widgets.dart';
-import 'home/home.dart';
+import 'home.dart';
 
 class Payment extends StatefulWidget {
   static const id = 'payment_page';
