@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../utilities/widgets.dart';
-import 'home.dart';
+import 'home/home.dart';
 
 class History extends StatefulWidget {
   static const id = 'history_page';
@@ -17,7 +17,7 @@ class _HistoryState extends State<History> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title:  Row(
+        title: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

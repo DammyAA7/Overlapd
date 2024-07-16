@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-Widget PhoneNumberField(BuildContext context, TextEditingController controller, Color borderColor){
+Widget PhoneNumberField(
+    BuildContext context, TextEditingController controller, Color borderColor) {
   return Container(
     decoration: BoxDecoration(
       border: Border.all(color: borderColor, width: 2),
@@ -15,9 +16,9 @@ Widget PhoneNumberField(BuildContext context, TextEditingController controller, 
             Text(
               '+353',
               style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                color: Colors.black,
-                fontWeight: FontWeight.normal,
-              ),
+                    color: Colors.black,
+                    fontWeight: FontWeight.normal,
+                  ),
             ),
             const VerticalDivider(
               color: Colors.grey,
@@ -31,9 +32,9 @@ Widget PhoneNumberField(BuildContext context, TextEditingController controller, 
                   border: InputBorder.none,
                   hintText: '9 digit phone number',
                   hintStyle: Theme.of(context).textTheme.labelLarge!.copyWith(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w400,
-                  ),
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w400,
+                      ),
                 ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [
@@ -42,9 +43,9 @@ Widget PhoneNumberField(BuildContext context, TextEditingController controller, 
                   PhoneNumberFormatter(),
                 ],
                 style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                  color: Colors.black,
-                  fontWeight: FontWeight.normal,
-                ),
+                      color: Colors.black,
+                      fontWeight: FontWeight.normal,
+                    ),
               ),
             ),
           ],
@@ -57,9 +58,9 @@ Widget PhoneNumberField(BuildContext context, TextEditingController controller, 
 class PhoneNumberFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-      ) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     final text = newValue.text.replaceAll(' ', '');
     final buffer = StringBuffer();
     for (int i = 0; i < text.length; i++) {

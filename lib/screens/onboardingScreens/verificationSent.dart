@@ -20,6 +20,7 @@ class _VerificationSentState extends State<VerificationSent> {
     super.initState();
     handleDynamicLinks(widget.emailAddress);
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,7 +50,10 @@ class _VerificationSentState extends State<VerificationSent> {
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   'A link has been sent to your email address',
-                  style: Theme.of(context).textTheme.displayMedium!.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context)
+                      .textTheme
+                      .displayMedium!
+                      .copyWith(fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -57,7 +61,8 @@ class _VerificationSentState extends State<VerificationSent> {
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   'Click the link and you\'ll be redirected back to the app to continue your account recovery',
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold, color: Colors.grey),
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.bold, color: Colors.grey),
                   textAlign: TextAlign.center,
                 ),
               ),

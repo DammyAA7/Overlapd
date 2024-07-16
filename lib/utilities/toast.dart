@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-void showToast({required String text}){
+void showToast({required String text}) {
   Fluttertoast.showToast(
       msg: text,
       gravity: ToastGravity.BOTTOM,
@@ -9,6 +9,5 @@ void showToast({required String text}){
       toastLength: Toast.LENGTH_SHORT,
       backgroundColor: const Color(0xFF6EE8C5),
       textColor: Colors.white,
-      fontSize: 16.0
-  );
+      fontSize: 16.0);
 }

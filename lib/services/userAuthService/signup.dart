@@ -16,7 +16,6 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
-
   final FirebaseAuthService _auth = FirebaseAuthService();
   final InputBoxController _firstNameController = InputBoxController();
   final InputBoxController _lastNameController = InputBoxController();
@@ -28,16 +27,19 @@ class _SignUpState extends State<SignUp> {
     String email = _emailController.getText();
     String password = _passwordController.getText();
     bool isEmailValid = email.isNotEmpty && _isValidEmail(email);
-    bool isPasswordValid = _passwordController.getText().isNotEmpty && _isValidPassword(password);
+    bool isPasswordValid =
+        _passwordController.getText().isNotEmpty && _isValidPassword(password);
     return _firstNameController.getText().isNotEmpty &&
         _lastNameController.getText().isNotEmpty &&
-        isEmailValid && isPasswordValid &&
+        isEmailValid &&
+        isPasswordValid &&
         _passwordController.getText() == _rePasswordController.getText();
   }
 
   bool _isValidEmail(String email) {
     // Use a regular expression to check the email format
-    RegExp emailRegExp = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
+    RegExp emailRegExp =
+        RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
     return emailRegExp.hasMatch(email);
   }
 
@@ -74,6 +76,7 @@ class _SignUpState extends State<SignUp> {
     _rePasswordController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,15 +95,20 @@ class _SignUpState extends State<SignUp> {
                   Text('Create New Account',
                       style: Theme.of(context).textTheme.displayMedium),
                   pageText(context, 'First Name'),
-                  letterInputBox('Enter First Name', true, false, _firstNameController),
+                  letterInputBox(
+                      'Enter First Name', true, false, _firstNameController),
                   pageText(context, 'Last Name'),
-                  letterInputBox('Enter Last Name', true, false, _lastNameController),
+                  letterInputBox(
+                      'Enter Last Name', true, false, _lastNameController),
                   pageText(context, 'Email Address'),
-                  emailInputBox('Enter Email Address', true, false, _emailController),
+                  emailInputBox(
+                      'Enter Email Address', true, false, _emailController),
                   pageText(context, 'Password'),
-                  passwordInputBox('Enter Password', false, true, _passwordController),
+                  passwordInputBox(
+                      'Enter Password', false, true, _passwordController),
                   pageText(context, 'Confirm Password'),
-                  passwordConfirmationInputBox('Re-type Password', false, true, _passwordController, _rePasswordController),
+                  passwordConfirmationInputBox('Re-type Password', false, true,
+                      _passwordController, _rePasswordController),
                   const SizedBox(height: 15),
                   Center(
                     child: Column(
@@ -129,29 +137,30 @@ class _SignUpState extends State<SignUp> {
     );
   }
 
-  void _signUp() async{
+  void _signUp() async {
     String email = _emailController.getText();
     String password = _passwordController.getText();
 
     User? user = await _auth.signUpWithEmailAndPassword(email, password);
-    if (user != null){
+    if (user != null) {
       await _auth.setLoggedInAsUser();
       createUserCredentials(user: user);
       showToast(text: "User created successfully");
       Navigator.pushNamed(context, '/email_verification_page');
-    } else{
+    } else {
       print("Sign up error!");
     }
-
   }
-  Future createUserCredentials({required User? user}) async{
-    final docUser = FirebaseFirestore.instance.collection('users').doc(user?.uid);
+
+  Future createUserCredentials({required User? user}) async {
+    final docUser =
+        FirebaseFirestore.instance.collection('users').doc(user?.uid);
     final json = {
       'First Name': _firstNameController.getText(),
       'Last Name': _lastNameController.getText(),
       'Email Address': _emailController.getText(),
       'Phone Number': '',
-      'Address Book' : '',
+      'Address Book': '',
       'isPhoneNumberVerified': false
     };
     await docUser.set(json);

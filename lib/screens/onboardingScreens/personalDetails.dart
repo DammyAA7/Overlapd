@@ -20,12 +20,14 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   TextEditingController firstName = TextEditingController();
   TextEditingController lastName = TextEditingController();
   TextEditingController emailAddress = TextEditingController();
-  bool incorrectFormat = true, isLNEmpty = true, isFNEmpty = true, isEAEmpty = true;
+  bool incorrectFormat = true,
+      isLNEmpty = true,
+      isFNEmpty = true,
+      isEAEmpty = true;
   final FirebaseAuthService _auth = FirebaseAuthService();
 
   @override
   void initState() {
-
     super.initState();
     emailAddress.addListener(_onEmailChanged);
     firstName.addListener(_onChanged);
@@ -39,6 +41,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       isEAEmpty = emailAddress.text.isEmpty;
     });
   }
+
   void _onChanged() {
     // Check if the email is valid
     setState(() {
@@ -56,7 +59,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
           toolbarHeight: MediaQuery.of(context).size.height * 0.05,
           automaticallyImplyLeading: false,
         ),
-        body:Padding(
+        body: Padding(
           padding: const EdgeInsets.all(8.0),
           child: SingleChildScrollView(
             reverse: true,
@@ -64,42 +67,44 @@ class _PersonalDetailsState extends State<PersonalDetails> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0, left: 8.0, right: 8.0),
+                  padding: const EdgeInsets.only(
+                      bottom: 12.0, left: 8.0, right: 8.0),
                   child: Text(
                     'Let\'s get to know you',
-                    style: Theme.of(context).textTheme.headlineLarge!.copyWith(),
+                    style:
+                        Theme.of(context).textTheme.headlineLarge!.copyWith(),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: CustomTextBox(
-                      context,
-                      'First Name',
-                      'John',
-                      Theme.of(context).textTheme.labelLarge!.copyWith(
-                        color: textColor(isFNEmpty),
-                        fontWeight: FontWeight.normal,
-                      ),
-                      firstName,
-                      TextInputType.text,
-                      borderColor(isFNEmpty),
-                      FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z'-]")),
+                    context,
+                    'First Name',
+                    'John',
+                    Theme.of(context).textTheme.labelLarge!.copyWith(
+                          color: textColor(isFNEmpty),
+                          fontWeight: FontWeight.normal,
+                        ),
+                    firstName,
+                    TextInputType.text,
+                    borderColor(isFNEmpty),
+                    FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z'-]")),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: CustomTextBox(
-                      context,
-                      'Last Name',
-                      'Guiness',
-                      Theme.of(context).textTheme.labelLarge!.copyWith(
-                        color: textColor(isLNEmpty),
-                        fontWeight: FontWeight.normal,
-                      ),
-                      lastName,
-                      TextInputType.text,
-                      borderColor(isLNEmpty),
-                      FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z'-]")),
+                    context,
+                    'Last Name',
+                    'Guiness',
+                    Theme.of(context).textTheme.labelLarge!.copyWith(
+                          color: textColor(isLNEmpty),
+                          fontWeight: FontWeight.normal,
+                        ),
+                    lastName,
+                    TextInputType.text,
+                    borderColor(isLNEmpty),
+                    FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z'-]")),
                   ),
                 ),
                 Padding(
@@ -109,29 +114,32 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                       'Email address',
                       'john.guiness@email.com',
                       Theme.of(context).textTheme.labelLarge!.copyWith(
-                        color: textColor(isEAEmpty),
-                        fontWeight: FontWeight.normal,
-                      ),
+                            color: textColor(isEAEmpty),
+                            fontWeight: FontWeight.normal,
+                          ),
                       emailAddress,
                       TextInputType.emailAddress,
-                      borderColor(isEAEmpty)
-                  ),
+                      borderColor(isEAEmpty)),
                 ),
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (Widget child, Animation<double> animation) {
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
                     return FadeTransition(opacity: animation, child: child);
                   },
                   child: incorrectFormat
                       ? const SizedBox.shrink()
                       : Padding(
-                    key: ValueKey<bool>(incorrectFormat),
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'Incorrect email format',
-                      style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.red),
-                    ),
-                  ),
+                          key: ValueKey<bool>(incorrectFormat),
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Incorrect email format',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge!
+                                .copyWith(color: Colors.red),
+                          ),
+                        ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 30.0, right: 8.0, left: 8.0, bottom: 8.0),
@@ -146,14 +154,20 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                         }
                       },
                       double.infinity,
-                      Theme.of(context).textTheme.labelLarge!.copyWith(color: textButtonColor(!isFNEmpty && !isLNEmpty && !isEAEmpty && incorrectFormat), fontWeight: FontWeight.normal),
-                      buttonColor(!isFNEmpty && !isLNEmpty && !isEAEmpty && incorrectFormat)),
+                      Theme.of(context).textTheme.labelLarge!.copyWith(
+                          color: textButtonColor(!isFNEmpty &&
+                              !isLNEmpty &&
+                              !isEAEmpty &&
+                              incorrectFormat),
+                          fontWeight: FontWeight.normal),
+                      buttonColor(!isFNEmpty &&
+                          !isLNEmpty &&
+                          !isEAEmpty &&
+                          incorrectFormat)),
                 ),
-            
               ],
             ),
           ),
-        )
-    );
+        ));
   }
 }

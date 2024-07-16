@@ -7,7 +7,8 @@ import '../userAuthService/firebase_auth_implementation/firebase_auth_services.d
 class DeliveryService extends ChangeNotifier {
   final FirebaseAuthService _auth = FirebaseAuthService();
 
-  Future<void> acceptDelivery(String deliveryAddress, String userId, String placedBy, String orderId) async{
+  Future<void> acceptDelivery(String deliveryAddress, String userId,
+      String placedBy, String orderId) async {
     final details = {
       'Delivery Address': deliveryAddress,
       'Placed by': placedBy,
@@ -22,9 +23,18 @@ class DeliveryService extends ChangeNotifier {
         .collection('Accepted Deliveries')
         .doc(orderId)
         .set(details);
-
   }
-  Future<void> openDelivery(String address, GeoPoint coordinates, String storeName, List productList, String total, String paymentID, String? rewardCardUrl,  String serviceFee, String deliveryFee) async {
+
+  Future<void> openDelivery(
+      String address,
+      GeoPoint coordinates,
+      String storeName,
+      List productList,
+      String total,
+      String paymentID,
+      String? rewardCardUrl,
+      String serviceFee,
+      String deliveryFee) async {
     final userId = _auth.getUserId();
     String orderNo;
 
@@ -34,12 +44,12 @@ class DeliveryService extends ChangeNotifier {
       'Grocery Store': storeName,
       'Placed by': userId,
       'Items for Delivery': productList,
-      'Item Total' : total,
+      'Item Total': total,
       'Service fee': serviceFee,
       'delivery fee': deliveryFee,
       'Time Stamp': DateTime.now(),
       'status': 'Order Requested',
-      'accepted by' : 'N/A',
+      'accepted by': 'N/A',
       'picked up by': 'N/A',
       'deliverer code': '',
       'delivered': false,
@@ -48,7 +58,7 @@ class DeliveryService extends ChangeNotifier {
       'declined By': '',
       'payment id': paymentID,
       'reward card': rewardCardUrl,
-      'receipt':'N/A'
+      'receipt': 'N/A'
     };
     final orderInfoDocRef = await FirebaseFirestore.instance
         .collection('All Deliveries')
@@ -75,18 +85,28 @@ class DeliveryService extends ChangeNotifier {
       'cancelled': 'no'
     };
 
-    FirebaseFirestore.instance.collection('users').doc(userId).collection(
-        'Placed Delivery').doc(orderNo).set(private);
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('Placed Delivery')
+        .doc(orderNo)
+        .set(private);
   }
 
   Stream<QuerySnapshot> getRequestedDeliveries() {
-    return FirebaseFirestore.instance.collection('All Deliveries').doc(
-        'Open Deliveries').collection('Order Info').snapshots();
+    return FirebaseFirestore.instance
+        .collection('All Deliveries')
+        .doc('Open Deliveries')
+        .collection('Order Info')
+        .snapshots();
   }
 
-  Stream<DocumentSnapshot<Map<String, dynamic>>> getUserFistName(String placedUserID){
-    return FirebaseFirestore.instance.collection('users').doc(
-        placedUserID).snapshots();
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getUserFistName(
+      String placedUserID) {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(placedUserID)
+        .snapshots();
   }
 
   Future<String?> getLatestPlacedDelivery(String userId) async {
@@ -95,7 +115,8 @@ class DeliveryService extends ChangeNotifier {
           .collection('users')
           .doc(userId)
           .collection('Placed Delivery')
-          .orderBy('Time Stamp', descending: true) // Order by 'Time Stamp' in descending order
+          .orderBy('Time Stamp',
+              descending: true) // Order by 'Time Stamp' in descending order
           .limit(1) // Limit the result to one document (the latest one)
           .get();
 
@@ -113,8 +134,4 @@ class DeliveryService extends ChangeNotifier {
       return null;
     }
   }
-
-
-
-  
 }

@@ -20,13 +20,13 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   bool _areFieldsValid() {
     String email = _emailController.getText();
     bool isEmailValid = email.isNotEmpty && _isValidEmail(email);
-    return
-      isEmailValid;
+    return isEmailValid;
   }
 
   bool _isValidEmail(String email) {
     // Use a regular expression to check the email format
-    RegExp emailRegExp = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
+    RegExp emailRegExp =
+        RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
     return emailRegExp.hasMatch(email);
   }
 
@@ -41,17 +41,19 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     // Check if the email is valid
     setState(() {});
   }
+
   @override
   void dispose() {
     _emailController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title:  Row(
+        title: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -76,24 +78,27 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           children: [
             const Text('Send a reset link to change password'),
             pageText(context, 'Email Address'),
-            emailInputBox('Enter your email address', false, false, _emailController),
+            emailInputBox(
+                'Enter your email address', false, false, _emailController),
             const SizedBox(height: 10),
-            solidButton(context, 'Reset Password', _sendResetLink, _areFieldsValid()),
+            solidButton(
+                context, 'Reset Password', _sendResetLink, _areFieldsValid()),
           ],
         ),
       ),
     );
   }
 
-  void _sendResetLink() async{
-    try{
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: _emailController.getText());
+  void _sendResetLink() async {
+    try {
+      await FirebaseAuth.instance
+          .sendPasswordResetEmail(email: _emailController.getText());
       showToast(text: 'Successfully sent reset email link. Check inbox');
       Navigator.pushReplacement(
         context,
         pageAnimationlr(const Login()),
       );
-    } on FirebaseAuthException catch(e){
+    } on FirebaseAuthException catch (e) {
       showToast(text: e.toString());
     }
   }

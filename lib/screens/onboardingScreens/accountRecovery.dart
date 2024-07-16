@@ -21,7 +21,6 @@ class _AccountRecoveryState extends State<AccountRecovery> {
 
   @override
   void initState() {
-
     super.initState();
     emailAddress.addListener(_onEmailChanged);
   }
@@ -34,6 +33,7 @@ class _AccountRecoveryState extends State<AccountRecovery> {
       userExists = true;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,7 +59,8 @@ class _AccountRecoveryState extends State<AccountRecovery> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.only(bottom: 12.0, left: 8.0, right: 8.0),
+              padding:
+                  const EdgeInsets.only(bottom: 12.0, left: 8.0, right: 8.0),
               child: Text(
                 'Account Recovery',
                 style: Theme.of(context).textTheme.headlineLarge!.copyWith(),
@@ -72,13 +73,12 @@ class _AccountRecoveryState extends State<AccountRecovery> {
                   'Email address',
                   'john.guiness@email.com',
                   Theme.of(context).textTheme.labelLarge!.copyWith(
-                    color: textColor(isEAEmpty),
-                    fontWeight: FontWeight.normal,
-                  ),
+                        color: textColor(isEAEmpty),
+                        fontWeight: FontWeight.normal,
+                      ),
                   emailAddress,
                   TextInputType.emailAddress,
-                  borderColor(isEAEmpty && !correctFormat)
-              ),
+                  borderColor(isEAEmpty && !correctFormat)),
             ),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
@@ -88,13 +88,16 @@ class _AccountRecoveryState extends State<AccountRecovery> {
               child: isEAEmpty || correctFormat
                   ? const SizedBox.shrink()
                   : Padding(
-                key: ValueKey<bool>(!isEAEmpty || correctFormat),
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Incorrect email format',
-                  style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.red),
-                ),
-              ),
+                      key: ValueKey<bool>(!isEAEmpty || correctFormat),
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Incorrect email format',
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelLarge!
+                            .copyWith(color: Colors.red),
+                      ),
+                    ),
             ),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
@@ -104,37 +107,42 @@ class _AccountRecoveryState extends State<AccountRecovery> {
               child: userExists
                   ? const SizedBox.shrink()
                   : Padding(
-                key: ValueKey<bool>(!isEAEmpty || correctFormat),
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Email address does not exist in database',
-                  style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.red),
-                ),
-              ),
+                      key: ValueKey<bool>(!isEAEmpty || correctFormat),
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Email address does not exist in database',
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelLarge!
+                            .copyWith(color: Colors.red),
+                      ),
+                    ),
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 30.0, right: 8.0, left: 8.0, bottom: 8.0),
-              child: Button(
-                  context,
-                  'Continue',
-                      () async{
-                    if(!isEAEmpty && correctFormat){
-                      bool exists = await _auth.checkIfUserExists(emailAddress.text);
-                      if(!exists){
-                        setState(() {
-                          userExists = false;
-                        });
-                      } else{
-                        await _auth.sendSignInLinkToEmail(emailAddress.text);
-                        Navigator.push(
-                          context,
-                          pageAnimationrl(VerificationSent(emailAddress: emailAddress.text)),
-                        );
-                      }
-                    }
-                  },
+              padding: const EdgeInsets.only(
+                  top: 30.0, right: 8.0, left: 8.0, bottom: 8.0),
+              child: Button(context, 'Continue', () async {
+                if (!isEAEmpty && correctFormat) {
+                  bool exists =
+                      await _auth.checkIfUserExists(emailAddress.text);
+                  if (!exists) {
+                    setState(() {
+                      userExists = false;
+                    });
+                  } else {
+                    await _auth.sendSignInLinkToEmail(emailAddress.text);
+                    Navigator.push(
+                      context,
+                      pageAnimationrl(
+                          VerificationSent(emailAddress: emailAddress.text)),
+                    );
+                  }
+                }
+              },
                   double.infinity,
-                  Theme.of(context).textTheme.labelLarge!.copyWith(color: textButtonColor(!isEAEmpty && correctFormat), fontWeight: FontWeight.normal),
+                  Theme.of(context).textTheme.labelLarge!.copyWith(
+                      color: textButtonColor(!isEAEmpty && correctFormat),
+                      fontWeight: FontWeight.normal),
                   buttonColor(!isEAEmpty && correctFormat)),
             ),
           ],

@@ -23,14 +23,13 @@ class _LoginState extends State<Login> {
   bool _areFieldsValid() {
     String email = _emailController.getText();
     bool isEmailValid = email.isNotEmpty && _isValidEmail(email);
-    return
-        isEmailValid &&
-        _passwordController.getText().isNotEmpty;
+    return isEmailValid && _passwordController.getText().isNotEmpty;
   }
 
   bool _isValidEmail(String email) {
     // Use a regular expression to check the email format
-    RegExp emailRegExp = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
+    RegExp emailRegExp =
+        RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
     return emailRegExp.hasMatch(email);
   }
 
@@ -56,10 +55,12 @@ class _LoginState extends State<Login> {
               Text('Log in to your account',
                   style: Theme.of(context).textTheme.displayMedium),
               pageText(context, 'Email Address'),
-              emailInputBox('Enter your email address', false, false, _emailController),
+              emailInputBox(
+                  'Enter your email address', false, false, _emailController),
               const SizedBox(height: 10),
               pageText(context, 'Password'),
-              passwordInputBoxForLogin('Enter your password', false, true, _passwordController),
+              passwordInputBoxForLogin(
+                  'Enter your password', false, true, _passwordController),
               textButton(
                   context, 'Forgotten password?', '/forgotten_password_page'),
               Center(
@@ -81,11 +82,13 @@ class _LoginState extends State<Login> {
       ),
     );
   }
-  void _logIn() async{
+
+  void _logIn() async {
     String email = _emailController.getText();
     String password = _passwordController.getText();
     await _auth.signInWithEmailAndPassword(email, password, context);
-    final pickersCollection = FirebaseFirestore.instance.collection('employees');
+    final pickersCollection =
+        FirebaseFirestore.instance.collection('employees');
     final snapshot = await pickersCollection.get();
     final pickerUids = snapshot.docs.map((doc) => doc.id).toList();
 
@@ -95,10 +98,10 @@ class _LoginState extends State<Login> {
       await _auth.setLoggedInAsEmployee();
     } else {
       // User is not a picker (customer)
-      if(_auth.currentUser?.emailVerified == false ){
+      if (_auth.currentUser?.emailVerified == false) {
         print(_auth.currentUser?.phoneNumber);
         Navigator.pushReplacementNamed(context, '/email_verification_page');
-      } else if(_auth.currentUser?.emailVerified == true) {
+      } else if (_auth.currentUser?.emailVerified == true) {
         reauthenticateUser();
         Navigator.pushReplacementNamed(context, '/phone_verification_page');
       }
@@ -109,7 +112,8 @@ class _LoginState extends State<Login> {
     String email = _emailController.getText();
     String password = _passwordController.getText();
     final user = FirebaseAuth.instance.currentUser;
-    final credential = EmailAuthProvider.credential(email: email, password: password);
+    final credential =
+        EmailAuthProvider.credential(email: email, password: password);
     await user!.reauthenticateWithCredential(credential);
   }
 }

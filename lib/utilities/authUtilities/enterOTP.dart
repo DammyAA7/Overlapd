@@ -11,7 +11,12 @@ class EnterOTP extends StatefulWidget {
   final String verificationId;
   final FirebaseAuthService authService;
   final String type;
-  const EnterOTP({super.key, required this.mobileNumber, required this.verificationId, required this.authService, required this.type});
+  const EnterOTP(
+      {super.key,
+      required this.mobileNumber,
+      required this.verificationId,
+      required this.authService,
+      required this.type});
 
   @override
   State<EnterOTP> createState() => _EnterOTPState();
@@ -22,11 +27,11 @@ class _EnterOTPState extends State<EnterOTP> {
   final defaultPinTheme = PinTheme(
     width: 56,
     height: 56,
-    textStyle: const TextStyle(fontSize: 20, color: Colors.black, fontWeight: FontWeight.w700),
+    textStyle: const TextStyle(
+        fontSize: 20, color: Colors.black, fontWeight: FontWeight.w700),
     decoration: BoxDecoration(
       border: Border.all(color: Colors.grey),
       borderRadius: BorderRadius.circular(10),
-
     ),
   );
   bool incorrectCode = true;
@@ -74,6 +79,7 @@ class _EnterOTPState extends State<EnterOTP> {
     final seconds = (_start % 60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,23 +100,26 @@ class _EnterOTPState extends State<EnterOTP> {
             ],
           ),
         ),
-        body:Padding(
+        body: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.only(bottom: 12.0, left: 8.0, right: 8.0),
+                padding:
+                    const EdgeInsets.only(bottom: 12.0, left: 8.0, right: 8.0),
                 child: Text(
                   'Enter the OTP sent to',
                   style: Theme.of(context).textTheme.headlineLarge!.copyWith(),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 20.0, left: 8.0, right: 8.0),
+                padding:
+                    const EdgeInsets.only(top: 20.0, left: 8.0, right: 8.0),
                 child: Text(
                   '+353 ${widget.mobileNumber}',
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.grey, fontWeight: FontWeight.w300),
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      color: Colors.grey, fontWeight: FontWeight.w300),
                 ),
               ),
               Padding(
@@ -124,12 +133,12 @@ class _EnterOTPState extends State<EnterOTP> {
                   ),
                   submittedPinTheme: defaultPinTheme.copyWith(
                       decoration: defaultPinTheme.decoration?.copyWith(
-                        border: Border.all(color: Colors.black, width: 2),
-                      )),
+                    border: Border.all(color: Colors.black, width: 2),
+                  )),
                   pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
                   showCursor: true,
-                  onChanged: (s){
-                    if(s.length < 6){
+                  onChanged: (s) {
+                    if (s.length < 6) {
                       setState(() {
                         incorrectCode = true;
                         buttonEnabled = false;
@@ -141,7 +150,6 @@ class _EnterOTPState extends State<EnterOTP> {
                       buttonEnabled = true;
                       code = pin;
                     });
-
                   },
                 ),
               ),
@@ -153,29 +161,33 @@ class _EnterOTPState extends State<EnterOTP> {
                 child: incorrectCode
                     ? const SizedBox.shrink()
                     : Padding(
-                  key: ValueKey<bool>(incorrectCode),
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'The OTP is incorrect! Please try again',
-                    style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.red),
-                  ),
-                ),
+                        key: ValueKey<bool>(incorrectCode),
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'The OTP is incorrect! Please try again',
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelLarge!
+                              .copyWith(color: Colors.red),
+                        ),
+                      ),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 30.0, right: 8.0, left: 8.0, bottom: 8.0),
-                child: Button(
-                    context,
-                    'Continue',
-                        () async{
-                          if(buttonEnabled){
-                            bool value = await verifyOTP(context, widget.verificationId, code, widget.type);
-                            setState(() {
-                              incorrectCode = value;
-                            });
-                          }
-                    },
+                padding: const EdgeInsets.only(
+                    top: 30.0, right: 8.0, left: 8.0, bottom: 8.0),
+                child: Button(context, 'Continue', () async {
+                  if (buttonEnabled) {
+                    bool value = await verifyOTP(
+                        context, widget.verificationId, code, widget.type);
+                    setState(() {
+                      incorrectCode = value;
+                    });
+                  }
+                },
                     double.infinity,
-                    Theme.of(context).textTheme.labelLarge!.copyWith(color: textButtonColor(buttonEnabled), fontWeight: FontWeight.normal),
+                    Theme.of(context).textTheme.labelLarge!.copyWith(
+                        color: textButtonColor(buttonEnabled),
+                        fontWeight: FontWeight.normal),
                     buttonColor(buttonEnabled)),
               ),
               AnimatedSwitcher(
@@ -185,55 +197,63 @@ class _EnterOTPState extends State<EnterOTP> {
                 },
                 child: !_showResendButton
                     ? Padding(
-                  key: ValueKey<bool>(_showResendButton),
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Resend code in $_formattedTime',
-                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey,
-                      fontSize: 15,
-                    ),
-                  ),
-                )
-                    : Padding(
-                  key: ValueKey<bool>(_showResendButton),
-                  padding: const EdgeInsets.all(8.0),
-                  child: RichText(
-                    text: TextSpan(
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey,
-                        fontSize: 15,
-                      ),
-                      children: [
-                        const TextSpan(
-                          text: 'Didn\'t receive the code? ',
+                        key: ValueKey<bool>(_showResendButton),
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'Resend code in $_formattedTime',
+                          style:
+                              Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey,
+                                    fontSize: 15,
+                                  ),
                         ),
-                        WidgetSpan(
-                          child: GestureDetector(
-                            onTap: () {
-                              widget.authService.resendOTP(widget.mobileNumber, context); // Use auth service to resend OTP
-                              startTimer();
-                            },
-                            child: Text(
-                              ' Resend',
-                              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black,
-                                fontSize: 15,
+                      )
+                    : Padding(
+                        key: ValueKey<bool>(_showResendButton),
+                        padding: const EdgeInsets.all(8.0),
+                        child: RichText(
+                          text: TextSpan(
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey,
+                                  fontSize: 15,
+                                ),
+                            children: [
+                              const TextSpan(
+                                text: 'Didn\'t receive the code? ',
                               ),
-                            ),
+                              WidgetSpan(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    widget.authService.resendOTP(
+                                        widget.mobileNumber,
+                                        context); // Use auth service to resend OTP
+                                    startTimer();
+                                  },
+                                  child: Text(
+                                    ' Resend',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium!
+                                        .copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black,
+                                          fontSize: 15,
+                                        ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
+                      ),
               ),
             ],
           ),
-        )
-    );
+        ));
   }
 }

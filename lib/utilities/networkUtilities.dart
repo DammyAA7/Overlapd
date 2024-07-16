@@ -1,14 +1,16 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '';
-class NetworkUtility{
-  static Future<String?> fetchUrl(Uri uri, {Map<String, String>? headers}) async{
-    try{
+
+class NetworkUtility {
+  static Future<String?> fetchUrl(Uri uri,
+      {Map<String, String>? headers}) async {
+    try {
       final response = await http.get(uri, headers: headers);
-      if(response.statusCode == 200){
+      if (response.statusCode == 200) {
         return response.body;
       }
-    } catch(e){
+    } catch (e) {
       print(e.toString());
     }
     return null;
@@ -48,15 +50,18 @@ class PredictionTerms {
 
       // Assign values based on available terms
       // The index is checked against the length of terms to avoid out-of-bounds access
-      if (terms.length == 4 && RegExp(r'^\d+$').hasMatch(terms.first['value'])) {
+      if (terms.length == 4 &&
+          RegExp(r'^\d+$').hasMatch(terms.first['value'])) {
         // If there are 4 terms and the first is a building number, assign values accordingly
         buildingNumber = terms.first['value'];
         streetAddress = terms[1]['value'];
-        area = terms[2]['value']; // Assuming the third term is the area if locality is missing
+        area = terms[2][
+            'value']; // Assuming the third term is the area if locality is missing
         locality = null; // Locality is left as null
       } else {
         buildingNumber = terms.length > 4 ? terms[0]['value'] : null;
-        streetAddress = terms.length > 3 ? terms[terms.length - 4]['value'] : null;
+        streetAddress =
+            terms.length > 3 ? terms[terms.length - 4]['value'] : null;
         locality = terms.length > 2 ? terms[terms.length - 3]['value'] : null;
         area = terms.length > 1 ? terms[terms.length - 2]['value'] : null;
       }
@@ -70,7 +75,7 @@ class PredictionTerms {
   }
 }
 
-class AutocompletePrediction{
+class AutocompletePrediction {
   final String? description;
   final StructuredFormatting? structuredFormatting;
   final String? placeId;
@@ -129,9 +134,9 @@ class PlaceAutocompleteResponse {
       // ignore: prefer_null_aware_operators
       predictions: json['predictions'] != null
           ? json['predictions']
-          .map<AutocompletePrediction>(
-              (json) => AutocompletePrediction.fromJson(json))
-          .toList()
+              .map<AutocompletePrediction>(
+                  (json) => AutocompletePrediction.fromJson(json))
+              .toList()
           : null,
     );
   }
@@ -161,7 +166,11 @@ class DistanceMatrixResponse {
     return DistanceMatrixResponse(
       destinationAddresses: List<String>.from(json["destination_addresses"]),
       originAddresses: List<String>.from(json["origin_addresses"]),
-      elements: json["rows"] != null ? (json["rows"][0]["elements"] as List).map((e) => DistanceMatrixElement.fromJson(e)).toList() : [],
+      elements: json["rows"] != null
+          ? (json["rows"][0]["elements"] as List)
+              .map((e) => DistanceMatrixElement.fromJson(e))
+              .toList()
+          : [],
       status: json["status"],
     );
   }
