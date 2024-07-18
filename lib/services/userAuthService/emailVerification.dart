@@ -25,21 +25,21 @@ class _EmailVerificationState extends State<EmailVerification> {
   bool isNumberVerified = false;
   late final String _UID = _auth.getUserId();
   @override
-  void initState(){
+  void initState() {
     super.initState();
     isPhoneNumberVerified();
     _emailVerificationLink();
     timer = Timer.periodic(const Duration(seconds: 5), (timer) {
       _auth.currentUser?.reload();
-      if(_auth.currentUser!.emailVerified == true){
+      if (_auth.currentUser!.emailVerified == true) {
         timer.cancel();
         showToast(text: 'Email Verified');
-        if(isNumberVerified){
+        if (isNumberVerified) {
           Navigator.pushReplacement(
             context,
             pageAnimationlr(const Home()),
           );
-        } else{
+        } else {
           Navigator.pushReplacement(
             context,
             pageAnimationlr(const PhoneVerification()),
@@ -48,26 +48,27 @@ class _EmailVerificationState extends State<EmailVerification> {
       }
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title:  Row(
+        title: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             IconButton(
-              onPressed: () async{
+              onPressed: () async {
                 // Navigate to the home page with a fade transition
-                try{
+                try {
                   await _auth.setLoggedOut();
                   await FirebaseAuth.instance.signOut();
                   Navigator.pushReplacement(
                     context,
                     pageAnimationlr(const Login()),
                   );
-                } catch (e){
+                } catch (e) {
                   print(e);
                 }
               },
@@ -84,34 +85,34 @@ class _EmailVerificationState extends State<EmailVerification> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Text('Verification sent'),
-              ElevatedButton(onPressed: (){
-                try{
-                  _emailVerificationLink();
-                  showToast(text: 'Verification sent');
-                } catch (e){
-                  showToast(text: e.toString());
-                }
-
-              }, child: const Text('Resend Verification Email'))
+              ElevatedButton(
+                  onPressed: () {
+                    try {
+                      _emailVerificationLink();
+                      showToast(text: 'Verification sent');
+                    } catch (e) {
+                      showToast(text: e.toString());
+                    }
+                  },
+                  child: const Text('Resend Verification Email'))
             ],
           ),
         ),
       ),
     );
   }
-  void _emailVerificationLink(){
-    try{
+
+  void _emailVerificationLink() {
+    try {
       _auth.currentUser?.sendEmailVerification();
-    } catch (e){
+    } catch (e) {
       showToast(text: 'Error sending verification link. Try again!');
     }
   }
 
-  void isPhoneNumberVerified() async{
-    DocumentSnapshot userInfo = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_UID)
-        .get();
+  void isPhoneNumberVerified() async {
+    DocumentSnapshot userInfo =
+        await FirebaseFirestore.instance.collection('users').doc(_UID).get();
     setState(() {
       isNumberVerified = userInfo['isPhoneNumberVerified'];
     });

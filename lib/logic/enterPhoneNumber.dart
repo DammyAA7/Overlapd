@@ -13,7 +13,7 @@ bool isPhoneNumberValid(String phoneNumber) {
 
 Color buttonColor(bool isValid) => isValid ? Colors.black : Colors.grey;
 
-Color textButtonColor(bool isValid) =>  isValid ? Colors.white : Colors.black54;
+Color textButtonColor(bool isValid) => isValid ? Colors.white : Colors.black54;
 
 Widget termsAndConditions(BuildContext context) {
   return Padding(
@@ -21,10 +21,7 @@ Widget termsAndConditions(BuildContext context) {
     child: RichText(
       text: TextSpan(
         style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-            fontWeight: FontWeight.w500,
-            color: Colors.grey,
-            fontSize: 15
-        ),
+            fontWeight: FontWeight.w500, color: Colors.grey, fontSize: 15),
         children: [
           const TextSpan(
             text: 'By proceeding, I accept the',
@@ -37,18 +34,14 @@ Widget termsAndConditions(BuildContext context) {
                 style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     fontWeight: FontWeight.w600,
                     color: Colors.black,
-                    fontSize: 15
-                ),
+                    fontSize: 15),
               ),
             ),
           ),
           TextSpan(
             text: ' and ',
             style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-                fontSize: 15
-            ),
+                fontWeight: FontWeight.w500, color: Colors.grey, fontSize: 15),
           ),
           WidgetSpan(
             child: GestureDetector(
@@ -58,8 +51,7 @@ Widget termsAndConditions(BuildContext context) {
                 style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     fontWeight: FontWeight.w600,
                     color: Colors.black,
-                    fontSize: 15
-                ),
+                    fontSize: 15),
               ),
             ),
           ),
@@ -79,10 +71,7 @@ Widget cantAccessAccount(BuildContext context) {
       child: Text(
         'Don\'t have access to your phone number?',
         style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
-            fontSize: 15
-        ),
+            fontWeight: FontWeight.w600, color: Colors.black, fontSize: 15),
       ),
     ),
   );

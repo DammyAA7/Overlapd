@@ -8,6 +8,7 @@ import '../../logic/personalDetails.dart';
 import '../../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
 import '../../utilities/customButton.dart';
 import '../../utilities/customNumberField.dart';
+
 class ConfirmMobileNumber extends StatefulWidget {
   const ConfirmMobileNumber({super.key});
 
@@ -29,7 +30,7 @@ class _ConfirmMobileNumberState extends State<ConfirmMobileNumber> {
   Future<void> handleUnlinkPhoneNumber() async {
     String? userMobileNumber = await _auth.getUserMobileNumber();
     if (userMobileNumber == '+353${mobileNumber.text.replaceAll(' ', '')}') {
-      if(_auth.currentUser?.phoneNumber != null){
+      if (_auth.currentUser?.phoneNumber != null) {
         await _auth.unlinkPhoneNumber();
         print('Phone number unlinked successfully');
       }
@@ -46,13 +47,14 @@ class _ConfirmMobileNumberState extends State<ConfirmMobileNumber> {
     // Check if the mobile number is valid
     setState(() {
       wrongNumber = false;
-      if(mobileNumber.text.length == 11){
+      if (mobileNumber.text.length == 11) {
         isMNEmpty = false;
-      } else{
+      } else {
         isMNEmpty = true;
       }
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,7 +67,8 @@ class _ConfirmMobileNumberState extends State<ConfirmMobileNumber> {
             IconButton(
               onPressed: () {
                 FirebaseAuth.instance.signOut();
-                Navigator.pushReplacement(context, pageAnimationlr(const Onboarding()));
+                Navigator.pushReplacement(
+                    context, pageAnimationlr(const Onboarding()));
               },
               icon: const Icon(Icons.arrow_back_outlined),
             ),
@@ -80,14 +83,14 @@ class _ConfirmMobileNumberState extends State<ConfirmMobileNumber> {
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 12.0, left: 8.0, right: 8.0),
-              child: Text(
-                'Enter mobile number associated with account',
-                style: Theme.of(context).textTheme.headlineLarge!.copyWith()
-              ),
+              child: Text('Enter mobile number associated with account',
+                  style: Theme.of(context).textTheme.headlineLarge!.copyWith()),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 16.0, bottom: 8.0),
-              child: PhoneNumberField(context, mobileNumber, borderColor(isMNEmpty)),
+              padding: const EdgeInsets.only(
+                  left: 8.0, right: 8.0, top: 16.0, bottom: 8.0),
+              child: PhoneNumberField(
+                  context, mobileNumber, borderColor(isMNEmpty)),
             ),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
@@ -97,33 +100,37 @@ class _ConfirmMobileNumberState extends State<ConfirmMobileNumber> {
               child: !wrongNumber
                   ? const SizedBox.shrink()
                   : Padding(
-                key: ValueKey<bool>(!wrongNumber),
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Wrong Number',
-                  style: Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.red),
-                ),
-              ),
+                      key: ValueKey<bool>(!wrongNumber),
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Wrong Number',
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelLarge!
+                            .copyWith(color: Colors.red),
+                      ),
+                    ),
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 30.0, right: 8.0, left: 8.0, bottom: 8.0),
-              child: Button(
-                  context,
-                  'Continue',
-                      () async{
-                    if(!isMNEmpty){
-                      String? userMobileNumber = await _auth.getUserMobileNumber();
-                      if(userMobileNumber == '+353${mobileNumber.text.replaceAll(' ', '')}'){
-                        await handleUnlinkPhoneNumber();
-                      } else{
-                        setState(() {
-                          wrongNumber = true;
-                        });
-                      }
-                    }
-                  },
+              padding: const EdgeInsets.only(
+                  top: 30.0, right: 8.0, left: 8.0, bottom: 8.0),
+              child: Button(context, 'Continue', () async {
+                if (!isMNEmpty) {
+                  String? userMobileNumber = await _auth.getUserMobileNumber();
+                  if (userMobileNumber ==
+                      '+353${mobileNumber.text.replaceAll(' ', '')}') {
+                    await handleUnlinkPhoneNumber();
+                  } else {
+                    setState(() {
+                      wrongNumber = true;
+                    });
+                  }
+                }
+              },
                   double.infinity,
-                  Theme.of(context).textTheme.labelLarge!.copyWith(color: textButtonColor(!isMNEmpty), fontWeight: FontWeight.normal),
+                  Theme.of(context).textTheme.labelLarge!.copyWith(
+                      color: textButtonColor(!isMNEmpty),
+                      fontWeight: FontWeight.normal),
                   buttonColor(!isMNEmpty)),
             ),
           ],

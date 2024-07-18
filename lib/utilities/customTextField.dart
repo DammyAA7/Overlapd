@@ -9,15 +9,14 @@ Widget CustomTextBox(
     TextEditingController controller,
     TextInputType keyboardType,
     Color borderColor,
-    [TextInputFormatter? inputFormatter]
-    ) {
+    [TextInputFormatter? inputFormatter]) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Padding(
         padding: const EdgeInsets.only(top: 8.0, bottom: 15.0),
         child: Text(
-            title,
+          title,
           style: titleStyle,
         ),
       ),
@@ -34,16 +33,16 @@ Widget CustomTextBox(
               border: InputBorder.none,
               hintText: hintText,
               hintStyle: Theme.of(context).textTheme.labelLarge!.copyWith(
-                color: Colors.grey,
-                fontWeight: FontWeight.w400,
-              ),
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w400,
+                  ),
             ),
             keyboardType: keyboardType,
             inputFormatters: inputFormatter != null ? [inputFormatter] : null,
             style: Theme.of(context).textTheme.labelLarge!.copyWith(
-              color: Colors.black,
-              fontWeight: FontWeight.normal,
-            ),
+                  color: Colors.black,
+                  fontWeight: FontWeight.normal,
+                ),
           ),
         ),
       ),

@@ -21,8 +21,7 @@ class _SupportState extends State<Support> {
   final InputBoxController body = InputBoxController();
 
   bool _areFieldsValid() {
-    return body.getText().isNotEmpty &&
-        title.getText().isNotEmpty;
+    return body.getText().isNotEmpty && title.getText().isNotEmpty;
   }
 
   @override
@@ -37,7 +36,7 @@ class _SupportState extends State<Support> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title:  Row(
+        title: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -72,7 +71,8 @@ class _SupportState extends State<Support> {
               pageText(context, 'Title'),
               supportLetterInputBox('Enter Subject', true, false, title),
               pageText(context, 'Body'),
-              multilineLetterInputBox('Enter complaint, suggestion or feedback', true, false, body),
+              multilineLetterInputBox(
+                  'Enter complaint, suggestion or feedback', true, false, body),
               Padding(
                   padding: EdgeInsets.only(
                       bottom: MediaQuery.of(context).viewInsets.bottom))
@@ -82,9 +82,8 @@ class _SupportState extends State<Support> {
       ),
       bottomSheet: Padding(
         padding: const EdgeInsets.all(8.0),
-        child:solidButton(context, 'Submit', () {
+        child: solidButton(context, 'Submit', () {
           submitFeedback();
-
         }, _areFieldsValid()),
       ),
     );
@@ -95,8 +94,10 @@ class _SupportState extends State<Support> {
     Map<String, dynamic> feedbackData = {
       'title': title.getText(),
       'body': body.getText(),
-      'timestamp': FieldValue.serverTimestamp(), // This will add the current timestamp according to Firestore's server
-      'userId': _auth.getUsername(), // Assuming you want to track which user submitted the feedback
+      'timestamp': FieldValue
+          .serverTimestamp(), // This will add the current timestamp according to Firestore's server
+      'userId': _auth
+          .getUsername(), // Assuming you want to track which user submitted the feedback
     };
 
     try {

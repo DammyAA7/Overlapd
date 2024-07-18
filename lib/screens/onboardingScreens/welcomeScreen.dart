@@ -61,7 +61,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     Future.delayed(const Duration(seconds: 5), () {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const PersonalDetails(), // Navigate to your personal details screen
+          builder: (context) =>
+              const PersonalDetails(), // Navigate to your personal details screen
         ),
       );
     });
@@ -90,7 +91,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       body: Center(
         child: Text(
           'Welcome to Overlap!',
-          style: Theme.of(context).textTheme.displayLarge!.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context)
+              .textTheme
+              .displayLarge!
+              .copyWith(fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
       ),

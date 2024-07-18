@@ -74,11 +74,11 @@ Future<bool> verifyOTP(BuildContext context, String verificationId, String pin, 
       ));
     }
     return true;
-  } catch(e){
+  } catch (e) {
     return false;
   }
 }
 
 Color buttonColor(bool isValid) => isValid ? Colors.black : Colors.grey;
 
-Color textButtonColor(bool isValid) =>  isValid ? Colors.white : Colors.black54;
+Color textButtonColor(bool isValid) => isValid ? Colors.white : Colors.black54;

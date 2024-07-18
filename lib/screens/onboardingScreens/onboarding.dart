@@ -18,8 +18,7 @@ class _OnboardingState extends State<Onboarding> {
     final double phoneHeight = MediaQuery.of(context).size.height;
     final pages = List.generate(
         4,
-            (index) =>
-            Container(
+        (index) => Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -36,7 +35,7 @@ class _OnboardingState extends State<Onboarding> {
                     ),
                   ),
                   Container(
-                    margin: const EdgeInsets.fromLTRB(0,10.0, 0,0),
+                    margin: const EdgeInsets.fromLTRB(0, 10.0, 0, 0),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -45,7 +44,10 @@ class _OnboardingState extends State<Onboarding> {
                         padding: const EdgeInsets.only(top: 15.0),
                         child: Text(
                           'This paragraph describes a USP',
-                          style: Theme.of(context).textTheme.headlineLarge?.copyWith(color: Colors.black),
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineLarge
+                              ?.copyWith(color: Colors.black),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -53,7 +55,12 @@ class _OnboardingState extends State<Onboarding> {
                         padding: const EdgeInsets.only(top: 15.0),
                         child: Text(
                           'Lorem ipsum dolor sit amet consectetur',
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.black, fontWeight: FontWeight.normal),
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelLarge
+                              ?.copyWith(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.normal),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -97,30 +104,24 @@ class _OnboardingState extends State<Onboarding> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Button(
-                        context,
-                        'Log in',
-                        () {
-                          Navigator.of(context).pushReplacement(pageAnimationrl(
-                              const EnterPhoneNumber(type: 'Log in',)
-                          ));
-                        },
+                    Button(context, 'Log in', () {
+                      Navigator.of(context).pushReplacement(
+                          pageAnimationrl(const EnterPhoneNumber(
+                        type: 'Log in',
+                      )));
+                    },
                         MediaQuery.of(context).size.width * 0.45,
-                        Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.black, fontWeight: FontWeight.normal),
-                        Colors.grey
-                    ),
-                    Button(
-                      context,
-                      'Sign up',
-                       () {
-                         Navigator.of(context).pushReplacement(pageAnimationrl(
-                             const EnterPhoneNumber(type: 'Sign up')
-                         ));
-                       },
-                      MediaQuery.of(context).size.width * 0.45,
-                      Theme.of(context).textTheme.labelLarge!.copyWith(color: Colors.white, fontWeight: FontWeight.normal),
-                      Colors.black
-                    ),
+                        Theme.of(context).textTheme.labelLarge!.copyWith(
+                            color: Colors.black, fontWeight: FontWeight.normal),
+                        Colors.grey),
+                    Button(context, 'Sign up', () {
+                      Navigator.of(context).pushReplacement(pageAnimationrl(
+                          const EnterPhoneNumber(type: 'Sign up')));
+                    },
+                        MediaQuery.of(context).size.width * 0.45,
+                        Theme.of(context).textTheme.labelLarge!.copyWith(
+                            color: Colors.white, fontWeight: FontWeight.normal),
+                        Colors.black),
                   ],
                 ),
               )

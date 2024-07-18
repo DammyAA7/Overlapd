@@ -8,9 +8,10 @@ import '../../utilities/widgets.dart';
 import 'groceryRange.dart';
 
 class SubRange extends StatefulWidget {
-  final Map<String,Map <String, Future<List<List>>>> subRange;
+  final Map<String, Map<String, Future<List<List>>>> subRange;
   final String categoryName;
-  const SubRange({super.key, required this.subRange, required this.categoryName});
+  const SubRange(
+      {super.key, required this.subRange, required this.categoryName});
 
   @override
   State<SubRange> createState() => _SubRangeState();
@@ -33,17 +34,15 @@ class _SubRangeState extends State<SubRange> {
           },
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
         ),
-        title:  Text(
+        title: Text(
           widget.categoryName,
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         actions: [
           IconButton(
-              onPressed: (){
-                Navigator.push(
-                    context,
-                    pageAnimationFromBottomToTop(const ShoppingCart())
-                );
+              onPressed: () {
+                Navigator.push(context,
+                    pageAnimationFromBottomToTop(const ShoppingCart()));
               },
               icon: const Icon(Icons.shopping_cart_rounded)),
         ],
@@ -51,11 +50,11 @@ class _SubRangeState extends State<SubRange> {
       body: ListView(
         children: widget.subRange.keys.map((key) {
           return InkWell(
-            onTap: (){
+            onTap: () {
               Navigator.push(
                   context,
-                  pageAnimationrl
-                    (SubSubRange(subRange:widget.subRange[key]!, categoryName:key)));
+                  pageAnimationrl(SubSubRange(
+                      subRange: widget.subRange[key]!, categoryName: key)));
             },
             child: Column(
               children: [
@@ -68,7 +67,9 @@ class _SubRangeState extends State<SubRange> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Flexible(child: Text(key, style: const TextStyle(fontSize: 15))),
+                        Flexible(
+                            child: Text(key,
+                                style: const TextStyle(fontSize: 15))),
                         const Icon(Icons.arrow_forward_ios_outlined)
                       ],
                     ),

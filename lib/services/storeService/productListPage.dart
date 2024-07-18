@@ -9,8 +9,6 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../utilities/widgets.dart';
 
-
-
 class Meat extends StatefulWidget {
   static const id = 'meat_page';
   final Future<List<List>> productCSV;
@@ -42,18 +40,19 @@ class _MeatState extends State<Meat> {
           },
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
         ),
-        title:  Text(
+        title: Text(
           'Tesco',
           style: Theme.of(context).textTheme.displayMedium,
         ),
       ),
       body: Consumer<Cart>(
-        builder: (context, cart, child) => NotificationListener<UserScrollNotification>(
-          onNotification: (notification){
-            if(notification.direction == ScrollDirection.forward){
-              if(!scroll) setState(() => scroll = true);
-            } else if(notification.direction == ScrollDirection.reverse){
-              if(scroll) setState(() => scroll = false);
+        builder: (context, cart, child) =>
+            NotificationListener<UserScrollNotification>(
+          onNotification: (notification) {
+            if (notification.direction == ScrollDirection.forward) {
+              if (!scroll) setState(() => scroll = true);
+            } else if (notification.direction == ScrollDirection.reverse) {
+              if (scroll) setState(() => scroll = false);
             }
             return true;
           },
@@ -66,7 +65,7 @@ class _MeatState extends State<Meat> {
                   maintainState: true,
                   child: TextField(
                     controller: searchText, // Use the stored value
-                    onChanged: (value){
+                    onChanged: (value) {
                       setState(() {
                         filterProduct = value;
                       });
@@ -74,23 +73,22 @@ class _MeatState extends State<Meat> {
                     decoration: InputDecoration(
                         filled: true,
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide.none,
                         ),
-                      hintText: 'Search',
-                      prefixIcon: const Icon(Icons.search_outlined),
-                      suffixIcon: IconButton(onPressed: (){
-                        setState((){
-                          filterProduct = "";
-                          searchText.clear();
-                        });
-                      }, icon: const Icon(Icons.clear))
-                    ),
+                        hintText: 'Search',
+                        prefixIcon: const Icon(Icons.search_outlined),
+                        suffixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                filterProduct = "";
+                                searchText.clear();
+                              });
+                            },
+                            icon: const Icon(Icons.clear))),
                   ),
                 ),
-                Expanded(
-                    child: _buildProductList(cart)
-                ),
+                Expanded(child: _buildProductList(cart)),
               ],
             ),
           ),
@@ -99,10 +97,10 @@ class _MeatState extends State<Meat> {
       floatingActionButton: Stack(
         children: [
           FloatingActionButton(
-            onPressed: () async{
+            onPressed: () async {
               await Navigator.push(
                 context,
-                  pageAnimationFromBottomToTop(const ShoppingCart()),
+                pageAnimationFromBottomToTop(const ShoppingCart()),
               );
               setState(() {});
             },
@@ -114,39 +112,41 @@ class _MeatState extends State<Meat> {
     );
   }
 
-  Widget _buildProductItem(List data, Cart cart){
+  Widget _buildProductItem(List data, Cart cart) {
     bool isInCart = cart.isProductInCart(data[0].toString());
 
-    if(filterProduct.isEmpty){
+    if (filterProduct.isEmpty) {
       return productListTile(data, isInCart, cart);
     }
-    if(data[0].toString().toLowerCase().contains(filterProduct.toLowerCase())){
+    if (data[0]
+        .toString()
+        .toLowerCase()
+        .contains(filterProduct.toLowerCase())) {
       return productListTile(data, isInCart, cart);
-    }
-    else{
+    } else {
       return const SizedBox.shrink();
     }
-
   }
 
   Widget productListTile(List data, bool isInCart, Cart cart) {
     Product product = Product(
         title: data[0].toString(),
-        price: double.parse(data[1].toString().replaceAll(RegExp(r'[^0-9.]'), '')),
+        price:
+            double.parse(data[1].toString().replaceAll(RegExp(r'[^0-9.]'), '')),
         pricePer: data[3].toString(),
         imageUrl: data[5].toString(),
-        substitutable: true
-    );
-    int quantity = productQuantities[product] ?? 1; // Get quantity for the product
+        substitutable: true);
+    int quantity =
+        productQuantities[product] ?? 1; // Get quantity for the product
     bool flag = productFlags[product] ?? true; // Get flag for the product
     if (isInCart) {
       flag = false; // Set flag to false if the product is in the cart
       quantity = cart.getQuantity(product) ?? 1; // Get quantity from the cart
-    } else{
+    } else {
       flag = true; // Set flag to true if the product is not in the cart
       quantity = 1; // Set quantity to 1 if the product is not in the cart
     }
-    try{
+    try {
       return Padding(
         padding: const EdgeInsets.all(5.0),
         child: Column(
@@ -159,90 +159,121 @@ class _MeatState extends State<Meat> {
                   children: [
                     Expanded(
                       flex: 3,
-                      child: Image.network(data[5].toString(),
-                        errorBuilder: (context, error, stackTrace){
-                          return Image.network("https://digitalcontent.api.tesco.com/v2/media/ghs-mktg/b0b04216-fa73-466d-a9d7-c9fcfa1ce9b3/no-image.jpeg");
+                      child: Image.network(
+                        data[5].toString(),
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.network(
+                              "https://digitalcontent.api.tesco.com/v2/media/ghs-mktg/b0b04216-fa73-466d-a9d7-c9fcfa1ce9b3/no-image.jpeg");
                         },
                       ),
                     ),
                     const SizedBox(width: 5),
                     Expanded(
                         flex: 6,
-                        child:
-                        Column(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            Text(data[0].toString(), overflow: TextOverflow.visible, maxLines: 2, style: Theme.of(context).textTheme.labelLarge,),
+                            Text(
+                              data[0].toString(),
+                              overflow: TextOverflow.visible,
+                              maxLines: 2,
+                              style: Theme.of(context).textTheme.labelLarge,
+                            ),
                             Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
-                                children:[
-                                  Text(data[1].toString(), style: Theme.of(context).textTheme.labelLarge,),
+                                children: [
+                                  Text(
+                                    data[1].toString(),
+                                    style:
+                                        Theme.of(context).textTheme.labelLarge,
+                                  ),
                                   const SizedBox(width: 5),
-                                  Text(data[3].toString(), style: Theme.of(context).textTheme.labelMedium)
-                                ]
-                            ),
-                            GestureDetector(onTap: (){
-                              launchUrl(Uri.parse(data[4]), mode: LaunchMode.inAppBrowserView);
-                            }, child: Text('View Details', style: Theme.of(context).textTheme.labelLarge,))
+                                  Text(data[3].toString(),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium)
+                                ]),
+                            GestureDetector(
+                                onTap: () {
+                                  launchUrl(Uri.parse(data[4]),
+                                      mode: LaunchMode.inAppBrowserView);
+                                },
+                                child: Text(
+                                  'View Details',
+                                  style: Theme.of(context).textTheme.labelLarge,
+                                ))
                           ],
-                        )
-                    ),
+                        )),
                     Expanded(
                         flex: 1,
                         child: AnimatedSwitcher(
                           duration: const Duration(milliseconds: 500),
-                          child: flag ? IconButton(
-                            key: const Key('1'),
-                            onPressed: () {
-                              //add to cart
-                              cart.addToCart(product, quantity);
+                          child: flag
+                              ? IconButton(
+                                  key: const Key('1'),
+                                  onPressed: () {
+                                    //add to cart
+                                    cart.addToCart(product, quantity);
 
-                              showToast(text: 'Successfully Added to cart');
-                              setState(() {
-                                productFlags[product] = !flag; // Update flag in the map
-                              });
-                            },
-                            icon: const Icon(Icons.add_shopping_cart_rounded),
-                          ) : Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            key: const Key('2'),
-                            children: [
-                              Flexible(
-                                flex: 1,
-                                child: GestureDetector(
-                                    onTap: (){
-                                      setState(() {
-                                        quantity += 1;
-                                      });
-                                      productQuantities[product] = quantity; // Update quantity in the map
-                                      cart.addToCart(product, 1);
-                                    },
-
-                                    child: const Icon(Icons.add)),
-                              ),
-                              Text('$quantity', style: Theme.of(context).textTheme.labelLarge,),
-                              GestureDetector(
-                                  onTap: (){
+                                    showToast(
+                                        text: 'Successfully Added to cart');
                                     setState(() {
-                                      if(quantity > 0){
-                                        quantity -= 1;
-                                      }
-                                      if(quantity == 0){
-                                        productFlags[product] = !flag; // Update flag in the map
-                                        quantity = 1;
-                                        showToast(text: 'Removed from cart');
-                                      }
+                                      productFlags[product] =
+                                          !flag; // Update flag in the map
                                     });
-                                    productQuantities[product] = quantity; // Update quantity in the map
-                                    cart.reduceQtyFromCart(product, 1);
-                                    productQuantities[product] = quantity; // Update quantity in the map
                                   },
-                                  child: const Icon(Icons.remove)),
-                            ],
-                          ),
-                        )
-                    )
+                                  icon: const Icon(
+                                      Icons.add_shopping_cart_rounded),
+                                )
+                              : Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  key: const Key('2'),
+                                  children: [
+                                    Flexible(
+                                      flex: 1,
+                                      child: GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              quantity += 1;
+                                            });
+                                            productQuantities[product] =
+                                                quantity; // Update quantity in the map
+                                            cart.addToCart(product, 1);
+                                          },
+                                          child: const Icon(Icons.add)),
+                                    ),
+                                    Text(
+                                      '$quantity',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge,
+                                    ),
+                                    GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            if (quantity > 0) {
+                                              quantity -= 1;
+                                            }
+                                            if (quantity == 0) {
+                                              productFlags[product] =
+                                                  !flag; // Update flag in the map
+                                              quantity = 1;
+                                              showToast(
+                                                  text: 'Removed from cart');
+                                            }
+                                          });
+                                          productQuantities[product] =
+                                              quantity; // Update quantity in the map
+                                          cart.reduceQtyFromCart(product, 1);
+                                          productQuantities[product] =
+                                              quantity; // Update quantity in the map
+                                        },
+                                        child: const Icon(Icons.remove)),
+                                  ],
+                                ),
+                        ))
                   ],
                 ),
               ),
@@ -251,37 +282,37 @@ class _MeatState extends State<Meat> {
           ],
         ),
       );
-    } catch(e){
+    } catch (e) {
       return const SizedBox.shrink();
     }
-
   }
 
-  Widget _buildProductList(Cart cart){
+  Widget _buildProductList(Cart cart) {
     return FutureBuilder(
-        builder: (context, snapshot){
-          if (snapshot.connectionState == ConnectionState.none &&
-              snapshot.hasData) {
-            // If the data is still loading, return a loading indicator
-            return const CircularProgressIndicator();
-          }
-          return ListView.builder(
-            itemCount: productList.length,
-            itemBuilder: (context, index){
-              if(index == 0 || productList[index][1] == 'Currently out of stock'){
-                return const SizedBox.shrink();
-              }
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.none &&
+            snapshot.hasData) {
+          // If the data is still loading, return a loading indicator
+          return const CircularProgressIndicator();
+        }
+        return ListView.builder(
+          itemCount: productList.length,
+          itemBuilder: (context, index) {
+            if (index == 0 ||
+                productList[index][1] == 'Currently out of stock') {
+              return const SizedBox.shrink();
+            }
 
-              return _buildProductItem(productList[index], cart);
-            },
-          );
-          }, future: loadCSV(),
+            return _buildProductItem(productList[index], cart);
+          },
+        );
+      },
+      future: loadCSV(),
     );
   }
 
-  Future loadCSV() async{
+  Future loadCSV() async {
     productList = await widget.productCSV;
     return productList;
   }
-
 }

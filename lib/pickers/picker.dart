@@ -23,30 +23,31 @@ class _PickerState extends State<Picker> {
         automaticallyImplyLeading: true,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.logout_outlined), // You can replace this with your preferred icon
+          icon: const Icon(Icons
+              .logout_outlined), // You can replace this with your preferred icon
           onPressed: () {
             showDialog(
                 context: context,
                 builder: (BuildContext dialogContext) => AlertDialog(
-                  title: const Text('Are you sure you want to sign out?'),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () => Navigator.of(dialogContext).pop('No'),
-                      child: const Text('No'),
-                    ),
-                    TextButton(
-                      onPressed: () async{
-                        Navigator.of(dialogContext).pop('Yes');
-                        _signOut();
-                      },
-                      child: const Text('Yes'),
-                    ),
-                  ],
-                )
-            );
+                      title: const Text('Are you sure you want to sign out?'),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () =>
+                              Navigator.of(dialogContext).pop('No'),
+                          child: const Text('No'),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            Navigator.of(dialogContext).pop('Yes');
+                            _signOut();
+                          },
+                          child: const Text('Yes'),
+                        ),
+                      ],
+                    ));
           },
         ),
-        title:  Text(
+        title: Text(
           'Stores',
           style: Theme.of(context).textTheme.headlineSmall,
         ),
@@ -61,12 +62,9 @@ class _PickerState extends State<Picker> {
   }
 
   Widget selectStoreTile(
-      BuildContext context,
-      String imageName,
-      String storeName
-      ) {
+      BuildContext context, String imageName, String storeName) {
     return InkWell(
-      onTap: (){
+      onTap: () {
         Navigator.push(context, pageAnimationrl(Orders(store: storeName)));
       },
       child: Column(

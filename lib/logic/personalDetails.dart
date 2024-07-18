@@ -12,11 +12,11 @@ bool isValidEmail(String email) {
 
 Color buttonColor(bool isValid) => isValid ? Colors.black : Colors.grey;
 
-Color textButtonColor(bool isValid) =>  isValid ? Colors.white : Colors.black54;
+Color textButtonColor(bool isValid) => isValid ? Colors.white : Colors.black54;
 
-Color borderColor(bool isValid) =>  isValid ? Colors.grey : Colors.black;
+Color borderColor(bool isValid) => isValid ? Colors.grey : Colors.black;
 
-Color textColor(bool isValid) =>  isValid ? Colors.grey : Colors.black;
+Color textColor(bool isValid) => isValid ? Colors.grey : Colors.black;
 
 Future createUserCredentials(User? user, String firstName, String lastName, String email) async{
   final docUser = FirebaseFirestore.instance.collection('users').doc(user?.uid);

@@ -17,7 +17,7 @@ class _HistoryState extends State<History> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title:  Row(
+        title: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

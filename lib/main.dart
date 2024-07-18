@@ -6,10 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:hive/hive.dart';
 import 'package:overlapd/screens/activity/activity.dart';
+import 'package:overlapd/screens/cart/provider/cart_provider.dart';
+import 'package:overlapd/screens/category/provider/shop_by_category_provider.dart';
+import 'package:overlapd/screens/home.dart';
+import 'package:overlapd/screens/home/provider/home_provider.dart';
 import 'package:overlapd/screens/onboardingScreens/confirmMobileNumber.dart';
 import 'package:overlapd/screens/onboardingScreens/onboarding.dart';
 import 'package:overlapd/screens/onboardingScreens/splash.dart';
 import 'package:overlapd/pickers/picker.dart';
+import 'package:overlapd/screens/store/provider/store_provider.dart';
 import 'package:overlapd/screens/testScreen.dart';
 import 'package:overlapd/services/storeService/groceryRange.dart';
 import 'package:overlapd/services/userAuthService/forgottenPassword.dart';
@@ -28,7 +33,7 @@ import 'package:overlapd/services/userAuthService/firebase_auth_implementation/f
 import 'models/userModel.dart';
 import 'services/userAuthService/login.dart';
 import 'services/userAuthService/signup.dart';
-import 'screens/home.dart';
+// import 'screens/home.dart';
 import 'screens/settings.dart';
 
 
@@ -140,7 +145,11 @@ class _MyAppState extends State<MyApp> {
 
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => Cart()),
+          ChangeNotifierProvider(create: (context) => Cart()),
+        ChangeNotifierProvider(create: (context) => HomeProvider()),
+        ChangeNotifierProvider(create: (context) => ShopByCategoryProvider()),
+        ChangeNotifierProvider(create: (context) => StoreScreenProvider()),
+        ChangeNotifierProvider(create: (context) => CartProvider()),
         ChangeNotifierProvider(create: (context) => UserProvider()),
       ],
       child: Consumer<UserProvider>(

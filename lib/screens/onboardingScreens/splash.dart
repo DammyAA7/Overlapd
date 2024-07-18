@@ -28,11 +28,9 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin{
   @override
   void dispose() {
     // TODO: implement dispose
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.manual,
-      overlays: SystemUiOverlay.values
-    );
-    super.dispose();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+        overlays: SystemUiOverlay.values);
+  super.dispose();
   }
 
   void storeUserInfo() async {
@@ -53,8 +51,11 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin{
     return Scaffold(
       body: Center(
         child: Text(
-            'Overlap',
-            style: Theme.of(context).textTheme.displayLarge!.copyWith(fontWeight: FontWeight.bold),
+          'Overlap',
+          style: Theme.of(context)
+              .textTheme
+              .displayLarge!
+              .copyWith(fontWeight: FontWeight.bold),
         ),
       ),
     );
