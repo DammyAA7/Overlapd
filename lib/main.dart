@@ -9,6 +9,7 @@ import 'package:overlapd/screens/activity/activity.dart';
 import 'package:overlapd/screens/cart/provider/cart_provider.dart';
 import 'package:overlapd/screens/category/provider/shop_by_category_provider.dart';
 import 'package:overlapd/screens/home.dart';
+import 'package:overlapd/screens/home/home_screen.dart';
 import 'package:overlapd/screens/home/provider/home_provider.dart';
 import 'package:overlapd/screens/onboardingScreens/confirmMobileNumber.dart';
 import 'package:overlapd/screens/onboardingScreens/onboarding.dart';
@@ -288,7 +289,7 @@ class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
       return;
     } else if (isLoggedInAsUser) {
       navigatorKey.currentState?.pushReplacement(
-        MaterialPageRoute(builder: (context) => const TestScreen()),
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } else if (isLoggedInAsEmployee) {
       navigatorKey.currentState?.pushReplacement(
