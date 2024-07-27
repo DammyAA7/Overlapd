@@ -18,4 +18,13 @@ class CartModel {
       price += double.parse(product.price.substring(1));
     }
   }
+
+  // toJson
+  Map<String, dynamic> toJson() {
+    return {
+      'store': store.toJson(),
+      'products': products.map((e) => e.toJson()).toList(),
+      'price': price
+    };
+  }
 }

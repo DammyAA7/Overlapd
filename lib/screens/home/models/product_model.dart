@@ -34,4 +34,18 @@ class Product {
           json['store'] != null ? StoreItemModel.fromJson(json['store']) : null,
     );
   }
+
+  // toJson
+  Map<String, dynamic> toJson() {
+    return {
+      'Title': title,
+      'Price': price,
+      'Promotional Price': promotionalPrice,
+      'Price Per': pricePer,
+      'Product URL': productUrl,
+      'Image URL': imageUrl,
+      'productId': productId,
+      'store': store?.toJson(),
+    };
+  }
 }

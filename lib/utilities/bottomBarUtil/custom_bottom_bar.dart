@@ -4,12 +4,19 @@ import 'package:hive/hive.dart';
 
 enum BottomBarEnum { Home, Activity, Support, Profile }
 
-class CustomBottomBar extends StatelessWidget {
+class CustomBottomBar extends StatefulWidget {
   CustomBottomBar({Key? key, this.onChanged})
       : super(
           key: key,
         );
 
+  Function(BottomBarEnum)? onChanged;
+
+  @override
+  State<CustomBottomBar> createState() => _CustomBottomBarState();
+}
+
+class _CustomBottomBarState extends State<CustomBottomBar> {
   int selectedIndex = 0;
 
   List<BottomMenuModel> bottomMenuList = [
@@ -34,8 +41,6 @@ class CustomBottomBar extends StatelessWidget {
         type: BottomBarEnum.Profile,
         label: 'Profile')
   ];
-
-  Function(BottomBarEnum)? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -80,8 +85,11 @@ class CustomBottomBar extends StatelessWidget {
           );
         }),
         onTap: (index) {
-          selectedIndex = index;
-          onChanged?.call(bottomMenuList[index].type);
+          setState(() {
+                    selectedIndex = index;
+          widget.onChanged?.call(bottomMenuList[index].type);
+          });
+  
         },
       ),
     );

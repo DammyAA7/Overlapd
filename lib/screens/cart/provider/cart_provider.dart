@@ -51,12 +51,11 @@ class CartProvider extends ChangeNotifier {
              hierarchy: ["Store 1", "Store 1 Address"],
              image: "Store 1 Image",
             ),
-            )
-            
-        
-          
+            )          
         ],
       ),
+
+      
     );
     
   }

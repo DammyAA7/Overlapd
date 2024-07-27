@@ -53,6 +53,24 @@ class Store {
       subCategories: subCategories,
     );
   }
+
+  // toJson
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'address': address,
+      'phone': phone,
+      'email': email,
+      'image': imageAss,
+      'products': categories
+          .map((e) => {
+                e.name: e.subCategories
+                    .map((e) => {e.name: e.products.map((e) => e.toJson()).toList()})
+                    .toList()
+              })
+          .toList(),
+    };
+  }
 }
 
 class StoreItemModel {
@@ -77,5 +95,15 @@ class StoreItemModel {
       image: json['image'] as String,
       hierarchy: json['hierarchy'].cast<String>(),
     );
+  }
+
+  // toJson
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'address': address,
+      'image': image,
+      'hierarchy': hierarchy,
+    };
   }
 }

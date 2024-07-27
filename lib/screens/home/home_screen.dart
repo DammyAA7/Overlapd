@@ -11,6 +11,7 @@ import 'package:overlapd/screens/home/models/category.dart';
 import 'package:overlapd/screens/home/models/store.dart';
 import 'package:overlapd/screens/home/provider/home_provider.dart';
 import 'package:overlapd/screens/home/widget/home_widgets.dart';
+import 'package:overlapd/screens/profile/profile.dart';
 import 'package:overlapd/screens/store/provider/store_provider.dart';
 import 'package:overlapd/screens/store/store_screen.dart';
 import 'package:overlapd/utilities/bottomBarUtil/custom_bottom_bar.dart';
@@ -180,7 +181,7 @@ class HomeScreenPageState extends State<HomeScreenPage> {
                     child: Consumer<CartProvider>(
                       builder: (context, provider, child) {
                         return Text(
-                          provider.cart[1].products.length.toString(),
+                          provider.cart[0].products.length.toString(),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 12,
@@ -669,7 +670,7 @@ class HomeScreenState extends State<HomeScreen> {
       case '/support':
         return const DefaultWidget();
       case '/profile':
-        return const DefaultWidget();
+        return const Profile();
       default:
         return const HomeScreenPage();
     }
