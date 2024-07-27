@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
+import 'package:overlapd/screens/home/home_screen.dart';
 import 'package:overlapd/screens/testScreen.dart';
 import 'package:overlapd/utilities/customTextField.dart';
 import 'package:overlapd/utilities/widgets.dart';
@@ -150,7 +151,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                         if(!isFNEmpty && !isLNEmpty && !isEAEmpty && incorrectFormat){
                           createUserCredentials(_auth.currentUser, firstName.text, lastName.text, emailAddress.text);
                           await _auth.setLoggedInAsUser();
-                          Navigator.of(context).pushReplacement(pageAnimationlr(const TestScreen()));
+                          Navigator.of(context).pushReplacement(pageAnimationlr(const HomeScreen()));
                         }
                       },
                       double.infinity,

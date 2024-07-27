@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:overlapd/screens/home/home_screen.dart';
 import 'package:overlapd/screens/onboardingScreens/welcomeScreen.dart';
 import 'package:overlapd/screens/testScreen.dart';
 import '../models/userModel.dart';
@@ -70,7 +71,7 @@ Future<bool> verifyOTP(BuildContext context, String verificationId, String pin, 
       }
       auth.setLoggedInAsUser();
       Navigator.of(context).push(pageAnimationrl(
-          const TestScreen()
+          const HomeScreen()
       ));
     }
     return true;

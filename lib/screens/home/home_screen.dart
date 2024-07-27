@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:overlapd/screens/activity/activity.dart';
 import 'package:overlapd/screens/cart/provider/cart_provider.dart';
 import 'package:overlapd/screens/cart/screen/cart_screen.dart';
 import 'package:overlapd/screens/category/shop_by_category.dart';
@@ -44,7 +45,7 @@ class HomeScreenPageState extends State<HomeScreenPage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-          resizeToAvoidBottomInset: false,
+          resizeToAvoidBottomInset: true,
           appBar: _buildAppBar(context),
           body: Container(
             width: double.maxFinite,
@@ -134,7 +135,7 @@ class HomeScreenPageState extends State<HomeScreenPage> {
   /// AppBar Widget
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      // leading:
+      automaticallyImplyLeading: false,
       title: Row(
         children: [
           const Icon(Icons.location_on, color: Color(0xFF535353)),
@@ -194,7 +195,10 @@ class HomeScreenPageState extends State<HomeScreenPage> {
           
             ],
           ),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context)
+                .pushReplacement(pageAnimationlr(const CartScreen()));
+          },
         ),
       ],
     );
@@ -661,7 +665,7 @@ class HomeScreenState extends State<HomeScreen> {
       case '/home':
         return const HomeScreenPage();
       case '/activity':
-        return const CartScreen();
+        return const Activity();
       case '/support':
         return const DefaultWidget();
       case '/profile':

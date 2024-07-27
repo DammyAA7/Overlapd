@@ -22,6 +22,7 @@ class _ActivityState extends State<Activity> {
     double containerHeight = MediaQuery.of(context).size.height * 0.1;
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
           title:  Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [

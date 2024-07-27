@@ -33,7 +33,7 @@ class _TestScreenState extends State<TestScreen> {
     super.initState();
     _loadUserCredentials();
     _setupFirestoreListener();
-    addUserChangeListener();
+    //addUserChangeListener();
   }
 
   void addUserChangeListener() {

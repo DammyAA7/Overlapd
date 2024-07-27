@@ -57,14 +57,26 @@ class _CartScreenState extends State<CartScreen> {
         onTap: () {
           Navigator.pop(context, true);
         },
-        child: const Row(
+        child: Row(
           children: [
             SizedBox(
               width: 10,
             ),
-            Icon(Icons.keyboard_backspace),
-            Text("Go Back",
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600))
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Icon(Icons.arrow_back_outlined),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: const Text('Go back'),
+                )
+              ],
+            ),
           ],
         ),
       ),
@@ -227,7 +239,7 @@ class _CartScreenState extends State<CartScreen> {
           CustomElevatedButton(
             text: "Checkout",
             onPressed: () {
-              
+
             }
           ),
           const SizedBox(height: 14.0),

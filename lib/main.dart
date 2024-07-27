@@ -16,7 +16,6 @@ import 'package:overlapd/screens/onboardingScreens/onboarding.dart';
 import 'package:overlapd/screens/onboardingScreens/splash.dart';
 import 'package:overlapd/pickers/picker.dart';
 import 'package:overlapd/screens/store/provider/store_provider.dart';
-import 'package:overlapd/screens/testScreen.dart';
 import 'package:overlapd/services/storeService/groceryRange.dart';
 import 'package:overlapd/services/userAuthService/forgottenPassword.dart';
 import 'package:overlapd/services/userAuthService/emailVerification.dart';
@@ -120,8 +119,9 @@ class _MyAppState extends State<MyApp> {
         await FirebaseFirestore.instance.collection('users').doc(_auth.currentUser?.uid).update({
           'Email Verified': _auth.currentUser?.emailVerified,
         });
+        _auth.setLoggedInAsUser();
         navigatorKey.currentState?.pushReplacement(
-          MaterialPageRoute(builder: (context) => const TestScreen()),
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
         );
       } else {
         // Handle sign-in failure

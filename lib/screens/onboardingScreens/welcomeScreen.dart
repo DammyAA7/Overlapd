@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:overlapd/screens/home/home_screen.dart';
 import 'package:overlapd/screens/onboardingScreens/personalDetails.dart';
 import 'package:overlapd/screens/testScreen.dart';
 import 'package:overlapd/services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
@@ -79,7 +80,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       Future.delayed(const Duration(seconds: 2), () {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => const TestScreen(), // Navigate to your personal details screen
+            builder: (context) => const HomeScreen(), // Navigate to your personal details screen
           ),
         );
       });
