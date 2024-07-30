@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:hive/hive.dart';
 
 enum BottomBarEnum { Home, Activity, Support, Profile }
 
 class CustomBottomBar extends StatefulWidget {
-  CustomBottomBar({Key? key, this.onChanged})
-      : super(
-          key: key,
-        );
+  CustomBottomBar({Key? key, this.onChanged, required this.pages}) : super(key: key);
 
   Function(BottomBarEnum)? onChanged;
+
+  List<Widget> pages;
 
   @override
   State<CustomBottomBar> createState() => _CustomBottomBarState();
@@ -19,7 +17,7 @@ class CustomBottomBar extends StatefulWidget {
 class _CustomBottomBarState extends State<CustomBottomBar> {
   int selectedIndex = 0;
 
-  List<BottomMenuModel> bottomMenuList = [
+  final List<BottomMenuModel> bottomMenuList = [
     BottomMenuModel(
         icon: "assets/bottomBar/home.svg",
         activeIcon: "assets/bottomBar/home.svg",
@@ -42,76 +40,95 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
         label: 'Profile')
   ];
 
+  final List<GlobalKey<NavigatorState>> navigatorKeys = [
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+  ];
+
+  void _onItemTapped(int index) {
+    if (index == selectedIndex) {
+      navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
+    } else {
+      setState(() {
+        selectedIndex = index;
+      });
+      widget.onChanged?.call(bottomMenuList[index].type);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(
-            color: Colors.grey,
-            width: 0.5,
-          ),
-        ),
-      ),
-      height: 60,
-      // decoration: BoxDecoration(
-      //   color: theme.colorScheme.primary
-      // ),
-      child: BottomNavigationBar(
-        backgroundColor: Colors.transparent,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        selectedFontSize: 12,
-        elevation: 0,
-        currentIndex: selectedIndex,
-        type: BottomNavigationBarType.fixed,
-        items: List.generate(bottomMenuList.length, (index) {
-          return BottomNavigationBarItem(
-            icon: SvgPicture.asset(bottomMenuList[index].icon,
-                height: 25,
-                width: 25,
-                colorFilter: ColorFilter.mode(Colors.grey, BlendMode.srcIn)
-                // color: Colors.black
-                ),
-            activeIcon: SvgPicture.asset(bottomMenuList[index].activeIcon,
-                height: 25,
-                width: 25,
-                colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn)
-
-                // color: Colors.black
-                ),
-            label: bottomMenuList[index].label,
+    return Scaffold(
+      body: IndexedStack(
+        index: selectedIndex,
+        children: List.generate(bottomMenuList.length, (index) {
+          return Navigator(
+            key: navigatorKeys[index],
+            onGenerateRoute: (routeSettings) {
+              return MaterialPageRoute(
+                builder: (context) => widget.pages[index],
+              );
+            },
           );
         }),
-        onTap: (index) {
-          setState(() {
-                    selectedIndex = index;
-          widget.onChanged?.call(bottomMenuList[index].type);
-          });
-  
-        },
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            top: BorderSide(
+              color: Colors.grey,
+              width: 0.5,
+            ),
+          ),
+        ),
+        height: 60,
+        child: BottomNavigationBar(
+          backgroundColor: Colors.transparent,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+          selectedFontSize: 12,
+          elevation: 0,
+          type: BottomNavigationBarType.fixed,
+          currentIndex: selectedIndex,
+          onTap: _onItemTapped,
+          items: bottomMenuList.map((menu) {
+            return BottomNavigationBarItem(
+              icon: SvgPicture.asset(
+                menu.icon,
+                height: 25,
+                width: 25,
+                colorFilter: ColorFilter.mode(Colors.grey, BlendMode.srcIn),
+              ),
+              activeIcon: SvgPicture.asset(
+                menu.activeIcon,
+                height: 25,
+                width: 25,
+                colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn),
+              ),
+              label: menu.label,
+            );
+          }).toList(),
+        ),
       ),
     );
   }
 }
-// ignore_for_file: must_be_immutable
 
-// ignore_for_file: must_be_immutable
 class BottomMenuModel {
-  BottomMenuModel(
-      {required this.icon,
-      required this.activeIcon,
-      required this.type,
-      required this.label});
+  BottomMenuModel({
+    required this.icon,
+    required this.activeIcon,
+    required this.type,
+    required this.label,
+  });
 
-  String icon;
-
-  String activeIcon;
-
-  BottomBarEnum type;
-
-  String label;
+  final String icon;
+  final String activeIcon;
+  final BottomBarEnum type;
+  final String label;
 }
 
 class DefaultWidget extends StatelessWidget {
@@ -132,7 +149,7 @@ class DefaultWidget extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
               ),
-            )
+            ),
           ],
         ),
       ),
