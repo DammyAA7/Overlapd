@@ -27,15 +27,18 @@ class Store {
   factory Store.fromJson(Map<String, dynamic> json) {
     List<Product> products = [];
     List<SubCategory> subCategories = [];
-    for (var cat in (json['products'] as Map<String, dynamic>)
-        .entries
-        .map((e) => Category.fromJson(
-            e.key, json['name'], e.value as Map<String, dynamic>))
+    /// We have the case where it's going to be null because when we push the cart to the firestore we don't need to push the products again.
+    if (json['products'] != null) {
+    for (var cat in (json['products']
+    as Map<String, dynamic>)
+        .keys
+        .map((e) => Category.fromJson(e, json['name'], json['products'][e]))
         .toList()) {
-      subCategories.addAll(cat.subCategories);
       for (var subCat in cat.subCategories) {
+        subCategories.add(subCat);
         products.addAll(subCat.products);
       }
+    }
     }
 
     return Store(
@@ -44,11 +47,10 @@ class Store {
       phone: json['phone'] as String? ?? '',
       email: json['email'] as String? ?? '',
       imageAss: json['image'] as String? ?? 'assets/storeLogos/tesco.png',
-      categories: (json['products'] as Map<String, dynamic>)
-          .entries
-          .map((e) => Category.fromJson(
-              e.key, json['name'], e.value as Map<String, dynamic>))
-          .toList(),
+      categories: json['products'] != null ? (json['products'] as Map<String, dynamic>)
+          .keys
+          .map((e) => Category.fromJson(e, json['name'], json['products'][e]))
+          .toList() : [],
       products: products,
       subCategories: subCategories,
     );
@@ -62,13 +64,8 @@ class Store {
       'phone': phone,
       'email': email,
       'image': imageAss,
-      'products': categories
-          .map((e) => {
-                e.name: e.subCategories
-                    .map((e) => {e.name: e.products.map((e) => e.toJson()).toList()})
-                    .toList()
-              })
-          .toList(),
+      'products': null /// It's better to keep it null as it's not needed (Complex to handle as it just duplicates the data)
+       
     };
   }
 }

@@ -1,3 +1,7 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:overlapd/screens/cart/model/cart_model.dart';
 import 'package:overlapd/screens/home/models/product_model.dart';
@@ -22,10 +26,51 @@ class CartProvider extends ChangeNotifier {
    
   }
 
+  // Update firestore record
+  Future<bool> updateCartData() async {
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+    final collection = _firestore.collection('cart');
+    final doc = collection.doc(FirebaseAuth.instance.currentUser!.uid);
+
+    try {
+      var cartData = cart.map((e) => e.toJson()).toList();
+      log(cartData.toString()) ;
+      await doc.set({
+        'cart': cartData
+      });
+      return true;
+    } catch (e) {
+      log("Error: " + e.toString());
+      return false;
+    }
+  }
+
+  // Fetch cart data from firestore
+  Future<bool> fetchCartData() async {
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final collection = firestore.collection('cart');
+    final doc = collection.doc(FirebaseAuth.instance.currentUser!.uid);
+
+    try {
+      final data = await doc.get();
+      if (data.exists) {
+        final cartData = data.data()!['cart'] as List;
+        cart = cartData.map((e) => CartModel.fromJson(e)).toList();
+      }
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   // @override 
   // Object contains==()
 
   CartProvider() {
+    // Fetch cart data from firestore
+    fetchCartData();
+
+    // TODO: Remove Test Data
     cart.add(
       CartModel(
         store: Store(
