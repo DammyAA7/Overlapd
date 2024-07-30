@@ -179,7 +179,7 @@ class _ShopByCategoryState extends State<ShopByCategory> {
                     child: Consumer<CartProvider>(
                       builder: (context, provider, child) {
                         return Text(
-                          provider.cart[1].products.length.toString(),
+                          provider.cart[0].products.length.toString(),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 12,
@@ -275,10 +275,13 @@ class _ShopByCategoryState extends State<ShopByCategory> {
                             phone: 'products[index].store!.phone,',
                             categories: [],
                             email: 'products[index].store!.email,',
+                            products: null
                             // image: "Store 1 Image",
                           ),
                           products: [products[index]],
                         ));
+
+                        providercart.updateCartData();
                         
                       });
                     },

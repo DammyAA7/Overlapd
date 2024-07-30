@@ -27,4 +27,12 @@ class CartModel {
       'price': price
     };
   }
+
+  // fromJson
+  factory CartModel.fromJson(Map<String, dynamic> json) {
+    return CartModel(
+      store: Store.fromJson(json['store']),
+      products: (json['products'] as List).map((e) => Product.fromJson(e)).toList(),
+    );
+  }
 }
