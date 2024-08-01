@@ -645,7 +645,14 @@ class HomeScreenState extends State<HomeScreen> {
   Widget _buildBottomBar(BuildContext context) {
     return CustomBottomBar(onChanged: (BottomBarEnum type) {
       Navigator.pushNamed(navigatorKey.currentContext!, getCurrentRoute(type));
-    });
+    }, 
+    pages:const [
+       HomeScreenPage(),
+       Activity(),
+       DefaultWidget(),
+       Profile(),
+    ]
+    ,);
   }
 
   String getCurrentRoute(BottomBarEnum type) {
