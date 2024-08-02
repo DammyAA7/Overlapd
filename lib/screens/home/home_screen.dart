@@ -48,88 +48,86 @@ class HomeScreenPageState extends State<HomeScreenPage> {
       child: Scaffold(
           resizeToAvoidBottomInset: true,
           appBar: _buildAppBar(context),
-          body: SingleChildScrollView(
-            child: Container(
-              width: double.maxFinite,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Column(
-                children: [
-                  Consumer<HomeProvider>(
-                      builder: (context, provider, child) =>
-                          provider.isEmailVerfied 
-                              ? const SizedBox()
-                              : _buildVerifyYourEmail(context)),
-                  const SizedBox(height: 12),
-                  _buildOrderGroceries(context),
-                  const SizedBox(height: 12),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Selector<HomeProvider, TextEditingController?>(
-                      selector: (context, provider) => provider.searchController,
-                      builder: (context, searchController, child) {
-                        return SizedBox(
-                          height: 50,
-                          child: TextField(
-                            controller: searchController,
-                            onChanged: (value) {
-                              if (value.isEmpty) {
-                                Provider.of<HomeProvider>(context, listen: false)
-                                    .clearSearch();
-                              }
+          body: Container(
+            width: double.maxFinite,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              children: [
+                Consumer<HomeProvider>(
+                    builder: (context, provider, child) =>
+                        provider.isEmailVerfied
+                            ? const SizedBox()
+                            : _buildVerifyYourEmail(context)),
+                const SizedBox(height: 12),
+                _buildOrderGroceries(context),
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Selector<HomeProvider, TextEditingController?>(
+                    selector: (context, provider) => provider.searchController,
+                    builder: (context, searchController, child) {
+                      return SizedBox(
+                        height: 50,
+                        child: TextField(
+                          controller: searchController,
+                          onChanged: (value) {
+                            if (value.isEmpty) {
                               Provider.of<HomeProvider>(context, listen: false)
-                                  .searchCategory(value);
+                                  .clearSearch();
+                            }
+                            Provider.of<HomeProvider>(context, listen: false)
+                                .searchCategory(value);
+                            Provider.of<HomeProvider>(context, listen: false)
+                                .searchStore(value);
+                          },
+                          onSubmitted: (value) {
+                            if (value.isEmpty) {
                               Provider.of<HomeProvider>(context, listen: false)
-                                  .searchStore(value);
-                            },
-                            onSubmitted: (value) {
-                              if (value.isEmpty) {
-                                Provider.of<HomeProvider>(context, listen: false)
-                                    .clearSearch();
-                              }
-                              Provider.of<HomeProvider>(context, listen: false)
-                                  .searchCategory(value);
-                              Provider.of<HomeProvider>(context, listen: false)
-                                  .searchStore(value);
-                            },
-                            decoration: InputDecoration(
-                              hintText: "Search items, supermarkets, etc",
-                              hintStyle: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFFA6A6A6)),
-                              prefixIcon: const Icon(Icons.search,
-                                  color: Color(0xFFA6A6A6)),
-                              border: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                  color: Colors.red,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
+                                  .clearSearch();
+                            }
+                            Provider.of<HomeProvider>(context, listen: false)
+                                .searchCategory(value);
+                            Provider.of<HomeProvider>(context, listen: false)
+                                .searchStore(value);
+                          },
+                          decoration: InputDecoration(
+                            hintText: "Search items, supermarkets, etc",
+                            hintStyle: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xFFA6A6A6)),
+                            prefixIcon: const Icon(Icons.search,
+                                color: Color(0xFFA6A6A6)),
+                            border: OutlineInputBorder(
+                              borderSide: const BorderSide(
+                                color: Colors.red,
                               ),
+                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
-                  const SizedBox(height: 12),
-                  _buildShopByCategory(context),
-                  const SizedBox(height: 12),
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 26),
-                      child: Text("Stores around you",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black,
-                          )),
-                    ),
+                ),
+                const SizedBox(height: 12),
+                _buildShopByCategory(context),
+                const SizedBox(height: 12),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 26),
+                    child: Text("Stores around you",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        )),
                   ),
-                  const SizedBox(height: 12),
-                  _buildUserProfile(context),
-                ],
-              ),
+                ),
+                const SizedBox(height: 12),
+                _buildUserProfile(context),
+              ],
             ),
           )),
     );
@@ -645,14 +643,13 @@ class HomeScreenState extends State<HomeScreen> {
   Widget _buildBottomBar(BuildContext context) {
     return CustomBottomBar(onChanged: (BottomBarEnum type) {
       Navigator.pushNamed(navigatorKey.currentContext!, getCurrentRoute(type));
-    }, 
-    pages:const [
-       HomeScreenPage(),
-       Activity(),
-       DefaultWidget(),
-       Profile(),
+    }, pages:const [
+      HomeScreenPage(),
+      Activity(),
+      DefaultWidget(),
+      Profile(),
     ]
-    ,);
+      ,);
   }
 
   String getCurrentRoute(BottomBarEnum type) {
