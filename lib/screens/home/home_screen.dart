@@ -18,6 +18,11 @@ import 'package:overlapd/utilities/bottomBarUtil/custom_bottom_bar.dart';
 import 'package:overlapd/utilities/widgets.dart';
 import 'package:provider/provider.dart';
 
+import '../../logic/enterOTP.dart';
+import '../../models/userModel.dart';
+import '../../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
+import '../../utilities/customButton.dart';
+
 class HomeScreenPage extends StatefulWidget {
   const HomeScreenPage({super.key});
 
@@ -36,6 +41,8 @@ class HomeScreenPage extends StatefulWidget {
 }
 
 class HomeScreenPageState extends State<HomeScreenPage> {
+  final FirebaseAuthService _auth = FirebaseAuthService();
+  UserModel? _userModel;
   @override
   void initState() {
     super.initState();
@@ -207,154 +214,41 @@ class HomeScreenPageState extends State<HomeScreenPage> {
 
   /// Verify Email Widget
   Widget _buildVerifyYourEmail(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 11,
-      ),
-      decoration: BoxDecoration(
-        color: const Color(0xFFEDEDED),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(
-                width: 158,
-                child: Text(
-                  "Verify your email address to complete your profile",
-                  maxLines: 2,
-                  // style: theme.textTheme.titleSmall,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 7,
-              ),
-              Align(
-                alignment: Alignment.topLeft,
-                child: Stack(
-                  children: [
-                    Positioned(
-                      top: -10.4,
-                      child: Transform(
-                        transform: Matrix4.identity()..rotateZ(-1.097375287),
-                        child: SizedBox(
-                            width: 28.5,
-                            height: 28.5,
-                            child:
-                                // draw an ellipse
-                                Transform.rotate(
-                              angle: 0.0,
-                              child: Container(
-                                width: 28.5,
-                                height: 28.5,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFEDEDED),
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                              ),
-                            )),
-                      ),
-                    ),
-                    Positioned(
-                      left: -5.9,
-                      top: -7.6,
-                      child: Transform(
-                        transform: Matrix4.identity()..rotateZ(0.1135441011),
-                        child: SizedBox(
-                            width: 23.4,
-                            height: 23.4,
-                            child:
-                                // draw an ellipse
-                                Transform.rotate(
-                              angle: 0.0,
-                              child: Container(
-                                width: 23.4,
-                                height: 23.4,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFEDEDED),
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                              ),
-                            )),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(8.4, 10.4, 7.5, 9.1),
-                      child: const Text(
-                        '90%',
-                        style: TextStyle(
-                          // 'Inter',
-                          fontWeight: FontWeight.w400,
-                          fontSize: 6.1,
-                          height: 1.5,
-                          color: Color(0xFF000000),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.only(right: 129),
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEDEDED),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      height: 1,
-                    ),
-                    // progress bar
-                  ],
-                ),
-              )
-            ],
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Container(
+          decoration: BoxDecoration(
+              color: Colors.grey,
+              borderRadius: BorderRadius.circular(10)
           ),
-          CustomElevatedButton(
-              onPressed: () {},
-              text: "Verify Email",
-              buttonTextStyle: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-                color: Colors.white,
-              ),
-              // style: theme.textTheme.titleSmall,
-              width: 122,
-              margin: const EdgeInsets.symmetric(vertical: 20),
-              //  decoration: BoxDecoration(
-              //    color: Colors.black,
-              //    borderRadius: BorderRadius.circular(8),
-              //  ),
-              buttonStyle: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.black),
-                shape: MaterialStateProperty.all(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+          height: 80,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween ,
+              children: [
+                Expanded(
+                  child: Text(
+                    'Verify your email address to complete your profile',
+                    style: Theme.of(context).textTheme.labelMedium!.copyWith(fontWeight: FontWeight.w500),
                   ),
                 ),
-
-                //  shape: MaterialStateProperty.all(
-                //    RoundedRectangleBorder(
-                //      borderRadius: BorderRadius.circular(8),
-                //    ),
-                //  ),
-              ))
-        ],
+                const SizedBox(width: 5),
+                Button(
+                    context,
+                    'Verify email',
+                        () async {
+                      await _auth.sendLinkToPhone(_userModel!.email);
+                    },
+                    null,
+                    Theme.of(context).textTheme.labelMedium!.copyWith(
+                      color: textButtonColor(true),
+                      fontWeight: FontWeight.w500,
+                    ),
+                    buttonColor(true))
+              ],
+            ),
+          )
       ),
     );
   }
