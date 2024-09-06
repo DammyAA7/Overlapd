@@ -1,6 +1,6 @@
 # overlapd
 
-A new Flutter project.
+Overlapd is a mobile app poised to revolutionize how we deliver packages. The aim is to piggy back on existing routes and eliminate the need for extra vehicles on the road.
 
 ## Getting Started
 
