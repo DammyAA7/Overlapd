@@ -55,86 +55,88 @@ class HomeScreenPageState extends State<HomeScreenPage> {
       child: Scaffold(
           resizeToAvoidBottomInset: true,
           appBar: _buildAppBar(context),
-          body: Container(
-            width: double.maxFinite,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Column(
-              children: [
-                Consumer<HomeProvider>(
-                    builder: (context, provider, child) =>
-                        provider.isEmailVerfied
-                            ? const SizedBox()
-                            : _buildVerifyYourEmail(context)),
-                const SizedBox(height: 12),
-                _buildOrderGroceries(context),
-                const SizedBox(height: 12),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Selector<HomeProvider, TextEditingController?>(
-                    selector: (context, provider) => provider.searchController,
-                    builder: (context, searchController, child) {
-                      return SizedBox(
-                        height: 50,
-                        child: TextField(
-                          controller: searchController,
-                          onChanged: (value) {
-                            if (value.isEmpty) {
+          body: SingleChildScrollView(
+            child: Container(
+              width: double.maxFinite,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Column(
+                children: [
+                  Consumer<HomeProvider>(
+                      builder: (context, provider, child) =>
+                          provider.isEmailVerfied
+                              ? const SizedBox()
+                              : _buildVerifyYourEmail(context)),
+                  const SizedBox(height: 12),
+                  _buildOrderGroceries(context),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Selector<HomeProvider, TextEditingController?>(
+                      selector: (context, provider) => provider.searchController,
+                      builder: (context, searchController, child) {
+                        return SizedBox(
+                          height: 50,
+                          child: TextField(
+                            controller: searchController,
+                            onChanged: (value) {
+                              if (value.isEmpty) {
+                                Provider.of<HomeProvider>(context, listen: false)
+                                    .clearSearch();
+                              }
                               Provider.of<HomeProvider>(context, listen: false)
-                                  .clearSearch();
-                            }
-                            Provider.of<HomeProvider>(context, listen: false)
-                                .searchCategory(value);
-                            Provider.of<HomeProvider>(context, listen: false)
-                                .searchStore(value);
-                          },
-                          onSubmitted: (value) {
-                            if (value.isEmpty) {
+                                  .searchCategory(value);
                               Provider.of<HomeProvider>(context, listen: false)
-                                  .clearSearch();
-                            }
-                            Provider.of<HomeProvider>(context, listen: false)
-                                .searchCategory(value);
-                            Provider.of<HomeProvider>(context, listen: false)
-                                .searchStore(value);
-                          },
-                          decoration: InputDecoration(
-                            hintText: "Search items, supermarkets, etc",
-                            hintStyle: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xFFA6A6A6)),
-                            prefixIcon: const Icon(Icons.search,
-                                color: Color(0xFFA6A6A6)),
-                            border: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                color: Colors.red,
+                                  .searchStore(value);
+                            },
+                            onSubmitted: (value) {
+                              if (value.isEmpty) {
+                                Provider.of<HomeProvider>(context, listen: false)
+                                    .clearSearch();
+                              }
+                              Provider.of<HomeProvider>(context, listen: false)
+                                  .searchCategory(value);
+                              Provider.of<HomeProvider>(context, listen: false)
+                                  .searchStore(value);
+                            },
+                            decoration: InputDecoration(
+                              hintText: "Search items, supermarkets, etc",
+                              hintStyle: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xFFA6A6A6)),
+                              prefixIcon: const Icon(Icons.search,
+                                  color: Color(0xFFA6A6A6)),
+                              border: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: Colors.red,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                _buildShopByCategory(context),
-                const SizedBox(height: 12),
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 26),
-                    child: Text("Stores around you",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                        )),
+                  const SizedBox(height: 12),
+                  _buildShopByCategory(context),
+                  const SizedBox(height: 12),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 26),
+                      child: Text("Stores around you",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                          )),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                _buildUserProfile(context),
-              ],
+                  const SizedBox(height: 12),
+                  _buildUserProfile(context),
+                ],
+              ),
             ),
           )),
     );
@@ -144,81 +146,93 @@ class HomeScreenPageState extends State<HomeScreenPage> {
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
+      toolbarHeight: MediaQuery.of(context).size.height * 0.10,
       title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Icon(Icons.location_on, color: Color(0xFF535353)),
-          const SizedBox(
-            width: 10,
+          GestureDetector(
+            child: const Row(
+              children: [
+                Icon(Icons.location_on, color: Color(0xFF535353)),
+                SizedBox(
+                  width: 10,
+                ),
+                Text("2972 Westheimer Rd ",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF535353),
+                    )
+                    // style: theme.textTheme.titleLarge,
+                    ),
+
+                Padding(
+                  padding: EdgeInsets.only(left: 4.0),
+                  child: Icon(Icons.keyboard_arrow_down_sharp),
+                ),
+              ],
+            ),
           ),
-          const Text("2972 Westheimer Rd ",
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF535353),
-              )
-              // style: theme.textTheme.titleLarge,
-              ),
           IconButton(
-            icon: const Icon(Icons.keyboard_arrow_down_sharp),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      actions: [
-         IconButton(
-          icon: Stack(
-            children: [
-                  const CircleAvatar(
-                backgroundColor: Color(0xFFEDEDED),
-                child: Icon(Icons.shopping_cart_outlined),
-                foregroundColor: Colors.black,
-              ),
-              Positioned(
-                left: 20,
-                child: Container(
-                  height: 18,
-                  width: 18,
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: Consumer<CartProvider>(
-                      builder: (context, provider, child) {
-                        return Text(
-                          provider.cart[0].products.length.toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        );
-                      }
+            icon: Stack(
+              children: [
+                Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: Icon(Icons.shopping_cart_outlined, color: Colors.black),
+                    )
+                ),
+                Positioned(
+                  left: 25,
+                  child: Container(
+                    height: 18,
+                    width: 18,
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Center(
+                      child: Consumer<CartProvider>(
+                          builder: (context, provider, child) {
+                            return Text(
+                              provider.cart[0].products.length.toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            );
+                          }
+                      ),
                     ),
                   ),
                 ),
-              ),
-          
-            ],
-          ),
-          onPressed: () {
-            Navigator.of(context)
-                .pushReplacement(pageAnimationlr(const CartScreen()));
-          },
-        ),
-      ],
+
+              ],
+            ),
+            onPressed: () {
+              Navigator.of(context)
+                  .push(pageAnimationlr(const CartScreen()));
+            },
+          )
+        ],
+      ),
     );
   }
 
   /// Verify Email Widget
   Widget _buildVerifyYourEmail(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.only(left: 20.0, right: 16.0, bottom: 20.0),
       child: Container(
           decoration: BoxDecoration(
-              color: Colors.grey,
+              color: const Color(0xFFD9D9D9),
               borderRadius: BorderRadius.circular(10)
           ),
           height: 80,
@@ -300,19 +314,9 @@ class HomeScreenPageState extends State<HomeScreenPage> {
                     ),
                   ],
                 ),
-                const Align(
-                  alignment: Alignment.topRight,
-                  child: Row(
-                    // mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 55,
-                      ),
-                      CircleAvatar(
-                        backgroundColor: Color(0xFFD9D9D9),
-                      ),
-                    ],
+                const Center(
+                  child: CircleAvatar(
+                    backgroundColor: Color(0xFFD9D9D9),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -368,19 +372,9 @@ class HomeScreenPageState extends State<HomeScreenPage> {
                         ))
                   ],
                 ),
-                const Align(
-                  alignment: Alignment.topRight,
-                  child: Row(
-                    // mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 55,
-                      ),
-                      CircleAvatar(
-                        backgroundColor: Color(0xFFD9D9D9),
-                      ),
-                    ],
+                const Center(
+                  child: CircleAvatar(
+                    backgroundColor: Color(0xFFD9D9D9),
                   ),
                 ),
                 const SizedBox(height: 10),

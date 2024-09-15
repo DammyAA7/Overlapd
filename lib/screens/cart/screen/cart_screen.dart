@@ -53,73 +53,23 @@ class _CartScreenState extends State<CartScreen> {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      leading: InkWell(
-        onTap: () {
-          Navigator.pop(context, true);
-        },
-        child: Row(
-          children: [
-            SizedBox(
-              width: 10,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Icon(Icons.arrow_back_outlined),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: const Text('Go back'),
-                )
-              ],
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        IconButton(
-          icon: Stack(
-            children: [
-                  const CircleAvatar(
-                backgroundColor: Color(0xFFEDEDED),
-                child: Icon(Icons.shopping_cart_outlined),
-                foregroundColor: Colors.black,
-              ),
-              Positioned(
-                left: 20,
-                child: Container(
-                  height: 18,
-                  width: 18,
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: Consumer<CartProvider>(
-                      builder: (context, provider, child) {
-                        return Text(
-                          provider.cart[1].products.length.toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        );
-                      }
-                    ),
-                  ),
-                ),
-              ),
-          
-            ],
+      automaticallyImplyLeading: false,
+      toolbarHeight: MediaQuery.of(context).size.height * 0.10,
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+            child: const Icon(Icons.arrow_back_outlined),
           ),
-          onPressed: () {},
-        ),
-      ],
+          const Padding(
+            padding: EdgeInsets.only(left: 8.0),
+            child: Text('Go back'),
+          )
+        ],
+      ),
     );
   }
 

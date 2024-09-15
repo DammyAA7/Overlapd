@@ -82,13 +82,16 @@ class ShopCategoryItem extends StatelessWidget {
               const SizedBox(
                 height: 12,
               ),
-              Text(
-                shopCategory.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style:
-                    const TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
-                // style:
+              Flexible(
+                child: Text(
+                  shopCategory.name,
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.visible,
+                  style:
+                      const TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+                  // style:
+                ),
               )
             ],
           ),

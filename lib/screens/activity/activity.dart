@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:overlapd/screens/activity/orderTimeline.dart';
 import 'package:overlapd/utilities/widgets.dart';
+import 'package:provider/provider.dart';
+
+import '../cart/provider/cart_provider.dart';
+import '../category/provider/shop_by_category_provider.dart';
 
 
 enum ActivityTypes { orders, deliveries }
@@ -20,175 +24,211 @@ class _ActivityState extends State<Activity> {
   @override
   Widget build(BuildContext context) {
     double containerHeight = MediaQuery.of(context).size.height * 0.1;
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-          title:  Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: const Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: Icon(Icons.shopping_cart_outlined, color: Colors.black),
-                  )
-              )
-            ],
-          )
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top:8.0, bottom: 8.0),
-                child: Text(
-                    'Activity',
-                  style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w600),
-                ),
-              ),
-            Row(
-              children: <Widget>[
-                Flexible(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 4.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _character = ActivityTypes.orders;
-                        });
-                      },
-                      child: Container(
-                        height: containerHeight,
-                        decoration: BoxDecoration(
-                          color: Colors.grey,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Stack(
-                          children: [
-                            Center(
-                              child: Text(
-                                'Orders',
-                                style: Theme.of(context).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.normal),
-                              ),
+    return ChangeNotifierProvider(
+      create: (context) => ShopByCategoryProvider(),
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+            title:  Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: Stack(
+                    children: [
+                      Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.all(10.0),
+                            child: Icon(Icons.shopping_cart_outlined, color: Colors.black),
+                          )
+                      ),
+                      Positioned(
+                        left: 25,
+                        child: Container(
+                          height: 18,
+                          width: 18,
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Center(
+                            child: Consumer<CartProvider>(
+                                builder: (context, provider, child) {
+                                  return Text(
+                                    provider.cart[0].products.length.toString(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  );
+                                }
                             ),
-                            Positioned(
-                              top: 0,
-                              right: 0,
-                              child: Radio<ActivityTypes>(
-                                value: ActivityTypes.orders,
-                                groupValue: _character,
-                                onChanged: (ActivityTypes? value) {
-                                  setState(() {
-                                    _character = value;
-                                  });
-                                },
-                                activeColor: Colors.black,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
+
+                    ],
                   ),
-                ),
-                Flexible(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 4.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _character = ActivityTypes.deliveries;
-                        });
-                      },
-                      child: Container(
-                        height: containerHeight,
-                        decoration: BoxDecoration(
-                          color: Colors.grey,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Stack(
-                          children: [
-                            Center(
-                              child: Text(
-                                'Deliveries',
-                                style: Theme.of(context).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.normal),
-                              ),
-                            ),
-                            Positioned(
-                              top: 0,
-                              right: 0,
-                              child: Radio<ActivityTypes>(
-                                value: ActivityTypes.deliveries,
-                                groupValue: _character,
-                                onChanged: (ActivityTypes? value) {
-                                  setState(() {
-                                    _character = value;
-                                  });
-                                },
-                                activeColor: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                  onPressed: () {},
                 ),
               ],
-            ),
-              DefaultTabController(
-                  length: 2,
-                  child: Expanded(
-                    flex: 5,
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 70,
+            )
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SafeArea(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top:8.0, bottom: 8.0),
+                  child: Text(
+                      'Activity',
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              Row(
+                children: <Widget>[
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 4.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _character = ActivityTypes.orders;
+                          });
+                        },
+                        child: Container(
+                          height: containerHeight,
                           decoration: BoxDecoration(
-                            borderRadius:  BorderRadius.circular(20),
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          child: TabBar(
-                              dividerColor: Colors.black12,
-                              indicatorSize: TabBarIndicatorSize.tab,
-                              unselectedLabelColor: Colors.black12,
-                              indicatorWeight: 4.0,
-                              labelStyle: Theme.of(context).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.normal),
-                              indicator: const UnderlineTabIndicator(
-                                borderSide: BorderSide(
-                                  width: 4.0, // Thickness of the underline
-                                  color: Colors.black, // Color of the underline
-                                ),
-                                insets: EdgeInsets.symmetric(horizontal: 0.0), // Adjust this to fit the tab width
-                              ),
-
-                              labelColor: Colors.black,
-                              tabs: const [
-                                Tab(child: Text('Ongoing')),
-                                Tab(child: Text('Completed')),
-                              ]
-                          ),
-                        ),
-                        Expanded(
-                          flex: 10,
-                          child: TabBarView(
+                          child: Stack(
                             children: [
-                              _buildListView(),
-                              _buildListView()
+                              Center(
+                                child: Text(
+                                  'Orders',
+                                  style: Theme.of(context).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.normal),
+                                ),
+                              ),
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: Radio<ActivityTypes>(
+                                  value: ActivityTypes.orders,
+                                  groupValue: _character,
+                                  onChanged: (ActivityTypes? value) {
+                                    setState(() {
+                                      _character = value;
+                                    });
+                                  },
+                                  activeColor: Colors.black,
+                                ),
+                              ),
                             ],
                           ),
-                        )
-                      ],
+                        ),
+                      ),
                     ),
-                  )
-              )
-            ],
+                  ),
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 4.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _character = ActivityTypes.deliveries;
+                          });
+                        },
+                        child: Container(
+                          height: containerHeight,
+                          decoration: BoxDecoration(
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Stack(
+                            children: [
+                              Center(
+                                child: Text(
+                                  'Deliveries',
+                                  style: Theme.of(context).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.normal),
+                                ),
+                              ),
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: Radio<ActivityTypes>(
+                                  value: ActivityTypes.deliveries,
+                                  groupValue: _character,
+                                  onChanged: (ActivityTypes? value) {
+                                    setState(() {
+                                      _character = value;
+                                    });
+                                  },
+                                  activeColor: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+                DefaultTabController(
+                    length: 2,
+                    child: Expanded(
+                      flex: 5,
+                      child: Column(
+                        children: [
+                          Container(
+                            height: 70,
+                            decoration: BoxDecoration(
+                              borderRadius:  BorderRadius.circular(20),
+                            ),
+                            child: TabBar(
+                                dividerColor: Colors.black12,
+                                indicatorSize: TabBarIndicatorSize.tab,
+                                unselectedLabelColor: Colors.black12,
+                                indicatorWeight: 4.0,
+                                labelStyle: Theme.of(context).textTheme.labelLarge!.copyWith(fontWeight: FontWeight.normal),
+                                indicator: const UnderlineTabIndicator(
+                                  borderSide: BorderSide(
+                                    width: 4.0, // Thickness of the underline
+                                    color: Colors.black, // Color of the underline
+                                  ),
+                                  insets: EdgeInsets.symmetric(horizontal: 0.0), // Adjust this to fit the tab width
+                                ),
+
+                                labelColor: Colors.black,
+                                tabs: const [
+                                  Tab(child: Text('Ongoing')),
+                                  Tab(child: Text('Completed')),
+                                ]
+                            ),
+                          ),
+                          Expanded(
+                            flex: 10,
+                            child: TabBarView(
+                              children: [
+                                _buildListView(),
+                                _buildListView()
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                )
+              ],
+            ),
           ),
         ),
       ),

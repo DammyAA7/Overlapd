@@ -45,96 +45,94 @@ class _ShopByCategoryState extends State<ShopByCategory> {
 
     return ChangeNotifierProvider(
         create: (context) => ShopByCategoryProvider(),
-        child: SafeArea(
-          child: Scaffold(
-            resizeToAvoidBottomInset: false,
-            appBar: _buildAppBar(context),
-            body: SizedBox(
-              width: double.maxFinite,
-              child: Column(
-                children: [
-                  const SizedBox(
-                    height: 9,
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(left: 20),
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: Text(
-                        "Category",
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w700),
-                      ),
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: _buildAppBar(context),
+          body: SizedBox(
+            width: double.maxFinite,
+            child: Column(
+              children: [
+                const SizedBox(
+                  height: 9,
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(left: 20),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      "Category",
+                      style: TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w700),
                     ),
                   ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Selector<HomeProvider, TextEditingController?>(
-                        selector: (p0, p1) => p1.searchController,
-                        builder: (context, value, child) {
-                          return SizedBox(
-                            height: 50,
-                            child: TextField(
-                              controller: value,
-                              decoration: InputDecoration(
-                                hintText:
-                                    "Search for a category. i.e ${category.name}",
-                                hintStyle: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                    color: Color(0xFFA6A6A6)),
-                                prefixIcon: const Icon(Icons.search,
-                                    color: Color(0xFFA6A6A6)),
-                                border: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                    color: Colors.red,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                Align(
+                  alignment: Alignment.center,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Selector<HomeProvider, TextEditingController?>(
+                      selector: (p0, p1) => p1.searchController,
+                      builder: (context, value, child) {
+                        return SizedBox(
+                          height: 50,
+                          child: TextField(
+                            controller: value,
+                            decoration: InputDecoration(
+                              hintText:
+                                  "Search for a category. i.e ${category.name}",
+                              hintStyle: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xFFA6A6A6)),
+                              prefixIcon: const Icon(Icons.search,
+                                  color: Color(0xFFA6A6A6)),
+                              border: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: Colors.red,
                                 ),
+                                borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 18,
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: shopCategoryItems.length,
-                    
-                      itemBuilder: (context, index) {
-                        return _buildSearchResults(context, shopCategoryItems.values.elementAt(index), shopCategoryItems.keys.elementAt(index));
+                          ),
+                        );
                       },
                     ),
                   ),
-                  // _buildSearchResults(context, category.selectedCategory),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                ),
+                const SizedBox(
+                  height: 18,
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: shopCategoryItems.length,
 
-                  // SizedBox(height: 39,),
-                  // Padding(padding: EdgeInsets.only(left: 20),
-                  // child: Row(
-                  //   children: [
-                  //     Container(
-                  //       height: 52,
-                  //       width: 52,
-                  //       decoration: BoxDecoration(
-                  //         color:
-                  //       ),
-                  //     )
-                  // ],
-                  // ),)
-                ],
-              ),
+                    itemBuilder: (context, index) {
+                      return _buildSearchResults(context, shopCategoryItems.values.elementAt(index), shopCategoryItems.keys.elementAt(index));
+                    },
+                  ),
+                ),
+                // _buildSearchResults(context, category.selectedCategory),
+                const SizedBox(
+                  height: 20,
+                ),
+
+                // SizedBox(height: 39,),
+                // Padding(padding: EdgeInsets.only(left: 20),
+                // child: Row(
+                //   children: [
+                //     Container(
+                //       height: 52,
+                //       width: 52,
+                //       decoration: BoxDecoration(
+                //         color:
+                //       ),
+                //     )
+                // ],
+                // ),)
+              ],
             ),
           ),
         ));
@@ -142,61 +140,71 @@ class _ShopByCategoryState extends State<ShopByCategory> {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      leading: InkWell(
-        onTap: () {
-          Navigator.pop(context, true);
-        },
-        child: const Row(
-          children: [
-            SizedBox(
-              width: 10,
-            ),
-            Icon(Icons.keyboard_backspace),
-            Text("Go Back",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600))
-          ],
-        ),
-      ),
-      actions: [
-          IconButton(
-          icon: Stack(
+      automaticallyImplyLeading: false,
+      toolbarHeight: MediaQuery.of(context).size.height * 0.10,
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-                  const CircleAvatar(
-                backgroundColor: Color(0xFFEDEDED),
-                child: Icon(Icons.shopping_cart_outlined),
-                foregroundColor: Colors.black,
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Icon(Icons.arrow_back_outlined),
               ),
-              Positioned(
-                left: 20,
-                child: Container(
-                  height: 18,
-                  width: 18,
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: Consumer<CartProvider>(
-                      builder: (context, provider, child) {
-                        return Text(
-                          provider.cart[0].products.length.toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        );
-                      }
+              const Padding(
+                padding: EdgeInsets.only(left: 8.0),
+                child: Text('Go back'),
+              )
+            ],
+          ),
+          IconButton(
+            icon: Stack(
+              children: [
+                Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: Icon(Icons.shopping_cart_outlined, color: Colors.black),
+                    )
+                ),
+                Positioned(
+                  left: 25,
+                  child: Container(
+                    height: 18,
+                    width: 18,
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Center(
+                      child: Consumer<CartProvider>(
+                          builder: (context, provider, child) {
+                            return Text(
+                              provider.cart[0].products.length.toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            );
+                          }
+                      ),
                     ),
                   ),
                 ),
-              ),
-          
-            ],
+
+              ],
+            ),
+            onPressed: () {},
           ),
-          onPressed: () {},
-        ),
-      ],
+        ],
+      ),
     );
   }
 
