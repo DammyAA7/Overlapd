@@ -705,7 +705,7 @@ class _HomeState extends State<Home> {
                 padding: const EdgeInsets.all(8.0),
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
-                    color: const Color(0xFF21D19F).withOpacity(0.5),
+                    color: const Color(0xFF21D19F).withValues(),
                     borderRadius: BorderRadius.circular(20)
                 ),
                 child: IntrinsicHeight(
@@ -713,9 +713,9 @@ class _HomeState extends State<Home> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(data['Grocery Store']),
-                      Text('Distance to Store: ${details?.distanceToStore}'),
-                      Text('Distance from Store to Destination: ${details?.storeToDestination}'),
-                      Text('Total Journey Time: ${(details!.totalJourneyTime / 60).round()} mins'),
+                      Text('Distance to Store: '),//${details.distanceToStore}'),
+                      Text('Distance from Store to Destination:'), //${details.storeToDestination}'),
+                      Text('Total Journey Time:' ),//${(details.totalJourneyTime / 60).round()} mins'),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [

@@ -58,25 +58,5 @@ Future<UserModel?> getUserCredentials(String? uid) async {
   // Retrieve from Hive
   UserModel? userModel = userBox.get(uid);
 
-  // If not found in Hive, try fetching from Firestore
-  if (userModel == null) {
-    final docUser = FirebaseFirestore.instance.collection('users').doc(uid);
-    final snapshot = await docUser.get();
-    if (snapshot.exists) {
-      final data = snapshot.data();
-      if (data != null) {
-        userModel = UserModel(
-          firstName: data['First Name'],
-          lastName: data['Last Name'],
-          email: data['Email Address'],
-          phoneNumber: data['Phone Number'],
-          emailVerified: data['Email Verified']
-        );
-        // Save to Hive for future retrieval
-        userBox.put(uid, userModel);
-      }
-    }
-  }
-
   return userModel;
 }

@@ -366,7 +366,7 @@ Widget widgetInputBox({
           width: 4.5,
         ),
       ),
-      errorText: hasError ? validator!(inputBoxController?.controller.text) : null,
+      errorText: hasError ? validator(inputBoxController?.controller.text) : null,
       errorStyle: const TextStyle(
         fontSize: 18.0, // Adjust as needed
         fontWeight: FontWeight.bold,

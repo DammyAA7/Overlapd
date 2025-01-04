@@ -7,7 +7,6 @@ import 'package:hive/hive.dart';
 import 'package:overlapd/logic/signInLink.dart';
 import 'package:overlapd/screens/onboardingScreens/onboarding.dart';
 import 'package:overlapd/screens/profile/profile.dart';
-import 'package:overlapd/services/permissions/permissions.dart';
 import 'package:overlapd/utilities/customButton.dart';
 import '../logic/personalDetails.dart';
 import '../models/userModel.dart';
@@ -73,7 +72,7 @@ class _TestScreenState extends State<TestScreen> {
             child: _isEmailVerified ?? false
                 ? Text(
               'Email is verified',
-              style: Theme.of(context).textTheme.headline6,
+              style: Theme.of(context).textTheme.bodyMedium,
             )
                 : Button(
                 context,

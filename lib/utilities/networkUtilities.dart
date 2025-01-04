@@ -1,6 +1,5 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '';
 class NetworkUtility{
   static Future<String?> fetchUrl(Uri uri, {Map<String, String>? headers}) async{
     try{

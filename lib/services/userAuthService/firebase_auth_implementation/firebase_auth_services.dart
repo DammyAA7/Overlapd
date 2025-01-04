@@ -110,15 +110,6 @@ class FirebaseAuthService{
     if (user != null) {
       String? phoneNumber = user.phoneNumber;
 
-      if (phoneNumber == null) {
-        // Fetch from Firestore
-        DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection(
-            'users').doc(user.uid).get();
-        if (userDoc.exists) {
-          phoneNumber = userDoc.get('Phone Number');
-        }
-      }
-
       return phoneNumber;
     }
     return null;

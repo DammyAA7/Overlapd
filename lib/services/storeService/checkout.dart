@@ -443,30 +443,28 @@ class _CheckoutState extends State<Checkout> {
   Future<void> loadLastSelectedOrDefaultAddress() async {
     final userDocSnapshot = await _auth.getAccountInfoGet(_UID); // Assuming this returns a Future<DocumentSnapshot>
     Map<String, dynamic>? userData = userDocSnapshot.data();
-    if (userData != null) {
-      if (userData.containsKey('lastAddressSelected') && userData['lastAddressSelected'] != null) {
-        // Last selected address exists, use it
-        setState(() {
-          fullAddress = userData['lastAddressSelected']['Full Address'];
-          addressCoordinates = GeoPoint((userData['lastAddressSelected']['Coordinates']['lat']), userData['lastAddressSelected']['Coordinates']['lng']);
-        });
-      } else if (userData.containsKey('Address Book') && userData['Address Book'].isNotEmpty) {
-        // Check for a default address in the address book
-        final defaultAddress = (userData['Address Book'] as List).cast<Map<String, dynamic>?>().firstWhere(
-              (address) => address != null && address['Default'] == true,
-          orElse: () => null,
-        );
+    if (userData!.containsKey('lastAddressSelected') && userData['lastAddressSelected']) {
+      // Last selected address exists, use it
+      setState(() {
+        fullAddress = userData['lastAddressSelected']['Full Address'];
+        addressCoordinates = GeoPoint((userData['lastAddressSelected']['Coordinates']['lat']), userData['lastAddressSelected']['Coordinates']['lng']);
+      });
+    } else if (userData!.containsKey('Address Book') && userData?['Address Book'].isNotEmpty) {
+      // Check for a default address in the address book
+      final defaultAddress = (userData?['Address Book'] as List).cast<Map<String, dynamic>?>().firstWhere(
+            (address) => address != null && address['Default'] == true,
+        orElse: () => null,
+      );
 
-        if (defaultAddress != null) {
-          // Default address exists, use it
-          setState(() {
-            fullAddress = defaultAddress['Full Address'];
-            addressCoordinates = GeoPoint((userData['lastAddressSelected']['Coordinates']['lat']), userData['lastAddressSelected']['Coordinates']['lng']);
-          });
-        }
+      if (defaultAddress != null) {
+        // Default address exists, use it
+        setState(() {
+          fullAddress = defaultAddress['Full Address'];
+          addressCoordinates = GeoPoint((userData?['lastAddressSelected']['Coordinates']['lat']), userData?['lastAddressSelected']['Coordinates']['lng']);
+        });
       }
     }
-  }
+    }
 
   Future<void> fetchRewardCard() async {
     // Fetch the reward card URL from Firestore

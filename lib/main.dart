@@ -5,7 +5,6 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:hive/hive.dart';
-import 'package:overlapd/screens/activity/activity.dart';
 import 'package:overlapd/screens/onboardingScreens/confirmMobileNumber.dart';
 import 'package:overlapd/screens/onboardingScreens/onboarding.dart';
 import 'package:overlapd/screens/onboardingScreens/splash.dart';
@@ -258,10 +257,8 @@ class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
     bool isLoggedInAsEmployee = await _auth.isLoggedInAsEmployee();
     String? storedUri = Hive.box<String>('deepLinkBox').get('deepLinkUri');
     Uri? deepLinkUri;
-    if (storedUri != null) {
-      deepLinkUri = Uri.parse(storedUri);
-    }
-    if (deepLinkUri != null) {
+    deepLinkUri = Uri.parse(storedUri.toString());
+      if (deepLinkUri != null) {
       // Do not navigate again if deep link was handled
       await Hive.box<String>('deepLinkBox').delete('deepLinkUri');
       return;

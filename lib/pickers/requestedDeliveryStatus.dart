@@ -169,7 +169,7 @@ class _RequestedDeliveryStatusState extends State<RequestedDeliveryStatus> {
                             if(value!){
                               setState(() {
                                 itemsForDelivery[index]['found'] = value;
-                                itemsForDelivery[index]['unavailable'] = !value!;
+                                itemsForDelivery[index]['unavailable'] = !value;
                                 totalShopped += (item['product']['price'] * item['quantity']);
                               });
                             }
@@ -183,7 +183,7 @@ class _RequestedDeliveryStatusState extends State<RequestedDeliveryStatus> {
                             if(value!){
                               setState(() {
                                 itemsForDelivery[index]['unavailable'] = value;
-                                itemsForDelivery[index]['found'] = !value!;
+                                itemsForDelivery[index]['found'] = !value;
                                 totalShopped != 0 ? totalShopped -= (item['product']['price'] * item['quantity']) : totalShopped;
                                 // Adjust the totalShopped accordingly if necessary
                                 // This part might require adjustments based on your app's logic
