@@ -1,7 +1,5 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:overlapd/logic/signInLink.dart';
@@ -59,7 +57,6 @@ class _TestScreenState extends State<TestScreen> {
         _isEmailVerified = userModel?.emailVerified;
       });
     }
-    handleDynamicLinks(_userModel!.email);
   }
 
   @override
@@ -125,26 +122,6 @@ class _TestScreenState extends State<TestScreen> {
         ],
       ),
     );
-  }
-  Future<void> handleDynamicLinks(String email) async {
-    FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) async {
-      Uri deepLink = dynamicLinkData.link;
-      bool success = await handleEmailLinkCredentials(deepLink, email);
-      if (success && mounted) {
-        // Call navigation function
-      }
-    }).onError((error) {
-      // Handle errors (e.g., show a message to the user)
-      print('Error handling dynamic link: $error');
-    });
-
-    final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
-    if (initialLink != null) {
-      bool success = await handleEmailLinkCredentials(initialLink.link, email);
-      if (success && mounted) {
-        // Call navigation function
-      }
-    }
   }
 
 

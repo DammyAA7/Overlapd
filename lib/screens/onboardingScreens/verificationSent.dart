@@ -1,4 +1,3 @@
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:overlapd/logic/signInLink.dart';
 import 'package:overlapd/screens/onboardingScreens/confirmMobileNumber.dart';
@@ -18,7 +17,6 @@ class _VerificationSentState extends State<VerificationSent> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    handleDynamicLinks(widget.emailAddress);
   }
   @override
   Widget build(BuildContext context) {
@@ -66,23 +64,5 @@ class _VerificationSentState extends State<VerificationSent> {
         ),
       ),
     );
-  }
-
-  Future<void> handleDynamicLinks(String email) async {
-    FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) async {
-      Uri deepLink = dynamicLinkData.link;
-      bool success = await handleEmailLinkSignIn(deepLink, email);
-      if (success) {
-        Navigator.push(
-          context,
-          pageAnimationrl(const ConfirmMobileNumber()),
-        ); // Call navigation function
-      } else {
-        // Handle failure (e.g., show a message to the user)
-      }
-    }).onError((error) {
-      // Handle errors (e.g., show a message to the user)
-      print('Error handling dynamic link: $error');
-    });
   }
 }

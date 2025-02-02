@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:hive/hive.dart';
@@ -42,16 +41,12 @@ Future<void> main() async {
   Stripe.publishableKey = "pk_test_51OWmrwIaruu0MDtu9f0fOLYUdaDsxU6FHsV2TtXLw6CstWMCKPwZhhldZEWSmsStYYTYpfeRfzGVAZ9tfLKODOYt00gDUZP4EI";
   Stripe.instance.applySettings();
 
-  // Check for the initial dynamic link if the app was started from a terminated state
-  final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
 
-  runApp(MyApp(initialLink: initialLink));
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
-  final PendingDynamicLinkData? initialLink;
 
-  MyApp({super.key, this.initialLink});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -69,14 +64,6 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _initialize();
     // Listen for dynamic links while the app is running or in the background
-    FirebaseDynamicLinks.instance.onLink.listen((PendingDynamicLinkData? dynamicLinkData) async {
-      if (dynamicLinkData?.link != null) {
-        Uri deepLink = dynamicLinkData!.link;
-        _handleDynamicLink(deepLink);
-      }
-    }).onError((error) {
-      print('Error handling dynamic link: $error');
-    });
   }
 
   Future<void> _initialize() async {
@@ -88,13 +75,6 @@ class _MyAppState extends State<MyApp> {
     userModel = userBox.get(_auth.getUserId());
 
     // Handle the initial link if it exists
-    if (widget.initialLink != null) {
-      deepLinkUri = widget.initialLink!.link;
-      if (deepLinkUri.toString().contains('https://overlapd.page.link/7Yoh')){
-        await Hive.box<String>('deepLinkBox').put('deepLinkUri', deepLinkUri.toString());
-      }
-      _handleDynamicLink(deepLinkUri!);
-    }
   }
 
   void _handleDynamicLink(Uri deepLink) async {

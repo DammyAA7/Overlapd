@@ -1,12 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:hive/hive.dart';
 import '../../models/userModel.dart';
 import '../../services/userAuthService/firebase_auth_implementation/firebase_auth_services.dart';
-import 'package:overlapd/logic/signInLink.dart';
-import '../testScreen.dart';
 
 class Splash extends StatefulWidget {
   const Splash({super.key});
