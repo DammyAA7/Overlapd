@@ -4,7 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:hive/hive.dart';
-import 'package:overlapd/screens/onboardingScreens/confirmMobileNumber.dart';
 import 'package:overlapd/screens/onboardingScreens/onboarding.dart';
 import 'package:overlapd/screens/onboardingScreens/splash.dart';
 import 'package:overlapd/pickers/picker.dart';
@@ -14,7 +13,6 @@ import 'package:overlapd/services/userAuthService/forgottenPassword.dart';
 import 'package:overlapd/services/userAuthService/emailVerification.dart';
 import 'package:overlapd/services/userAuthService/phoneVerification.dart';
 import 'package:overlapd/services/userAuthService/phoneVerificationCode.dart';
-import 'package:overlapd/utilities/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:overlapd/screens/about.dart';
@@ -37,7 +35,6 @@ Future<void> main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(UserModelAdapter());
   await Hive.openBox<UserModel>('userBox');
-  await Hive.openBox<String>('deepLinkBox');  // Open a box to store the deep link URI
   Stripe.publishableKey = "pk_test_51OWmrwIaruu0MDtu9f0fOLYUdaDsxU6FHsV2TtXLw6CstWMCKPwZhhldZEWSmsStYYTYpfeRfzGVAZ9tfLKODOYt00gDUZP4EI";
   Stripe.instance.applySettings();
 
@@ -56,7 +53,6 @@ class _MyAppState extends State<MyApp> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   bool isLoggedInAsUser = false;
   bool isLoggedInAsEmployee = false;
-  Uri? deepLinkUri;
   UserModel? userModel;
 
   @override
@@ -74,43 +70,8 @@ class _MyAppState extends State<MyApp> {
     final userBox = Hive.box<UserModel>('userBox');
     userModel = userBox.get(_auth.getUserId());
 
+
     // Handle the initial link if it exists
-  }
-
-  void _handleDynamicLink(Uri deepLink) async {
-    if (userModel == null) {
-      print('No user data found');
-      return;
-    }
-
-    final email = userModel!.email;
-    if (deepLink.toString().contains('https://overlapd.page.link/bAmq')) {
-      // Handle sign-in link
-      bool success = await handleEmailLinkCredentials(deepLink, email);
-      if (success) {
-        _auth.currentUser?.reload();
-        await FirebaseFirestore.instance.collection('users').doc(_auth.currentUser?.uid).update({
-          'Email Verified': _auth.currentUser?.emailVerified,
-        });
-        navigatorKey.currentState?.pushReplacement(
-          MaterialPageRoute(builder: (context) => const TestScreen()),
-        );
-      } else {
-        // Handle sign-in failure
-      }
-    } else if (deepLink.toString().contains('https://overlapd.page.link/7Yoh')) {
-      // Handle phone verification link
-      bool success = await handleEmailLinkSignIn(deepLink, email);
-      if (success) {
-        navigatorKey.currentState?.pushReplacement(
-          pageAnimationrl(const ConfirmMobileNumber()),
-        );
-      } else {
-        // Handle sign-in failure
-      }
-    } else {
-      // Handle other types of deep links
-    }
   }
 
   @override
@@ -160,60 +121,7 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-Future<bool> handleEmailLinkCredentials(Uri deepLink, String email) async {
-  if (FirebaseAuth.instance.isSignInWithEmailLink(deepLink.toString())) {
-    print('deeplink: ${deepLink.toString()}');
-    if (email.isNotEmpty) {
-      try {
-        // Get email credential
-        final AuthCredential emailCredential = EmailAuthProvider.credentialWithLink(
-          email: email,
-          emailLink: deepLink.toString(),
-        );
 
-        // Link email credential to the current user
-        final User? user = FirebaseAuth.instance.currentUser;
-        if (user != null) {
-          await FirebaseAuth.instance.currentUser?.linkWithCredential(emailCredential);
-          // Update Firestore document
-          user.reload();
-          await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-            'Email Verified': user.emailVerified,
-          });
-          print('Email successfully linked to phone number.');
-          print(user.emailVerified);
-          return true;
-        }
-      } catch (e) {
-        print('Error linking email to phone number: $e');
-      }
-    }
-  }
-  return false;
-}
-
-Future<bool> handleEmailLinkSignIn(Uri deepLink, String email) async {
-  if (FirebaseAuth.instance.isSignInWithEmailLink(deepLink.toString())) {
-    if (email.isNotEmpty) {
-      try {
-        // Sign in the user with the email link
-        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailLink(
-          email: email,
-          emailLink: deepLink.toString(),
-        );
-
-        User? user = userCredential.user;
-        if (user != null) {
-          print('User successfully signed in.');
-          return true; // Indicate success
-        }
-      } catch (e) {
-        print('Error signing in with email link: $e');
-      }
-    }
-  }
-  return false; // Indicate failure
-}
 
 class SplashScreenWrapper extends StatefulWidget {
   const SplashScreenWrapper({super.key});
@@ -235,14 +143,7 @@ class _SplashScreenWrapperState extends State<SplashScreenWrapper> {
     await Future.delayed(const Duration(seconds: 3)); // Simulate a delay for the splash screen
     bool isLoggedInAsUser = await _auth.isLoggedInAsUser();
     bool isLoggedInAsEmployee = await _auth.isLoggedInAsEmployee();
-    String? storedUri = Hive.box<String>('deepLinkBox').get('deepLinkUri');
-    Uri? deepLinkUri;
-    deepLinkUri = Uri.parse(storedUri.toString());
-      if (deepLinkUri != null) {
-      // Do not navigate again if deep link was handled
-      await Hive.box<String>('deepLinkBox').delete('deepLinkUri');
-      return;
-    } else if (isLoggedInAsUser) {
+    if (isLoggedInAsUser) {
       navigatorKey.currentState?.pushReplacement(
         MaterialPageRoute(builder: (context) => const TestScreen()),
       );
